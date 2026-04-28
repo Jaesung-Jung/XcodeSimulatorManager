@@ -121,4 +121,8 @@ iOSInjectionProject/
 # Documents
 Documents/**/*.ko.md
 
+# Agent State
+.agent-state/
+.agent-docs/
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,swift

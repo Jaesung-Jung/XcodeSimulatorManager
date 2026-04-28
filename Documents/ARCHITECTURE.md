@@ -11,7 +11,7 @@ SimControl is organized around a small application core shared by multiple UI su
 ```mermaid
 flowchart TB
     App["SimControlApp"]
-    Delegate["AppLifecycleDelegate"]
+    Delegate["AppDelegate"]
     Container["AppContainer"]
     Store["SimulatorStore"]
     Repository["SimulatorRepository"]
@@ -54,10 +54,10 @@ The UI sends user intent to `SimulatorStore`. The store coordinates long-running
 - `Settings` for preferences and environment information
 - `Commands` for app-level menu commands and shortcuts
 
-`AppLifecycleDelegate` prevents the app from quitting when the last window closes.
+`AppDelegate` prevents the app from quitting when the last window closes.
 
 ```swift
-final class AppLifecycleDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
     false
   }
@@ -391,7 +391,7 @@ The confirmation view identifies the affected device, app, identifier, and path 
 SimControl/
   App/
     SimControlApp.swift
-    AppLifecycleDelegate.swift
+    AppDelegate.swift
     AppContainer.swift
   Domain/
     SimulatorSnapshot.swift
