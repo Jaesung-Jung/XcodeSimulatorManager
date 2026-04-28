@@ -1,0 +1,4 @@
+interface:
+  display_name: "Swift Testing"
+  short_description: "Write Swift Testing tests"
+  default_prompt: "Use $swift-testing to write or review these Swift Testing cases with correct @Test, expectations, and async patterns."

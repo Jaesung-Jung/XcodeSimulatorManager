@@ -118,4 +118,7 @@ fastlane/test_output
 
 iOSInjectionProject/
 
+# Documents
+Documents/**/*.ko.md
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,swift

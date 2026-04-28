@@ -1,0 +1,4 @@
+interface:
+  display_name: "Session Context Save"
+  short_description: "Explicitly save session progress, decisions, and handoff state"
+  default_prompt: "Use $session-context-save when I explicitly ask to save context, checkpoint progress, write a handoff, or record session state into .agent-state."

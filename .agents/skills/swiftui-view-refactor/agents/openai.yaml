@@ -1,0 +1,4 @@
+interface:
+  display_name: "SwiftUI View Refactor"
+  short_description: "Restructure an existing SwiftUI view file"
+  default_prompt: "Use $swiftui-view-refactor to clean up, split, and stabilize this existing SwiftUI view file while preserving its current behavior."
