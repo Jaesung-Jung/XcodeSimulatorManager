@@ -109,7 +109,7 @@ struct MainWindowFeature {
       selectedDeviceID: String? = nil,
       selectedAppID: String? = nil,
       lastCommandResults: [CommandResult] = [],
-      installedAppsAvailability: InstalledAppsAvailability = .notLoaded,
+      installedAppsAvailability: InstalledAppsAvailability? = nil,
       deviceCommandState: DeviceCommandState? = nil,
       isOpeningSimulatorApp: Bool = false,
       lastMenuBarAutoRefreshAttemptAt: Date? = nil,

@@ -24,14 +24,17 @@ actor SimulatorRepository {
 
   typealias SelectedXcodePathProvider = () async -> CoreSimulatorService.DeveloperPathResult
   typealias SimctlListProvider = () async -> CoreSimulatorService.ListResult
+  typealias InstalledAppsProvider = (SimulatorDevice) async -> AppContainerScanner.ScanResult
 
   private let selectedXcodePath: SelectedXcodePathProvider
   private let list: SimctlListProvider
+  private let installedApps: InstalledAppsProvider
   private let now: () -> Date
   private var refreshTask: Task<RefreshResult, Never>?
 
   init(
     coreSimulatorService: CoreSimulatorService = CoreSimulatorService(),
+    appContainerScanner: AppContainerScanner = AppContainerScanner(),
     now: @escaping () -> Date = Date.init
   ) {
     self.init(
@@ -41,6 +44,9 @@ actor SimulatorRepository {
       },
       list: {
         await coreSimulatorService.list()
+      },
+      installedApps: { device in
+        appContainerScanner.scanInstalledApps(for: device)
       }
     )
   }
@@ -48,10 +54,14 @@ actor SimulatorRepository {
   init(
     now: @escaping () -> Date = Date.init,
     selectedXcodePath: @escaping SelectedXcodePathProvider,
-    list: @escaping SimctlListProvider
+    list: @escaping SimctlListProvider,
+    installedApps: @escaping InstalledAppsProvider = { _ in
+      AppContainerScanner.ScanResult(apps: [], warnings: [])
+    }
   ) {
     self.selectedXcodePath = selectedXcodePath
     self.list = list
+    self.installedApps = installedApps
     self.now = now
   }
 
@@ -95,7 +105,7 @@ actor SimulatorRepository {
       )
     }
 
-    let snapshot = makeSnapshot(
+    let snapshot = await makeSnapshot(
       from: payload,
       developerPath: xcodePathResult.developerPath,
       xcodeIsValid: xcodePathResult.succeeded
@@ -113,7 +123,7 @@ actor SimulatorRepository {
     from payload: SimctlListPayload,
     developerPath: URL?,
     xcodeIsValid: Bool
-  ) -> SimulatorSnapshot {
+  ) async -> SimulatorSnapshot {
     var warnings: [SimulatorWarning] = []
     let runtimes = mapRuntimes(payload.runtimes, warnings: &warnings)
     let runtimeByID = keyedByID(runtimes)
@@ -129,6 +139,10 @@ actor SimulatorRepository {
       deviceByID: deviceByID,
       warnings: &warnings
     )
+    let installedAppsByDeviceID = await scanInstalledApps(
+      for: devices,
+      warnings: &warnings
+    )
 
     return SimulatorSnapshot(
       generatedAt: now(),
@@ -141,9 +155,27 @@ actor SimulatorRepository {
       deviceTypes: deviceTypes,
       devices: devices,
       pairs: pairs,
-      installedAppsByDeviceID: [:],
+      installedAppsByDeviceID: installedAppsByDeviceID,
       warnings: warnings
     )
+  }
+
+  private func scanInstalledApps(
+    for devices: [SimulatorDevice],
+    warnings: inout [SimulatorWarning]
+  ) async -> [String: [InstalledApp]] {
+    var installedAppsByDeviceID: [String: [InstalledApp]] = [:]
+
+    for device in devices {
+      let scanResult = await installedApps(device)
+      warnings.append(contentsOf: scanResult.warnings)
+
+      if !scanResult.apps.isEmpty {
+        installedAppsByDeviceID[device.id] = scanResult.apps
+      }
+    }
+
+    return installedAppsByDeviceID
   }
 
   private func mapRuntimes(

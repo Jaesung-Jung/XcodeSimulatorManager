@@ -175,6 +175,87 @@ struct SimulatorRepositoryTests {
     #expect(await recorder.listCallCount() == 0)
   }
 
+  @Test func refreshIncludesScannerDiscoveredAppsAndWarnings() async throws {
+    let app = InstalledApp(
+      id: "PHONE-UDID:com.example.app",
+      bundleID: "com.example.app",
+      displayName: "Example",
+      version: "1.0",
+      build: "100",
+      deviceID: "PHONE-UDID",
+      bundleContainer: URL(fileURLWithPath: "/tmp/Bundle/Application/app"),
+      dataContainer: URL(fileURLWithPath: "/tmp/Data/Application/app"),
+      appBundlePath: URL(fileURLWithPath: "/tmp/Bundle/Application/app/App.app"),
+      appGroups: [
+        AppGroupContainer(
+          id: "PHONE-UDID:group.com.example.shared",
+          groupID: "group.com.example.shared",
+          path: URL(fileURLWithPath: "/tmp/Shared/AppGroup/group")
+        )
+      ],
+      iconPath: nil
+    )
+    let scannerWarning = SimulatorWarning(
+      id: "apps-PHONE-UDID-fixture-warning",
+      severity: .warning,
+      category: .filesystem,
+      message: "Fixture scanner warning.",
+      relatedID: "PHONE-UDID"
+    )
+    let recorder = try RepositoryServiceRecorder(
+      selectedXcodePathResult: makeSelectedXcodePathResult(),
+      listResult: makeListResult(
+        json: """
+        {
+          "runtimes": [
+            {
+              "identifier": "runtime-ios",
+              "name": "iOS 26.4",
+              "platform": "iOS"
+            }
+          ],
+          "devicetypes": [],
+          "devices": {
+            "runtime-ios": [
+              {
+                "udid": "PHONE-UDID",
+                "name": "iPhone 17 Pro",
+                "state": "Shutdown",
+                "dataPath": "/tmp/CoreSimulator/Devices/PHONE-UDID/data"
+              },
+              {
+                "udid": "SECOND-UDID",
+                "name": "iPhone 17",
+                "state": "Shutdown",
+                "dataPath": "/tmp/CoreSimulator/Devices/SECOND-UDID/data"
+              }
+            ]
+          },
+          "pairs": {}
+        }
+        """
+      )
+    )
+    let repository = makeRepository(
+      recorder: recorder,
+      installedApps: { device in
+        if device.id == "PHONE-UDID" {
+          return AppContainerScanner.ScanResult(apps: [app], warnings: [scannerWarning])
+        }
+
+        return AppContainerScanner.ScanResult(apps: [], warnings: [])
+      }
+    )
+
+    let result = await repository.refresh()
+
+    #expect(result.succeeded)
+    let snapshot = try #require(result.snapshot)
+    #expect(snapshot.installedAppsByDeviceID["PHONE-UDID"] == [app])
+    #expect(snapshot.installedAppsByDeviceID["SECOND-UDID"] == nil)
+    #expect(snapshot.warnings.contains(scannerWarning))
+  }
+
   @Test func refreshPreservesListFailureAfterXcodePathSucceeds() async throws {
     let xcodeCommandResult = makeCommandResult(
       executable: "xcode-select",
@@ -353,7 +434,10 @@ struct SimulatorRepositoryTests {
 
   private func makeRepository(
     recorder: RepositoryServiceRecorder,
-    now: @escaping () -> Date = { Date(timeIntervalSince1970: 500) }
+    now: @escaping () -> Date = { Date(timeIntervalSince1970: 500) },
+    installedApps: @escaping SimulatorRepository.InstalledAppsProvider = { _ in
+      AppContainerScanner.ScanResult(apps: [], warnings: [])
+    }
   ) -> SimulatorRepository {
     SimulatorRepository(
       now: now,
@@ -362,6 +446,9 @@ struct SimulatorRepositoryTests {
       },
       list: {
         await recorder.list()
+      },
+      installedApps: { device in
+        await installedApps(device)
       }
     )
   }

@@ -20,7 +20,7 @@ struct WorkspaceFeature {
       selectedDeviceID: String? = nil,
       selectedAppID: String? = nil,
       commandResults: [CommandResult] = [],
-      installedAppsAvailability: InstalledAppsAvailability = .notLoaded,
+      installedAppsAvailability: InstalledAppsAvailability? = nil,
       deviceCommandState: DeviceCommandState? = nil,
       isOpeningSimulatorApp: Bool = false
     ) {
@@ -30,7 +30,7 @@ struct WorkspaceFeature {
       self.deviceDetail = DeviceDetailFeature.State()
       self.inspector = InspectorFeature.State(snapshot: snapshot)
       self.commandResults = commandResults
-      self.installedAppsAvailability = installedAppsAvailability
+      self.installedAppsAvailability = installedAppsAvailability ?? (snapshot == nil ? .notLoaded : .loaded)
       self.deviceCommandState = deviceCommandState
       self.isOpeningSimulatorApp = isOpeningSimulatorApp
       rebuildDeviceList(selectedDeviceID: selectedDeviceID)
@@ -63,6 +63,7 @@ struct WorkspaceFeature {
       self.snapshot = snapshot
       self.refreshState = refreshState
       self.commandResults = commandResults
+      installedAppsAvailability = .loaded
       rebuildDeviceList(selectedDeviceID: selectedDeviceID)
       rebuildDetail(selectedAppID: selectedAppID)
     }

@@ -4,6 +4,7 @@ import ComposableArchitecture
 final class AppContainer {
   let commandExecutor: CommandExecutor
   let coreSimulatorService: CoreSimulatorService
+  let appContainerScanner: AppContainerScanner
   let simulatorRepository: SimulatorRepository
   let settingsStore: SettingsStore
   let actionLogStore: ActionLogStore
@@ -12,10 +13,15 @@ final class AppContainer {
   init() {
     let commandExecutor = CommandExecutor()
     let coreSimulatorService = CoreSimulatorService(commandExecutor: commandExecutor)
-    let simulatorRepository = SimulatorRepository(coreSimulatorService: coreSimulatorService)
+    let appContainerScanner = AppContainerScanner()
+    let simulatorRepository = SimulatorRepository(
+      coreSimulatorService: coreSimulatorService,
+      appContainerScanner: appContainerScanner
+    )
 
     self.commandExecutor = commandExecutor
     self.coreSimulatorService = coreSimulatorService
+    self.appContainerScanner = appContainerScanner
     self.simulatorRepository = simulatorRepository
     settingsStore = SettingsStore()
     actionLogStore = ActionLogStore()
