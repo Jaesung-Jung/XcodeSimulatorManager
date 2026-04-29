@@ -146,22 +146,67 @@ struct CoreSimulatorServiceTests {
     ])
   }
 
+  @Test func bootDeviceRunsSimctlBootCommandAndReturnsResult() async {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: ["simctl", "boot", "DEVICE-1"]
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.bootDevice(id: "DEVICE-1")
+
+    #expect(result == commandResult)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "boot", "DEVICE-1"],
+        timeout: 60
+      )
+    ])
+  }
+
+  @Test func shutdownDeviceRunsSimctlShutdownCommandAndReturnsResult() async {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: ["simctl", "shutdown", "DEVICE-1"]
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.shutdownDevice(id: "DEVICE-1")
+
+    #expect(result == commandResult)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "shutdown", "DEVICE-1"],
+        timeout: 60
+      )
+    ])
+  }
+
   @Test func customTimeoutsAreForwardedToCommands() async {
     let recorder = CommandRecorder(results: [
       makeCommandResult(executable: "xcode-select", arguments: ["-p"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "list", "-j"]),
-      makeCommandResult(executable: "open", arguments: ["-a", "Simulator"])
+      makeCommandResult(executable: "open", arguments: ["-a", "Simulator"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "boot", "DEVICE-1"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "shutdown", "DEVICE-1"])
     ])
     let service = makeService(
       recorder: recorder,
       selectedXcodePathTimeout: 1,
       listTimeout: 2,
-      openSimulatorAppTimeout: 3
+      openSimulatorAppTimeout: 3,
+      deviceCommandTimeout: 4
     )
 
     _ = await service.selectedXcodePath()
     _ = await service.list()
     _ = await service.openSimulatorApp()
+    _ = await service.bootDevice(id: "DEVICE-1")
+    _ = await service.shutdownDevice(id: "DEVICE-1")
 
     #expect(await recorder.recordedCalls() == [
       CommandCall(
@@ -178,6 +223,16 @@ struct CoreSimulatorServiceTests {
         executable: "open",
         arguments: ["-a", "Simulator"],
         timeout: 3
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "boot", "DEVICE-1"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "shutdown", "DEVICE-1"],
+        timeout: 4
       )
     ])
   }
@@ -192,12 +247,14 @@ struct CoreSimulatorServiceTests {
     recorder: CommandRecorder,
     selectedXcodePathTimeout: TimeInterval?,
     listTimeout: TimeInterval?,
-    openSimulatorAppTimeout: TimeInterval?
+    openSimulatorAppTimeout: TimeInterval?,
+    deviceCommandTimeout: TimeInterval?
   ) -> CoreSimulatorService {
     CoreSimulatorService(
       selectedXcodePathTimeout: selectedXcodePathTimeout,
       listTimeout: listTimeout,
-      openSimulatorAppTimeout: openSimulatorAppTimeout
+      openSimulatorAppTimeout: openSimulatorAppTimeout,
+      deviceCommandTimeout: deviceCommandTimeout
     ) { executable, arguments, timeout in
       await recorder.run(executable, arguments, timeout)
     }

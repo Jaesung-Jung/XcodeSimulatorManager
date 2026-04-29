@@ -11,6 +11,8 @@ struct WorkspaceFeature {
     var inspector: InspectorFeature.State
     var commandResults: [CommandResult]
     var installedAppsAvailability: InstalledAppsAvailability
+    var deviceCommandState: DeviceCommandState?
+    var isOpeningSimulatorApp: Bool
 
     init(
       snapshot: SimulatorSnapshot? = nil,
@@ -18,7 +20,9 @@ struct WorkspaceFeature {
       selectedDeviceID: String? = nil,
       selectedAppID: String? = nil,
       commandResults: [CommandResult] = [],
-      installedAppsAvailability: InstalledAppsAvailability = .notLoaded
+      installedAppsAvailability: InstalledAppsAvailability = .notLoaded,
+      deviceCommandState: DeviceCommandState? = nil,
+      isOpeningSimulatorApp: Bool = false
     ) {
       self.snapshot = snapshot
       self.refreshState = refreshState
@@ -27,6 +31,8 @@ struct WorkspaceFeature {
       self.inspector = InspectorFeature.State(snapshot: snapshot)
       self.commandResults = commandResults
       self.installedAppsAvailability = installedAppsAvailability
+      self.deviceCommandState = deviceCommandState
+      self.isOpeningSimulatorApp = isOpeningSimulatorApp
       rebuildDeviceList(selectedDeviceID: selectedDeviceID)
       rebuildDetail(selectedAppID: selectedAppID)
     }
@@ -78,6 +84,16 @@ struct WorkspaceFeature {
       deviceDetail.commandResults = commandResults
     }
 
+    mutating func setDeviceCommandState(_ deviceCommandState: DeviceCommandState?) {
+      self.deviceCommandState = deviceCommandState
+      deviceDetail.deviceCommandState = deviceCommandState
+    }
+
+    mutating func setOpeningSimulatorApp(_ isOpeningSimulatorApp: Bool) {
+      self.isOpeningSimulatorApp = isOpeningSimulatorApp
+      deviceDetail.isOpeningSimulatorApp = isOpeningSimulatorApp
+    }
+
     private mutating func rebuildDeviceList(selectedDeviceID: String?) {
       deviceList = DeviceListFeature.State(
         devices: devices,
@@ -103,7 +119,9 @@ struct WorkspaceFeature {
           availability: installedAppsAvailability,
           selectedAppID: selectedAppID
         ),
-        commandResults: commandResults
+        commandResults: commandResults,
+        deviceCommandState: deviceCommandState,
+        isOpeningSimulatorApp: isOpeningSimulatorApp
       )
       rebuildInspector()
     }
@@ -182,7 +200,7 @@ struct WorkspaceFeature {
         state.selectApp(id: id)
         return .none
 
-      case .inspector:
+      case .deviceDetail, .inspector:
         return .none
       }
     }

@@ -28,6 +28,12 @@ extension Store where State == MainWindowFeature.State, Action == MainWindowFeat
       $0.coreSimulatorService.openSimulatorApp = {
         MainWindowPreviewFixtures.openSimulatorCommandResult
       }
+      $0.coreSimulatorService.bootDevice = { _ in
+        MainWindowPreviewFixtures.commandResults[1]
+      }
+      $0.coreSimulatorService.shutdownDevice = { _ in
+        MainWindowPreviewFixtures.commandResults[1]
+      }
     }
   }
 }

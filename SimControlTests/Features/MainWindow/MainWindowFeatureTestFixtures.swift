@@ -86,7 +86,11 @@ enum MainWindowTestFixtures {
     )
   }
 
-  static func makeDevice(id: String) -> SimulatorDevice {
+  static func makeDevice(
+    id: String,
+    state: SimulatorDevice.State = .shutdown,
+    isAvailable: Bool = true
+  ) -> SimulatorDevice {
     SimulatorDevice(
       id: id,
       udid: id,
@@ -94,8 +98,8 @@ enum MainWindowTestFixtures {
       runtimeID: runtime.id,
       deviceTypeID: deviceType.id,
       platform: .iOS,
-      state: .shutdown,
-      isAvailable: true,
+      state: state,
+      isAvailable: isAvailable,
       dataPath: URL(fileURLWithPath: "/tmp/\(id)/data"),
       logPath: URL(fileURLWithPath: "/tmp/\(id)/logs"),
       lastBootedAt: nil,
@@ -123,14 +127,16 @@ enum MainWindowTestFixtures {
     id: String,
     executable: String = "xcrun",
     arguments: [String] = ["simctl", "list", "-j"],
+    stdout: String = "",
+    stderr: String? = nil,
     exitCode: Int32 = 0
   ) -> CommandResult {
     CommandResult(
       id: id,
       executable: executable,
       arguments: arguments,
-      stdout: "",
-      stderr: exitCode == 0 ? "" : "simctl list failed",
+      stdout: stdout,
+      stderr: stderr ?? (exitCode == 0 ? "" : "simctl list failed"),
       exitCode: exitCode,
       duration: 0.1,
       startedAt: Date(timeIntervalSince1970: 100)
@@ -199,6 +205,76 @@ actor MainWindowBlockingRefreshRecorder {
 
   func refreshCallCount() -> Int {
     refreshCalls
+  }
+
+  private func resumeStartedWaiters() {
+    let waiters = startedWaiters
+    startedWaiters.removeAll()
+    waiters.forEach { $0.resume() }
+  }
+}
+
+actor MainWindowCommandRecorder {
+  private let result: CommandResult
+  private var callCount = 0
+
+  init(result: CommandResult) {
+    self.result = result
+  }
+
+  func run() -> CommandResult {
+    callCount += 1
+    return result
+  }
+
+  func calls() -> Int {
+    callCount
+  }
+}
+
+actor MainWindowBlockingCommandRecorder {
+  private let result: CommandResult
+  private var callCount = 0
+  private var startedWaiters: [CheckedContinuation<Void, Never>] = []
+  private var releaseContinuations: [CheckedContinuation<Void, Never>] = []
+  private var commandReleased = false
+
+  init(result: CommandResult) {
+    self.result = result
+  }
+
+  func run() async -> CommandResult {
+    callCount += 1
+    resumeStartedWaiters()
+
+    if !commandReleased {
+      await withCheckedContinuation { continuation in
+        releaseContinuations.append(continuation)
+      }
+    }
+
+    return result
+  }
+
+  func waitUntilCommandStarted() async {
+    guard callCount == 0 else {
+      return
+    }
+
+    await withCheckedContinuation { continuation in
+      startedWaiters.append(continuation)
+    }
+  }
+
+  func releaseCommand() {
+    commandReleased = true
+    let continuations = releaseContinuations
+    releaseContinuations.removeAll()
+    continuations.forEach { $0.resume() }
+  }
+
+  func calls() -> Int {
+    callCount
   }
 
   private func resumeStartedWaiters() {

@@ -21,6 +21,8 @@ struct MainWindowFeature {
       selectedAppID: String? = nil,
       lastCommandResults: [CommandResult] = [],
       installedAppsAvailability: InstalledAppsAvailability = .notLoaded,
+      deviceCommandState: DeviceCommandState? = nil,
+      isOpeningSimulatorApp: Bool = false,
       lastMenuBarAutoRefreshAttemptAt: Date? = nil
     ) {
       self.lastMenuBarAutoRefreshAttemptAt = lastMenuBarAutoRefreshAttemptAt
@@ -34,7 +36,9 @@ struct MainWindowFeature {
         selectedDeviceID: selectedDeviceID,
         selectedAppID: selectedAppID,
         commandResults: lastCommandResults,
-        installedAppsAvailability: installedAppsAvailability
+        installedAppsAvailability: installedAppsAvailability,
+        deviceCommandState: deviceCommandState,
+        isOpeningSimulatorApp: isOpeningSimulatorApp
       )
     }
   }
@@ -46,6 +50,8 @@ struct MainWindowFeature {
     case refreshResponse(SimulatorRepository.RefreshResult)
     case openSimulatorAppButtonTapped
     case openSimulatorAppResponse(CommandResult)
+    case deviceCommandResponse(DeviceCommandState, CommandResult)
+    case deviceCommandRefreshResponse(DeviceCommandState, SimulatorRepository.RefreshResult)
     case sidebar(SidebarFeature.Action)
     case workspace(WorkspaceFeature.Action)
   }
@@ -91,13 +97,66 @@ struct MainWindowFeature {
         return .none
 
       case .openSimulatorAppButtonTapped:
-        return .run { [coreSimulatorService] send in
-          await send(.openSimulatorAppResponse(await coreSimulatorService.openSimulatorApp()))
-        }
+        return openSimulatorApp(&state)
 
       case .openSimulatorAppResponse(let result):
         state.workspace.appendCommandResult(result)
+        state.workspace.setOpeningSimulatorApp(false)
         return .none
+
+      case .deviceCommandResponse(let deviceCommandState, let result):
+        guard state.workspace.deviceCommandState == deviceCommandState else {
+          return .none
+        }
+
+        state.workspace.appendCommandResult(result)
+        state.sidebar.refreshState = .refreshing
+        state.workspace.setRefreshState(.refreshing)
+        return .none
+
+      case .deviceCommandRefreshResponse(let deviceCommandState, let result):
+        guard state.workspace.deviceCommandState == deviceCommandState else {
+          return .none
+        }
+
+        let commandResults = state.workspace.commandResults + commandResults(from: result)
+
+        if let snapshot = result.snapshot, result.diagnostic == nil {
+          state.sidebar.snapshot = snapshot
+          state.sidebar.refreshState = .idle
+          state.workspace.applySnapshot(
+            snapshot,
+            refreshState: .idle,
+            commandResults: commandResults
+          )
+        } else {
+          let refreshState = InventoryRefreshState.failed(
+            diagnostic: result.diagnostic ?? "Unable to refresh simulator inventory."
+          )
+          state.sidebar.refreshState = refreshState
+          state.workspace.applyRefreshFailure(
+            refreshState,
+            commandResults: commandResults
+          )
+        }
+
+        state.workspace.setDeviceCommandState(nil)
+        return .none
+
+      case .workspace(.deviceDetail(.bootButtonTapped(let deviceID))):
+        return runDeviceCommand(
+          &state,
+          DeviceCommandState(command: .boot, deviceID: deviceID)
+        )
+
+      case .workspace(.deviceDetail(.shutdownButtonTapped(let deviceID))):
+        return runDeviceCommand(
+          &state,
+          DeviceCommandState(command: .shutdown, deviceID: deviceID)
+        )
+
+      case .workspace(.deviceDetail(.openSimulatorAppButtonTapped)):
+        return openSimulatorApp(&state)
 
       case .sidebar, .workspace:
         return .none
@@ -140,6 +199,48 @@ struct MainWindowFeature {
     }
   }
 
+  private func openSimulatorApp(_ state: inout State) -> Effect<Action> {
+    guard !state.workspace.isOpeningSimulatorApp else {
+      return .none
+    }
+
+    state.workspace.setOpeningSimulatorApp(true)
+
+    return .run { [coreSimulatorService] send in
+      let commandResult = await coreSimulatorService.openSimulatorApp()
+      await send(.openSimulatorAppResponse(commandResult))
+    }
+  }
+
+  private func runDeviceCommand(
+    _ state: inout State,
+    _ deviceCommandState: DeviceCommandState
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          let device = device(id: deviceCommandState.deviceID, in: state),
+          canRun(deviceCommandState.command, on: device)
+    else {
+      return .none
+    }
+
+    state.workspace.setDeviceCommandState(deviceCommandState)
+
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      let commandResult: CommandResult
+
+      switch deviceCommandState.command {
+      case .boot:
+        commandResult = await coreSimulatorService.bootDevice(deviceCommandState.deviceID)
+      case .shutdown:
+        commandResult = await coreSimulatorService.shutdownDevice(deviceCommandState.deviceID)
+      }
+
+      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+      let refreshResult = await simulatorRepository.refresh()
+      await send(.deviceCommandRefreshResponse(deviceCommandState, refreshResult))
+    }
+  }
+
   private func snapshotNeedsMenuBarRefresh(
     _ snapshot: SimulatorSnapshot?,
     at date: Date
@@ -160,6 +261,26 @@ struct MainWindowFeature {
     }
 
     return date.timeIntervalSince(lastMenuBarAutoRefreshAttemptAt) >= Self.menuBarAutoRefreshInterval
+  }
+
+  private func device(id: String, in state: State) -> SimulatorDevice? {
+    state.workspace.snapshot?.devices.first { $0.id == id }
+  }
+
+  private func canRun(
+    _ command: DeviceCommand,
+    on device: SimulatorDevice
+  ) -> Bool {
+    guard device.isAvailable else {
+      return false
+    }
+
+    switch command {
+    case .boot:
+      return device.state == .shutdown
+    case .shutdown:
+      return device.state == .booted
+    }
   }
 
   private func commandResults(

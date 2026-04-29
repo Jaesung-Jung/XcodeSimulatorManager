@@ -28,6 +28,12 @@ final class AppContainer {
       $0.coreSimulatorService.openSimulatorApp = {
         await coreSimulatorService.openSimulatorApp()
       }
+      $0.coreSimulatorService.bootDevice = { id in
+        await coreSimulatorService.bootDevice(id: id)
+      }
+      $0.coreSimulatorService.shutdownDevice = { id in
+        await coreSimulatorService.shutdownDevice(id: id)
+      }
     }
   }
 }

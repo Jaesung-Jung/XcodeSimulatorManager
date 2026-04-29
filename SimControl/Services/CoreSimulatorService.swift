@@ -41,21 +41,25 @@ struct CoreSimulatorService {
   private static let defaultSelectedXcodePathTimeout: TimeInterval = 10
   private static let defaultListTimeout: TimeInterval = 30
   private static let defaultOpenSimulatorAppTimeout: TimeInterval = 10
+  private static let defaultDeviceCommandTimeout: TimeInterval = 60
 
   private let runCommand: CommandRunner
   private let selectedXcodePathTimeout: TimeInterval?
   private let listTimeout: TimeInterval?
   private let openSimulatorAppTimeout: TimeInterval?
+  private let deviceCommandTimeout: TimeInterval?
 
   init(
     commandExecutor: CommandExecutor = CommandExecutor(),
     selectedXcodePathTimeout: TimeInterval? = Self.defaultSelectedXcodePathTimeout,
     listTimeout: TimeInterval? = Self.defaultListTimeout,
-    openSimulatorAppTimeout: TimeInterval? = Self.defaultOpenSimulatorAppTimeout
+    openSimulatorAppTimeout: TimeInterval? = Self.defaultOpenSimulatorAppTimeout,
+    deviceCommandTimeout: TimeInterval? = Self.defaultDeviceCommandTimeout
   ) {
     self.selectedXcodePathTimeout = selectedXcodePathTimeout
     self.listTimeout = listTimeout
     self.openSimulatorAppTimeout = openSimulatorAppTimeout
+    self.deviceCommandTimeout = deviceCommandTimeout
     self.runCommand = { executable, arguments, timeout in
       await commandExecutor.execute(
         executable: executable,
@@ -69,11 +73,13 @@ struct CoreSimulatorService {
     selectedXcodePathTimeout: TimeInterval? = Self.defaultSelectedXcodePathTimeout,
     listTimeout: TimeInterval? = Self.defaultListTimeout,
     openSimulatorAppTimeout: TimeInterval? = Self.defaultOpenSimulatorAppTimeout,
+    deviceCommandTimeout: TimeInterval? = Self.defaultDeviceCommandTimeout,
     runCommand: @escaping CommandRunner
   ) {
     self.selectedXcodePathTimeout = selectedXcodePathTimeout
     self.listTimeout = listTimeout
     self.openSimulatorAppTimeout = openSimulatorAppTimeout
+    self.deviceCommandTimeout = deviceCommandTimeout
     self.runCommand = runCommand
   }
 
@@ -151,6 +157,24 @@ struct CoreSimulatorService {
       "open",
       ["-a", "Simulator"],
       openSimulatorAppTimeout
+    )
+  }
+
+  /// Boots the simulator device identified by CoreSimulator UDID.
+  func bootDevice(id: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "boot", id],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Shuts down the simulator device identified by CoreSimulator UDID.
+  func shutdownDevice(id: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "shutdown", id],
+      deviceCommandTimeout
     )
   }
 

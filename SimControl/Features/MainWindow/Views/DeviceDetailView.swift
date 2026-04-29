@@ -20,7 +20,18 @@ struct DeviceDetailView: View {
           Header(
             device: device,
             runtime: store.runtime,
-            deviceType: store.deviceType
+            deviceType: store.deviceType,
+            deviceCommandState: store.deviceCommandState,
+            isOpeningSimulatorApp: store.isOpeningSimulatorApp,
+            onBoot: {
+              store.send(.bootButtonTapped(device.id))
+            },
+            onShutdown: {
+              store.send(.shutdownButtonTapped(device.id))
+            },
+            onOpenSimulatorApp: {
+              store.send(.openSimulatorAppButtonTapped)
+            }
           )
 
           MetricsGrid(
@@ -98,6 +109,11 @@ extension DeviceDetailView {
     let device: SimulatorDevice
     let runtime: SimulatorRuntime?
     let deviceType: SimulatorDeviceType?
+    let deviceCommandState: DeviceCommandState?
+    let isOpeningSimulatorApp: Bool
+    let onBoot: () -> Void
+    let onShutdown: () -> Void
+    let onOpenSimulatorApp: () -> Void
 
     private var subtitle: String {
       let runtimeName = runtime?.name ?? device.runtimeID
@@ -140,9 +156,119 @@ extension DeviceDetailView {
           }
 
           Spacer()
+
+          DeviceCommandControls(
+            device: device,
+            deviceCommandState: deviceCommandState,
+            isOpeningSimulatorApp: isOpeningSimulatorApp,
+            onBoot: onBoot,
+            onShutdown: onShutdown,
+            onOpenSimulatorApp: onOpenSimulatorApp
+          )
         }
       }
       .padding(.bottom, 2)
+    }
+  }
+}
+
+extension DeviceDetailView {
+  private struct DeviceCommandControls: View {
+    let device: SimulatorDevice
+    let deviceCommandState: DeviceCommandState?
+    let isOpeningSimulatorApp: Bool
+    let onBoot: () -> Void
+    let onShutdown: () -> Void
+    let onOpenSimulatorApp: () -> Void
+
+    private var canBoot: Bool {
+      device.isAvailable && device.state == .shutdown
+    }
+
+    private var canShutdown: Bool {
+      device.isAvailable && device.state == .booted
+    }
+
+    private var isLifecycleActionRunning: Bool {
+      deviceCommandState != nil
+    }
+
+    private var isBootRunning: Bool {
+      deviceCommandState == DeviceCommandState(command: .boot, deviceID: device.id)
+    }
+
+    private var isShutdownRunning: Bool {
+      deviceCommandState == DeviceCommandState(command: .shutdown, deviceID: device.id)
+    }
+
+    var body: some View {
+      HStack(spacing: 8) {
+        if canBoot {
+          Button {
+            onBoot()
+          } label: {
+            ActionButtonLabel(
+              title: isBootRunning ? "Booting" : "Boot",
+              systemImage: "power",
+              isRunning: isBootRunning
+            )
+          }
+          .disabled(isLifecycleActionRunning)
+          .help("Boot selected simulator")
+        }
+
+        if canShutdown {
+          Button {
+            onShutdown()
+          } label: {
+            ActionButtonLabel(
+              title: isShutdownRunning ? "Shutting Down" : "Shutdown",
+              systemImage: "power",
+              isRunning: isShutdownRunning
+            )
+          }
+          .disabled(isLifecycleActionRunning)
+          .help("Shut down selected simulator")
+        }
+
+        Button {
+          onOpenSimulatorApp()
+        } label: {
+          ActionButtonLabel(
+            title: isOpeningSimulatorApp ? "Opening" : "Open",
+            systemImage: "play.rectangle",
+            isRunning: isOpeningSimulatorApp
+          )
+        }
+        .disabled(isOpeningSimulatorApp)
+        .help("Open Simulator.app")
+      }
+      .buttonStyle(.bordered)
+    }
+  }
+}
+
+extension DeviceDetailView {
+  private struct ActionButtonLabel: View {
+    let title: LocalizedStringKey
+    let systemImage: String
+    let isRunning: Bool
+
+    var body: some View {
+      HStack(spacing: 6) {
+        if isRunning {
+          ProgressView()
+            .controlSize(.small)
+            .frame(width: 14, height: 14)
+        } else {
+          Image(systemName: systemImage)
+            .accessibilityHidden(true)
+        }
+
+        Text(title)
+          .lineLimit(1)
+      }
+      .frame(minWidth: 78)
     }
   }
 }
