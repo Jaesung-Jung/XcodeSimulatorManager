@@ -8,26 +8,15 @@ struct SimControlApp: App {
 
   var body: some Scene {
     WindowGroup {
-      ContentView()
-        .appStores(appContainer)
+      MainWindowView(store: appContainer.mainWindowStore)
     }
 
     MenuBarExtra("SimControl", systemImage: "iphone.gen1") {
       MenuBarRootView()
-        .appStores(appContainer)
     }
 
     Settings {
       SettingsRootView()
-        .appStores(appContainer)
     }
-  }
-}
-
-private extension View {
-  func appStores(_ container: AppContainer) -> some View {
-    environment(container.simulatorStore)
-      .environment(container.settingsStore)
-      .environment(container.actionLogStore)
   }
 }

@@ -4,15 +4,15 @@ import Testing
 
 @Suite
 struct CommandExecutorTests {
-  @Test func successCommandCapturesOutputAndTiming() async {
+  @Test func successBareCommandCapturesOutputAndTiming() async {
     let executor = CommandExecutor()
     let result = await executor.execute(
-      executable: "/bin/echo",
+      executable: "echo",
       arguments: ["hello"]
     )
 
     #expect(result.succeeded)
-    #expect(result.executable == "/bin/echo")
+    #expect(result.executable == "echo")
     #expect(result.arguments == ["hello"])
     #expect(result.stdout == "hello\n")
     #expect(result.stderr == "")
@@ -25,7 +25,7 @@ struct CommandExecutorTests {
   @Test func failureCommandPreservesStderrAndExitCode() async {
     let executor = CommandExecutor()
     let result = await executor.execute(
-      executable: "/bin/sh",
+      executable: "sh",
       arguments: ["-c", "printf 'problem' >&2; exit 7"]
     )
 
@@ -38,7 +38,7 @@ struct CommandExecutorTests {
   @Test func largeStdoutDoesNotBlockPipeDrain() async {
     let executor = CommandExecutor()
     let result = await executor.execute(
-      executable: "/bin/sh",
+      executable: "sh",
       arguments: ["-c", "i=0; while [ $i -lt 20000 ]; do echo output; i=$((i + 1)); done"]
     )
 
@@ -48,7 +48,7 @@ struct CommandExecutorTests {
   }
 
   @Test func missingExecutableReturnsFailureResult() async {
-    let executable = "/no/such/command-executor-fixture"
+    let executable = "command-executor-missing-fixture"
     let executor = CommandExecutor()
     let result = await executor.execute(executable: executable)
 
@@ -63,7 +63,7 @@ struct CommandExecutorTests {
   @Test func timeoutTerminatesCommandAndRecordsContext() async {
     let executor = CommandExecutor()
     let result = await executor.execute(
-      executable: "/bin/sh",
+      executable: "sh",
       arguments: ["-c", "sleep 2"],
       timeout: 0.1
     )
@@ -76,7 +76,7 @@ struct CommandExecutorTests {
   @Test func timeoutForceKillsCommandThatIgnoresTermination() async {
     let executor = CommandExecutor()
     let result = await executor.execute(
-      executable: "/bin/sh",
+      executable: "sh",
       arguments: ["-c", "trap '' TERM; while :; do :; done"],
       timeout: 0.1
     )

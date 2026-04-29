@@ -9,7 +9,7 @@ struct ActionResultTests {
     let occurredAt = Date(timeIntervalSince1970: 400)
     let commandResult = CommandResult(
       id: "command-1",
-      executable: "/usr/bin/xcrun",
+      executable: "xcrun",
       arguments: ["simctl", "boot", "UDID-1"],
       stdout: "booted",
       stderr: "",

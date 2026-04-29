@@ -7,8 +7,8 @@ struct SimulatorRepositoryTests {
   @Test func refreshMapsServicePayloadIntoDomainSnapshot() async throws {
     let generatedAt = Date(timeIntervalSince1970: 1_000)
     let xcodeCommandResult = makeCommandResult(
-      executable: "xcrun",
-      arguments: ["xcode-select", "-p"],
+      executable: "xcode-select",
+      arguments: ["-p"],
       stdout: "/Applications/Xcode.app/Contents/Developer\n"
     )
     let listCommandResult = makeCommandResult(
@@ -148,12 +148,12 @@ struct SimulatorRepositoryTests {
 
   @Test func refreshStopsWhenXcodePathLookupFailsAndPreservesFailure() async throws {
     let xcodeCommandResult = makeCommandResult(
-      executable: "xcrun",
-      arguments: ["xcode-select", "-p"],
+      executable: "xcode-select",
+      arguments: ["-p"],
       stderr: "unable to get active developer directory",
       exitCode: 72
     )
-    let diagnostic = "xcrun xcode-select -p failed with exit code 72."
+    let diagnostic = "xcode-select -p failed with exit code 72."
     let recorder = try RepositoryServiceRecorder(
       selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult(
         developerPath: nil,
@@ -177,8 +177,8 @@ struct SimulatorRepositoryTests {
 
   @Test func refreshPreservesListFailureAfterXcodePathSucceeds() async throws {
     let xcodeCommandResult = makeCommandResult(
-      executable: "xcrun",
-      arguments: ["xcode-select", "-p"],
+      executable: "xcode-select",
+      arguments: ["-p"],
       stdout: "/Applications/Xcode.app/Contents/Developer\n"
     )
     let listCommandResult = makeCommandResult(
@@ -370,8 +370,8 @@ struct SimulatorRepositoryTests {
     commandResult: CommandResult? = nil
   ) -> CoreSimulatorService.DeveloperPathResult {
     let commandResult = commandResult ?? makeCommandResult(
-      executable: "xcrun",
-      arguments: ["xcode-select", "-p"],
+      executable: "xcode-select",
+      arguments: ["-p"],
       stdout: "/Applications/Xcode.app/Contents/Developer\n"
     )
 

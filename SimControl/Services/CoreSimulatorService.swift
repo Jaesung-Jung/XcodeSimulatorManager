@@ -7,7 +7,7 @@ struct CoreSimulatorService {
     /// The selected Xcode developer directory, when the command succeeded and returned a path.
     let developerPath: URL?
 
-    /// The command result produced by `xcrun xcode-select -p`.
+    /// The command result produced by `xcode-select -p`.
     let commandResult: CommandResult
 
     /// Additional service-level context, such as an empty stdout or command failure.
@@ -77,11 +77,11 @@ struct CoreSimulatorService {
     self.runCommand = runCommand
   }
 
-  /// Returns the active Xcode developer path reported by `xcrun xcode-select -p`.
+  /// Returns the active Xcode developer path reported by `xcode-select -p`.
   func selectedXcodePath() async -> DeveloperPathResult {
     let commandResult = await runCommand(
-      "xcrun",
-      ["xcode-select", "-p"],
+      "xcode-select",
+      ["-p"],
       selectedXcodePathTimeout
     )
 
@@ -89,7 +89,7 @@ struct CoreSimulatorService {
       return DeveloperPathResult(
         developerPath: nil,
         commandResult: commandResult,
-        diagnostic: commandFailureDiagnostic(command: "xcrun xcode-select -p", result: commandResult)
+        diagnostic: commandFailureDiagnostic(command: "xcode-select -p", result: commandResult)
       )
     }
 
@@ -98,7 +98,7 @@ struct CoreSimulatorService {
       return DeveloperPathResult(
         developerPath: nil,
         commandResult: commandResult,
-        diagnostic: "xcrun xcode-select -p returned an empty developer path."
+        diagnostic: "xcode-select -p returned an empty developer path."
       )
     }
 
@@ -148,13 +148,20 @@ struct CoreSimulatorService {
   /// Opens Simulator.app without mutating UI state.
   func openSimulatorApp() async -> CommandResult {
     await runCommand(
-      "/usr/bin/open",
+      "open",
       ["-a", "Simulator"],
       openSimulatorAppTimeout
     )
   }
 
   private func commandFailureDiagnostic(command: String, result: CommandResult) -> String {
-    "\(command) failed with exit code \(result.exitCode)."
+    let summary = "\(command) failed with exit code \(result.exitCode)."
+    let stderr = result.stderr.trimmingCharacters(in: .whitespacesAndNewlines)
+
+    guard !stderr.isEmpty else {
+      return summary
+    }
+
+    return "\(summary)\n\(stderr)"
   }
 }

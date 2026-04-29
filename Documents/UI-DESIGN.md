@@ -16,33 +16,34 @@ This document describes the intended UI structure, layout behavior, interaction 
 
 ## Primary Layout
 
-The main window uses a sidebar and main view structure. The main view may internally use a device list, detail content, and inspector panel, but the app entry point should remain simple.
+The main window uses a stable sidebar, a device list column, and a selected-device workspace with an inspector. The app entry point should remain simple.
 
 ```text
 Main Window
   Toolbar
   Sidebar
-  Main View
-    Device List
+  Device List
+  Workspace
     Device Workspace
-      Device Header
-      Detail Content
-      Inspector
+    Inspector
 ```
 
 The preferred SwiftUI composition is:
 
 ```text
-ContentView
-  AppEntryView
-    SidebarView
-    MainWorkspaceView
+SimControlApp.WindowGroup
+  MainWindowView
+    NavigationSplitView
+      Sidebar
       DeviceListView
-      DeviceDetailView
-      InspectorView
+      WorkspaceView
+        DeviceDetailView or empty/refresh/error state
+        InspectorView
 ```
 
-`ContentView` should be a lightweight entry view. It should own only root-level composition and high-level state injection. It should not contain sample data, row layouts, tool panels, or inspector details in production.
+`MainWindowView` is the SwiftUI root for `MainWindowFeature`. It should own only main-window composition and high-level toolbar/lifecycle wiring. It should not contain sample data, row layouts, tool panels, or inspector details.
+
+The current production structure uses the three-column `NavigationSplitView` initializer: `Sidebar` is the sidebar column, `DeviceListView` is the content column, and `WorkspaceView` is the detail column. The device list should not be embedded as a custom column inside the detail view because that causes unstable macOS titlebar/safe-area behavior.
 
 ## Main Window
 
@@ -54,14 +55,14 @@ Recommended starting constraints:
 Minimum width: 1120
 Minimum height: 720
 Sidebar ideal width: 240
-Device list ideal width: 380
+Device list ideal width: 360
 Inspector width: 300-320
 ```
 
 The window contains:
 
 - Toolbar for global actions
-- Sidebar for navigation and broad filtering
+- Sidebar for current inventory summary and future navigation/filtering
 - Device list for simulator selection
 - Workspace area for selected-device management
 - Inspector panel for identifiers, paths, app metadata, and environment status
@@ -118,6 +119,8 @@ The Utilities section links to workspace-level tools:
 - Environment
 
 Selecting a sidebar item updates the main workspace without changing app-wide state unrelated to navigation. If the current device is no longer visible after filtering, selection moves to the first visible device or becomes empty.
+
+Current Phase 10 behavior is narrower: the sidebar is a read-only summary of inventory, platform counts, device-state counts, warnings, and environment status. Sidebar selection, filtering, pinned items, and utilities navigation are deferred to Phase 19.
 
 ## Device List
 
@@ -210,6 +213,8 @@ Metrics should be compact panels with 8 px corner radius or less. They are infor
 ### Installed Apps
 
 Installed apps are shown inside the selected device context. This section should support both quick action and inspection.
+
+Current Phase 10 behavior shows an `App Inventory Not Loaded` placeholder because `AppContainerScanner` is intentionally not implemented yet. This is a phase boundary, not a runtime scan failure. The definitive `No Installed Apps` state should only appear after installed app inventory has been loaded.
 
 Each app row shows:
 
@@ -427,49 +432,68 @@ Interactive rows should have full-row hit targets. Icon-only buttons must have h
 
 ## Implementation Boundaries
 
-The prototype may keep sample layout in one file while the UI direction is being evaluated. Production implementation should be split by responsibility.
+Production implementation is split by responsibility.
 
 Recommended files:
 
 ```text
 SimControl/
-  ContentView.swift
-  AppEntryView.swift
-  SidebarView.swift
-  MainWorkspaceView.swift
-  DeviceListView.swift
-  DeviceRow.swift
-  DeviceDetailView.swift
-  DeviceHeaderView.swift
-  InstalledAppsView.swift
-  DeveloperToolsView.swift
-  CommandResultsView.swift
-  InspectorView.swift
+  Features/MainWindow/
+    Features/
+      MainWindowFeature.swift
+      WorkspaceFeature.swift
+      SidebarFeature.swift
+      DeviceListFeature.swift
+      DeviceDetailFeature.swift
+      InstalledAppsFeature.swift
+      InspectorFeature.swift
+      State/
+        InventoryRefreshState.swift
+        InstalledAppsAvailability.swift
+    Views/
+      MainWindowView.swift
+      WorkspaceView.swift
+      Sidebar.swift
+      DeviceListView.swift
+      DeviceDetailView.swift
+      InstalledAppsView.swift
+      InspectorView.swift
+      Support/
+        MainWindowDisplayValues.swift
+      Previews/
+        MainWindowPreviewFixtures.swift
+  SharedUI/
+    EmptyStateView.swift
+    SectionHeader.swift
+    StatusBadge.swift
 ```
 
-`ContentView` should:
+`MainWindowView` should:
 
-- Compose the app entry view.
-- Inject shared store dependencies.
+- Compose the main-window surface.
+- Receive the `MainWindowFeature` store from the app container.
 - Hold no simulator sample data.
 - Hold no detailed row or panel rendering.
 
 Feature views should:
 
-- Receive derived state from `SimulatorStore`.
+- Receive scoped TCA store or state from the owning feature.
 - Send user intent back to the store through explicit actions.
 - Avoid direct shell execution.
 - Avoid direct CoreSimulator file scanning.
 - Avoid parsing `simctl` output.
 
-The store remains responsible for selection, filters, action state, command results, and stale snapshot handling. Views render the current state and expose user intent.
+View placement should follow ownership, not reducer presence. `SharedUI` is reserved for app-wide primitive views that do not know about simulator domain models or MainWindow copy. Reducer-free views that render MainWindow domain state stay under `Features/MainWindow`; single-use row/header/section fragments should be private nested views inside the owning screen.
+
+The TCA feature store remains responsible for selection, filters, action state, command results, and stale snapshot handling. Views render the current state and expose user intent.
 
 ## Future Refinements
 
 Near-term UI refinements:
 
-- Replace sample data with `SimulatorSnapshot`.
 - Add persistent selected-device and selected-app restoration.
+- Add installed app scanning through `AppContainerScanner`.
+- Add sidebar selection, filtering, pinned items, and search integration.
 - Add real command-state disabled reasons.
 - Add settings scene for environment and menu bar preferences.
 - Add full action log view.

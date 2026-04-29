@@ -4,10 +4,10 @@ import Testing
 
 @Suite
 struct CoreSimulatorServiceTests {
-  @Test func selectedXcodePathRunsXcrunCommandAndTrimsOutput() async {
+  @Test func selectedXcodePathRunsXcodeSelectCommandAndTrimsOutput() async {
     let commandResult = makeCommandResult(
-      executable: "xcrun",
-      arguments: ["xcode-select", "-p"],
+      executable: "xcode-select",
+      arguments: ["-p"],
       stdout: "/Applications/Xcode.app/Contents/Developer\n"
     )
     let recorder = CommandRecorder(results: [commandResult])
@@ -21,8 +21,8 @@ struct CoreSimulatorServiceTests {
     #expect(result.diagnostic == nil)
     #expect(await recorder.recordedCalls() == [
       CommandCall(
-        executable: "xcrun",
-        arguments: ["xcode-select", "-p"],
+        executable: "xcode-select",
+        arguments: ["-p"],
         timeout: 10
       )
     ])
@@ -30,8 +30,8 @@ struct CoreSimulatorServiceTests {
 
   @Test func selectedXcodePathFailurePreservesCommandResult() async {
     let commandResult = makeCommandResult(
-      executable: "xcrun",
-      arguments: ["xcode-select", "-p"],
+      executable: "xcode-select",
+      arguments: ["-p"],
       stderr: "xcode-select failed",
       exitCode: 72
     )
@@ -43,7 +43,7 @@ struct CoreSimulatorServiceTests {
     #expect(!result.succeeded)
     #expect(result.developerPath == nil)
     #expect(result.commandResult == commandResult)
-    #expect(result.diagnostic == "xcrun xcode-select -p failed with exit code 72.")
+    #expect(result.diagnostic == "xcode-select -p failed with exit code 72.\nxcode-select failed")
   }
 
   @Test func listRunsSimctlListCommandAndDecodesPayload() async throws {
@@ -106,7 +106,7 @@ struct CoreSimulatorServiceTests {
     #expect(!result.succeeded)
     #expect(result.payload == nil)
     #expect(result.commandResult == commandResult)
-    #expect(result.diagnostic == "xcrun simctl list -j failed with exit code 65.")
+    #expect(result.diagnostic == "xcrun simctl list -j failed with exit code 65.\nsimctl failed")
   }
 
   @Test func listInvalidJSONPreservesSuccessfulCommandResultAndDiagnostic() async {
@@ -128,7 +128,7 @@ struct CoreSimulatorServiceTests {
 
   @Test func openSimulatorAppRunsOpenCommandAndReturnsResult() async {
     let commandResult = makeCommandResult(
-      executable: "/usr/bin/open",
+      executable: "open",
       arguments: ["-a", "Simulator"]
     )
     let recorder = CommandRecorder(results: [commandResult])
@@ -139,7 +139,7 @@ struct CoreSimulatorServiceTests {
     #expect(result == commandResult)
     #expect(await recorder.recordedCalls() == [
       CommandCall(
-        executable: "/usr/bin/open",
+        executable: "open",
         arguments: ["-a", "Simulator"],
         timeout: 10
       )
@@ -148,9 +148,9 @@ struct CoreSimulatorServiceTests {
 
   @Test func customTimeoutsAreForwardedToCommands() async {
     let recorder = CommandRecorder(results: [
-      makeCommandResult(executable: "xcrun", arguments: ["xcode-select", "-p"]),
+      makeCommandResult(executable: "xcode-select", arguments: ["-p"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "list", "-j"]),
-      makeCommandResult(executable: "/usr/bin/open", arguments: ["-a", "Simulator"])
+      makeCommandResult(executable: "open", arguments: ["-a", "Simulator"])
     ])
     let service = makeService(
       recorder: recorder,
@@ -165,8 +165,8 @@ struct CoreSimulatorServiceTests {
 
     #expect(await recorder.recordedCalls() == [
       CommandCall(
-        executable: "xcrun",
-        arguments: ["xcode-select", "-p"],
+        executable: "xcode-select",
+        arguments: ["-p"],
         timeout: 1
       ),
       CommandCall(
@@ -175,7 +175,7 @@ struct CoreSimulatorServiceTests {
         timeout: 2
       ),
       CommandCall(
-        executable: "/usr/bin/open",
+        executable: "open",
         arguments: ["-a", "Simulator"],
         timeout: 3
       )

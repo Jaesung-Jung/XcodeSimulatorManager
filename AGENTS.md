@@ -1,7 +1,5 @@
 # Guidelines
 
-Behavioral guidelines to reduce common LLM coding mistakes, derived from [Andrej Karpathy's observations](https://x.com/karpathy/status/2015883857489522876) on LLM coding pitfalls.
-
 **Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
 ## 1. Think Before Coding
@@ -59,3 +57,7 @@ For multi-step tasks, state a brief plan:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+
+## 5. Coding Style Guide
+
+Project-local Swift and SwiftUI style rules are documented in [CODING-STYLES.md](CODING-STYLES.md). Consult that file before creating or refactoring views, reducers, or shared UI.

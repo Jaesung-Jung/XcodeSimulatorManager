@@ -7,13 +7,13 @@ struct AppContainerTests {
   @Test func holdsStableStoreInstances() {
     let container = AppContainer()
 
-    let simulatorStore = container.simulatorStore
     let settingsStore = container.settingsStore
     let actionLogStore = container.actionLogStore
+    let mainWindowStore = container.mainWindowStore
 
-    #expect(container.simulatorStore === simulatorStore)
     #expect(container.settingsStore === settingsStore)
     #expect(container.actionLogStore === actionLogStore)
+    #expect(container.mainWindowStore === mainWindowStore)
   }
 
   @Test func holdsStableRepositoryInstance() {

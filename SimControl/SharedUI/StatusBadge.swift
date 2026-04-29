@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct StatusBadgeView: View {
+struct StatusBadge: View {
   let title: LocalizedStringKey
   let systemImage: String?
 
@@ -30,10 +30,10 @@ struct StatusBadgeView: View {
   }
 }
 
-// MARK: - StatusBadgeView Preview
+// MARK: - StatusBadge Preview
 
 #Preview {
-  StatusBadgeView(title: "Title", systemImage: "apple.logo")
+  StatusBadge(title: "Title", systemImage: "apple.logo")
     .tint(.green)
     .padding(20)
 }

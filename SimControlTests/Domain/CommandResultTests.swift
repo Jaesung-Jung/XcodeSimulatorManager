@@ -17,7 +17,7 @@ struct CommandResultTests {
     let startedAt = Date(timeIntervalSince1970: 100)
     let result = CommandResult(
       id: "command-1",
-      executable: "/usr/bin/xcrun",
+      executable: "xcrun",
       arguments: ["simctl", "list", "-j"],
       stdout: "{}",
       stderr: "warning",
@@ -27,7 +27,7 @@ struct CommandResultTests {
     )
 
     #expect(result.id == "command-1")
-    #expect(result.executable == "/usr/bin/xcrun")
+    #expect(result.executable == "xcrun")
     #expect(result.arguments == ["simctl", "list", "-j"])
     #expect(result.stdout == "{}")
     #expect(result.stderr == "warning")
@@ -38,7 +38,7 @@ struct CommandResultTests {
   private func makeCommandResult(id: String, exitCode: Int32) -> CommandResult {
     CommandResult(
       id: id,
-      executable: "/usr/bin/true",
+      executable: "true",
       arguments: [],
       stdout: "",
       stderr: "",

@@ -1,11 +1,13 @@
+import ComposableArchitecture
+
 @MainActor
 final class AppContainer {
   let commandExecutor: CommandExecutor
   let coreSimulatorService: CoreSimulatorService
   let simulatorRepository: SimulatorRepository
-  let simulatorStore: SimulatorStore
   let settingsStore: SettingsStore
   let actionLogStore: ActionLogStore
+  let mainWindowStore: StoreOf<MainWindowFeature>
 
   init() {
     let commandExecutor = CommandExecutor()
@@ -15,8 +17,14 @@ final class AppContainer {
     self.commandExecutor = commandExecutor
     self.coreSimulatorService = coreSimulatorService
     self.simulatorRepository = simulatorRepository
-    simulatorStore = SimulatorStore(repository: simulatorRepository)
     settingsStore = SettingsStore()
     actionLogStore = ActionLogStore()
+    mainWindowStore = Store(initialState: MainWindowFeature.State()) {
+      MainWindowFeature()
+    } withDependencies: {
+      $0.simulatorRepository.refresh = {
+        await simulatorRepository.refresh()
+      }
+    }
   }
 }
