@@ -9,6 +9,17 @@ struct MainWindowView: View {
     store.workspace.refreshState == .refreshing
   }
 
+  private var lifecycleSheet: Binding<MainWindowFeature.DeviceLifecycleSheet?> {
+    Binding(
+      get: { store.lifecycleSheet },
+      set: { sheet in
+        if sheet == nil {
+          store.send(.lifecycleSheetDismissed)
+        }
+      }
+    )
+  }
+
   var body: some View {
     NavigationSplitView {
       Sidebar(
@@ -34,6 +45,26 @@ struct MainWindowView: View {
     .toolbar {
       ToolbarItem(placement: .primaryAction) {
         Button {
+          store.send(.createSimulatorButtonTapped)
+        } label: {
+          Label("Create Simulator", systemImage: "plus")
+        }
+        .disabled(!store.canCreateDevice)
+        .help("Create simulator")
+      }
+
+      ToolbarItem(placement: .primaryAction) {
+        Button {
+          store.send(.cloneSelectedSimulatorButtonTapped)
+        } label: {
+          Label("Clone Simulator", systemImage: "plus.square.on.square")
+        }
+        .disabled(!store.canCloneSelectedDevice)
+        .help("Clone selected simulator")
+      }
+
+      ToolbarItem(placement: .primaryAction) {
+        Button {
           store.send(.refreshButtonTapped)
         } label: {
           if isRefreshing {
@@ -47,6 +78,28 @@ struct MainWindowView: View {
         .disabled(isRefreshing)
         .help("Refresh simulator inventory")
         .keyboardShortcut("r", modifiers: .command)
+      }
+    }
+    .sheet(item: lifecycleSheet) { sheet in
+      switch sheet {
+      case .create(let formState):
+        if let snapshot = store.workspace.snapshot {
+          CreateDeviceView(
+            formState: formState,
+            runtimes: snapshot.runtimes,
+            deviceTypes: snapshot.deviceTypes
+          ) { formState in
+            store.send(.createDeviceSubmitted(formState))
+          }
+        }
+      case .clone(let formState):
+        CloneDeviceView(formState: formState) { formState in
+          store.send(.cloneDeviceSubmitted(formState))
+        }
+      case .rename(let formState):
+        RenameDeviceView(formState: formState) { formState in
+          store.send(.renameDeviceSubmitted(formState))
+        }
       }
     }
     .task {

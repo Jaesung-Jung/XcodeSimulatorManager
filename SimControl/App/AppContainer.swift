@@ -34,6 +34,19 @@ final class AppContainer {
       $0.coreSimulatorService.shutdownDevice = { id in
         await coreSimulatorService.shutdownDevice(id: id)
       }
+      $0.coreSimulatorService.createDevice = { name, deviceTypeID, runtimeID in
+        await coreSimulatorService.createDevice(
+          name: name,
+          deviceTypeID: deviceTypeID,
+          runtimeID: runtimeID
+        )
+      }
+      $0.coreSimulatorService.cloneDevice = { id, name in
+        await coreSimulatorService.cloneDevice(id: id, name: name)
+      }
+      $0.coreSimulatorService.renameDevice = { id, name in
+        await coreSimulatorService.renameDevice(id: id, name: name)
+      }
     }
   }
 }

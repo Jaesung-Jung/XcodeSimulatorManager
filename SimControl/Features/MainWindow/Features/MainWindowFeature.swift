@@ -8,9 +8,55 @@ struct MainWindowFeature {
   @Dependency(\.coreSimulatorService) private var coreSimulatorService
   @Dependency(\.simulatorRepository) private var simulatorRepository
 
+  enum DeviceLifecycleSheet: Equatable, Identifiable {
+    case create(CreateDeviceFormState)
+    case clone(CloneDeviceFormState)
+    case rename(RenameDeviceFormState)
+
+    var id: String {
+      switch self {
+      case .create:
+        "create"
+      case .clone(let formState):
+        "clone-\(formState.sourceDeviceID)"
+      case .rename(let formState):
+        "rename-\(formState.deviceID)"
+      }
+    }
+  }
+
+  struct CreateDeviceFormState: Equatable {
+    var name: String
+    var runtimeID: String
+    var deviceTypeID: String
+
+    init(
+      name: String = "",
+      runtimeID: String = "",
+      deviceTypeID: String = ""
+    ) {
+      self.name = name
+      self.runtimeID = runtimeID
+      self.deviceTypeID = deviceTypeID
+    }
+  }
+
+  struct CloneDeviceFormState: Equatable {
+    let sourceDeviceID: String
+    let sourceName: String
+    var name: String
+  }
+
+  struct RenameDeviceFormState: Equatable {
+    let deviceID: String
+    let currentName: String
+    var name: String
+  }
+
   @ObservableState
   struct State: Equatable {
     var lastMenuBarAutoRefreshAttemptAt: Date?
+    var lifecycleSheet: DeviceLifecycleSheet?
     var sidebar: SidebarFeature.State
     var workspace: WorkspaceFeature.State
 
@@ -23,9 +69,11 @@ struct MainWindowFeature {
       installedAppsAvailability: InstalledAppsAvailability = .notLoaded,
       deviceCommandState: DeviceCommandState? = nil,
       isOpeningSimulatorApp: Bool = false,
-      lastMenuBarAutoRefreshAttemptAt: Date? = nil
+      lastMenuBarAutoRefreshAttemptAt: Date? = nil,
+      lifecycleSheet: DeviceLifecycleSheet? = nil
     ) {
       self.lastMenuBarAutoRefreshAttemptAt = lastMenuBarAutoRefreshAttemptAt
+      self.lifecycleSheet = lifecycleSheet
       self.sidebar = SidebarFeature.State(
         snapshot: snapshot,
         refreshState: refreshState
@@ -41,6 +89,58 @@ struct MainWindowFeature {
         isOpeningSimulatorApp: isOpeningSimulatorApp
       )
     }
+
+    var canCreateDevice: Bool {
+      workspace.deviceCommandState == nil && initialCreateDeviceFormState != nil
+    }
+
+    var canCloneSelectedDevice: Bool {
+      workspace.deviceCommandState == nil && workspace.selectedDevice != nil
+    }
+
+    var initialCreateDeviceFormState: CreateDeviceFormState? {
+      guard let snapshot else {
+        return nil
+      }
+
+      return Self.initialCreateDeviceFormState(in: snapshot)
+    }
+
+    private var snapshot: SimulatorSnapshot? {
+      workspace.snapshot
+    }
+
+    private static func initialCreateDeviceFormState(
+      in snapshot: SimulatorSnapshot
+    ) -> CreateDeviceFormState? {
+      for runtime in snapshot.runtimes where runtime.isAvailable {
+        guard let deviceType = compatibleDeviceTypes(
+          for: runtime,
+          in: snapshot.deviceTypes
+        ).first else {
+          continue
+        }
+
+        return CreateDeviceFormState(
+          runtimeID: runtime.id,
+          deviceTypeID: deviceType.id
+        )
+      }
+
+      return nil
+    }
+
+    private static func compatibleDeviceTypes(
+      for runtime: SimulatorRuntime,
+      in deviceTypes: [SimulatorDeviceType]
+    ) -> [SimulatorDeviceType] {
+      guard !runtime.supportedDeviceTypeIDs.isEmpty else {
+        return deviceTypes
+      }
+
+      let supportedDeviceTypeIDs = Set(runtime.supportedDeviceTypeIDs)
+      return deviceTypes.filter { supportedDeviceTypeIDs.contains($0.id) }
+    }
   }
 
   enum Action: Equatable {
@@ -48,10 +148,20 @@ struct MainWindowFeature {
     case menuBarPresented(at: Date)
     case refreshButtonTapped
     case refreshResponse(SimulatorRepository.RefreshResult)
+    case createSimulatorButtonTapped
+    case cloneSelectedSimulatorButtonTapped
+    case lifecycleSheetDismissed
+    case createDeviceSubmitted(CreateDeviceFormState)
+    case cloneDeviceSubmitted(CloneDeviceFormState)
+    case renameDeviceSubmitted(RenameDeviceFormState)
     case openSimulatorAppButtonTapped
     case openSimulatorAppResponse(CommandResult)
     case deviceCommandResponse(DeviceCommandState, CommandResult)
-    case deviceCommandRefreshResponse(DeviceCommandState, SimulatorRepository.RefreshResult)
+    case deviceCommandRefreshResponse(
+      DeviceCommandState,
+      SimulatorRepository.RefreshResult,
+      preferredSelectedDeviceID: String?
+    )
     case sidebar(SidebarFeature.Action)
     case workspace(WorkspaceFeature.Action)
   }
@@ -96,6 +206,48 @@ struct MainWindowFeature {
 
         return .none
 
+      case .createSimulatorButtonTapped:
+        guard state.workspace.deviceCommandState == nil,
+              let formState = state.initialCreateDeviceFormState
+        else {
+          return .none
+        }
+
+        state.lifecycleSheet = .create(formState)
+        return .none
+
+      case .cloneSelectedSimulatorButtonTapped:
+        guard state.workspace.deviceCommandState == nil,
+              let device = state.workspace.selectedDevice
+        else {
+          return .none
+        }
+
+        state.lifecycleSheet = .clone(
+          CloneDeviceFormState(
+            sourceDeviceID: device.id,
+            sourceName: device.name,
+            name: "\(device.name) Copy"
+          )
+        )
+        return .none
+
+      case .lifecycleSheetDismissed:
+        state.lifecycleSheet = nil
+        return .none
+
+      case .createDeviceSubmitted(let formState):
+        state.lifecycleSheet = nil
+        return runCreateDeviceCommand(&state, formState: formState)
+
+      case .cloneDeviceSubmitted(let formState):
+        state.lifecycleSheet = nil
+        return runCloneDeviceCommand(&state, formState: formState)
+
+      case .renameDeviceSubmitted(let formState):
+        state.lifecycleSheet = nil
+        return runRenameDeviceCommand(&state, formState: formState)
+
       case .openSimulatorAppButtonTapped:
         return openSimulatorApp(&state)
 
@@ -114,7 +266,7 @@ struct MainWindowFeature {
         state.workspace.setRefreshState(.refreshing)
         return .none
 
-      case .deviceCommandRefreshResponse(let deviceCommandState, let result):
+      case .deviceCommandRefreshResponse(let deviceCommandState, let result, let preferredSelectedDeviceID):
         guard state.workspace.deviceCommandState == deviceCommandState else {
           return .none
         }
@@ -127,7 +279,8 @@ struct MainWindowFeature {
           state.workspace.applySnapshot(
             snapshot,
             refreshState: .idle,
-            commandResults: commandResults
+            commandResults: commandResults,
+            preferredSelectedDeviceID: preferredSelectedDeviceID
           )
         } else {
           let refreshState = InventoryRefreshState.failed(
@@ -157,6 +310,22 @@ struct MainWindowFeature {
 
       case .workspace(.deviceDetail(.openSimulatorAppButtonTapped)):
         return openSimulatorApp(&state)
+
+      case .workspace(.deviceDetail(.renameButtonTapped(let deviceID))):
+        guard state.workspace.deviceCommandState == nil,
+              let device = device(id: deviceID, in: state)
+        else {
+          return .none
+        }
+
+        state.lifecycleSheet = .rename(
+          RenameDeviceFormState(
+            deviceID: device.id,
+            currentName: device.name,
+            name: device.name
+          )
+        )
+        return .none
 
       case .sidebar, .workspace:
         return .none
@@ -217,7 +386,8 @@ struct MainWindowFeature {
     _ deviceCommandState: DeviceCommandState
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
-          let device = device(id: deviceCommandState.deviceID, in: state),
+          let deviceID = deviceCommandState.deviceID,
+          let device = device(id: deviceID, in: state),
           canRun(deviceCommandState.command, on: device)
     else {
       return .none
@@ -230,14 +400,133 @@ struct MainWindowFeature {
 
       switch deviceCommandState.command {
       case .boot:
-        commandResult = await coreSimulatorService.bootDevice(deviceCommandState.deviceID)
+        commandResult = await coreSimulatorService.bootDevice(deviceID)
       case .shutdown:
-        commandResult = await coreSimulatorService.shutdownDevice(deviceCommandState.deviceID)
+        commandResult = await coreSimulatorService.shutdownDevice(deviceID)
+      case .create, .clone, .rename:
+        return
       }
 
       await send(.deviceCommandResponse(deviceCommandState, commandResult))
       let refreshResult = await simulatorRepository.refresh()
-      await send(.deviceCommandRefreshResponse(deviceCommandState, refreshResult))
+      await send(
+        .deviceCommandRefreshResponse(
+          deviceCommandState,
+          refreshResult,
+          preferredSelectedDeviceID: nil
+        )
+      )
+    }
+  }
+
+  private func runCreateDeviceCommand(
+    _ state: inout State,
+    formState: CreateDeviceFormState
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          let snapshot = state.workspace.snapshot,
+          let runtime = snapshot.runtimes.first(where: { $0.id == formState.runtimeID && $0.isAvailable }),
+          let deviceType = compatibleDeviceTypes(for: runtime, in: snapshot.deviceTypes)
+            .first(where: { $0.id == formState.deviceTypeID })
+    else {
+      return .none
+    }
+
+    let name = nonEmpty(formState.name) ?? deviceType.name
+    guard !name.isEmpty else {
+      return .none
+    }
+
+    let deviceCommandState = DeviceCommandState(command: .create)
+    state.workspace.setDeviceCommandState(deviceCommandState)
+
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      let commandResult = await coreSimulatorService.createDevice(
+        name,
+        deviceType.id,
+        runtime.id
+      )
+      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+
+      let refreshResult = await simulatorRepository.refresh()
+      await send(
+        .deviceCommandRefreshResponse(
+          deviceCommandState,
+          refreshResult,
+          preferredSelectedDeviceID: Self.preferredDeviceID(from: commandResult)
+        )
+      )
+    }
+  }
+
+  private func runCloneDeviceCommand(
+    _ state: inout State,
+    formState: CloneDeviceFormState
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          device(id: formState.sourceDeviceID, in: state) != nil,
+          let name = nonEmpty(formState.name)
+    else {
+      return .none
+    }
+
+    let deviceCommandState = DeviceCommandState(
+      command: .clone,
+      deviceID: formState.sourceDeviceID
+    )
+    state.workspace.setDeviceCommandState(deviceCommandState)
+
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      let commandResult = await coreSimulatorService.cloneDevice(
+        formState.sourceDeviceID,
+        name
+      )
+      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+
+      let refreshResult = await simulatorRepository.refresh()
+      await send(
+        .deviceCommandRefreshResponse(
+          deviceCommandState,
+          refreshResult,
+          preferredSelectedDeviceID: Self.preferredDeviceID(from: commandResult)
+        )
+      )
+    }
+  }
+
+  private func runRenameDeviceCommand(
+    _ state: inout State,
+    formState: RenameDeviceFormState
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          device(id: formState.deviceID, in: state) != nil,
+          let name = nonEmpty(formState.name),
+          name != formState.currentName
+    else {
+      return .none
+    }
+
+    let deviceCommandState = DeviceCommandState(
+      command: .rename,
+      deviceID: formState.deviceID
+    )
+    state.workspace.setDeviceCommandState(deviceCommandState)
+
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      let commandResult = await coreSimulatorService.renameDevice(
+        formState.deviceID,
+        name
+      )
+      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+
+      let refreshResult = await simulatorRepository.refresh()
+      await send(
+        .deviceCommandRefreshResponse(
+          deviceCommandState,
+          refreshResult,
+          preferredSelectedDeviceID: nil
+        )
+      )
     }
   }
 
@@ -280,7 +569,37 @@ struct MainWindowFeature {
       return device.state == .shutdown
     case .shutdown:
       return device.state == .booted
+    case .create, .clone, .rename:
+      return false
     }
+  }
+
+  private func compatibleDeviceTypes(
+    for runtime: SimulatorRuntime,
+    in deviceTypes: [SimulatorDeviceType]
+  ) -> [SimulatorDeviceType] {
+    guard !runtime.supportedDeviceTypeIDs.isEmpty else {
+      return deviceTypes
+    }
+
+    let supportedDeviceTypeIDs = Set(runtime.supportedDeviceTypeIDs)
+    return deviceTypes.filter { supportedDeviceTypeIDs.contains($0.id) }
+  }
+
+  private func nonEmpty(_ value: String) -> String? {
+    let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    return trimmedValue.isEmpty ? nil : trimmedValue
+  }
+
+  private static func preferredDeviceID(from result: CommandResult) -> String? {
+    guard result.succeeded else {
+      return nil
+    }
+
+    return result.stdout
+      .split(whereSeparator: \.isNewline)
+      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+      .first { !$0.isEmpty }
   }
 
   private func commandResults(

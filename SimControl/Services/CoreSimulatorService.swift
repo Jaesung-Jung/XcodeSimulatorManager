@@ -178,6 +178,37 @@ struct CoreSimulatorService {
     )
   }
 
+  /// Creates a simulator device with the provided device type and runtime identifiers.
+  func createDevice(
+    name: String,
+    deviceTypeID: String,
+    runtimeID: String
+  ) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "create", name, deviceTypeID, runtimeID],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Clones an existing simulator device under a new display name.
+  func cloneDevice(id: String, name: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "clone", id, name],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Renames an existing simulator device.
+  func renameDevice(id: String, name: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "rename", id, name],
+      deviceCommandTimeout
+    )
+  }
+
   private func commandFailureDiagnostic(command: String, result: CommandResult) -> String {
     let summary = "\(command) failed with exit code \(result.exitCode)."
     let stderr = result.stderr.trimmingCharacters(in: .whitespacesAndNewlines)

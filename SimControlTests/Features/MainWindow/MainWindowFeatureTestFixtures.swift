@@ -88,13 +88,14 @@ enum MainWindowTestFixtures {
 
   static func makeDevice(
     id: String,
+    name: String? = nil,
     state: SimulatorDevice.State = .shutdown,
     isAvailable: Bool = true
   ) -> SimulatorDevice {
     SimulatorDevice(
       id: id,
       udid: id,
-      name: "Device \(id)",
+      name: name ?? "Device \(id)",
       runtimeID: runtime.id,
       deviceTypeID: deviceType.id,
       platform: .iOS,

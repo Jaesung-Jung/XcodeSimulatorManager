@@ -53,10 +53,12 @@ struct WorkspaceFeature {
     mutating func applySnapshot(
       _ snapshot: SimulatorSnapshot,
       refreshState: InventoryRefreshState,
-      commandResults: [CommandResult]
+      commandResults: [CommandResult],
+      preferredSelectedDeviceID: String? = nil
     ) {
-      let selectedDeviceID = validSelectedDeviceID(in: snapshot)
-      let selectedAppID = selectedDeviceID == nil ? nil : deviceDetail.installedApps.selectedAppID
+      let previousSelectedDeviceID = deviceList.selectedDeviceID
+      let selectedDeviceID = validPreferredSelectedDeviceID(preferredSelectedDeviceID, in: snapshot) ?? validSelectedDeviceID(in: snapshot)
+      let selectedAppID = selectedDeviceID == previousSelectedDeviceID ? deviceDetail.installedApps.selectedAppID : nil
 
       self.snapshot = snapshot
       self.refreshState = refreshState
@@ -146,6 +148,19 @@ struct WorkspaceFeature {
         : nil
     }
 
+    private func validPreferredSelectedDeviceID(
+      _ preferredSelectedDeviceID: String?,
+      in snapshot: SimulatorSnapshot
+    ) -> String? {
+      guard let preferredSelectedDeviceID else {
+        return nil
+      }
+
+      return snapshot.devices.contains(where: { $0.id == preferredSelectedDeviceID })
+        ? preferredSelectedDeviceID
+        : nil
+    }
+
     private var devices: [SimulatorDevice] {
       snapshot?.devices ?? []
     }
@@ -158,7 +173,7 @@ struct WorkspaceFeature {
       Dictionary(uniqueKeysWithValues: (snapshot?.deviceTypes ?? []).map { ($0.id, $0) })
     }
 
-    private var selectedDevice: SimulatorDevice? {
+    var selectedDevice: SimulatorDevice? {
       guard let selectedDeviceID = deviceList.selectedDeviceID else {
         return nil
       }
@@ -166,7 +181,7 @@ struct WorkspaceFeature {
       return devices.first { $0.id == selectedDeviceID }
     }
 
-    private var selectedRuntime: SimulatorRuntime? {
+    var selectedRuntime: SimulatorRuntime? {
       guard let selectedDevice else {
         return nil
       }
@@ -174,7 +189,7 @@ struct WorkspaceFeature {
       return runtimeByID[selectedDevice.runtimeID]
     }
 
-    private var selectedDeviceType: SimulatorDeviceType? {
+    var selectedDeviceType: SimulatorDeviceType? {
       guard let selectedDevice else {
         return nil
       }

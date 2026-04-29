@@ -186,13 +186,97 @@ struct CoreSimulatorServiceTests {
     ])
   }
 
+  @Test func createDeviceRunsSimctlCreateCommandAndReturnsResult() async {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: [
+        "simctl",
+        "create",
+        "iPhone 17 Pro",
+        "device-type-iphone",
+        "runtime-ios"
+      ],
+      stdout: "CREATED-DEVICE\n"
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.createDevice(
+      name: "iPhone 17 Pro",
+      deviceTypeID: "device-type-iphone",
+      runtimeID: "runtime-ios"
+    )
+
+    #expect(result == commandResult)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: [
+          "simctl",
+          "create",
+          "iPhone 17 Pro",
+          "device-type-iphone",
+          "runtime-ios"
+        ],
+        timeout: 60
+      )
+    ])
+  }
+
+  @Test func cloneDeviceRunsSimctlCloneCommandAndReturnsResult() async {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: ["simctl", "clone", "DEVICE-1", "Device Copy"],
+      stdout: "CLONED-DEVICE\n"
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.cloneDevice(id: "DEVICE-1", name: "Device Copy")
+
+    #expect(result == commandResult)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "clone", "DEVICE-1", "Device Copy"],
+        timeout: 60
+      )
+    ])
+  }
+
+  @Test func renameDeviceRunsSimctlRenameCommandAndReturnsResult() async {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: ["simctl", "rename", "DEVICE-1", "Renamed Device"]
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.renameDevice(id: "DEVICE-1", name: "Renamed Device")
+
+    #expect(result == commandResult)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "rename", "DEVICE-1", "Renamed Device"],
+        timeout: 60
+      )
+    ])
+  }
+
   @Test func customTimeoutsAreForwardedToCommands() async {
     let recorder = CommandRecorder(results: [
       makeCommandResult(executable: "xcode-select", arguments: ["-p"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "list", "-j"]),
       makeCommandResult(executable: "open", arguments: ["-a", "Simulator"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "boot", "DEVICE-1"]),
-      makeCommandResult(executable: "xcrun", arguments: ["simctl", "shutdown", "DEVICE-1"])
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "shutdown", "DEVICE-1"]),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "create", "iPhone 17 Pro", "device-type-iphone", "runtime-ios"]
+      ),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "clone", "DEVICE-1", "Device Copy"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "rename", "DEVICE-1", "Renamed Device"])
     ])
     let service = makeService(
       recorder: recorder,
@@ -207,6 +291,13 @@ struct CoreSimulatorServiceTests {
     _ = await service.openSimulatorApp()
     _ = await service.bootDevice(id: "DEVICE-1")
     _ = await service.shutdownDevice(id: "DEVICE-1")
+    _ = await service.createDevice(
+      name: "iPhone 17 Pro",
+      deviceTypeID: "device-type-iphone",
+      runtimeID: "runtime-ios"
+    )
+    _ = await service.cloneDevice(id: "DEVICE-1", name: "Device Copy")
+    _ = await service.renameDevice(id: "DEVICE-1", name: "Renamed Device")
 
     #expect(await recorder.recordedCalls() == [
       CommandCall(
@@ -232,6 +323,21 @@ struct CoreSimulatorServiceTests {
       CommandCall(
         executable: "xcrun",
         arguments: ["simctl", "shutdown", "DEVICE-1"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "create", "iPhone 17 Pro", "device-type-iphone", "runtime-ios"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "clone", "DEVICE-1", "Device Copy"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "rename", "DEVICE-1", "Renamed Device"],
         timeout: 4
       )
     ])

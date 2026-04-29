@@ -43,13 +43,14 @@ struct DeviceDetailFeature {
     case bootButtonTapped(String)
     case shutdownButtonTapped(String)
     case openSimulatorAppButtonTapped
+    case renameButtonTapped(String)
     case installedApps(InstalledAppsFeature.Action)
   }
 
   var body: some ReducerOf<Self> {
     Reduce { _, action in
       switch action {
-      case .bootButtonTapped, .shutdownButtonTapped, .openSimulatorAppButtonTapped:
+      case .bootButtonTapped, .shutdownButtonTapped, .openSimulatorAppButtonTapped, .renameButtonTapped:
         return .none
 
       case .installedApps:

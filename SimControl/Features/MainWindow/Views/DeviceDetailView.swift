@@ -31,6 +31,9 @@ struct DeviceDetailView: View {
             },
             onOpenSimulatorApp: {
               store.send(.openSimulatorAppButtonTapped)
+            },
+            onRename: {
+              store.send(.renameButtonTapped(device.id))
             }
           )
 
@@ -114,6 +117,7 @@ extension DeviceDetailView {
     let onBoot: () -> Void
     let onShutdown: () -> Void
     let onOpenSimulatorApp: () -> Void
+    let onRename: () -> Void
 
     private var subtitle: String {
       let runtimeName = runtime?.name ?? device.runtimeID
@@ -163,7 +167,8 @@ extension DeviceDetailView {
             isOpeningSimulatorApp: isOpeningSimulatorApp,
             onBoot: onBoot,
             onShutdown: onShutdown,
-            onOpenSimulatorApp: onOpenSimulatorApp
+            onOpenSimulatorApp: onOpenSimulatorApp,
+            onRename: onRename
           )
         }
       }
@@ -180,6 +185,7 @@ extension DeviceDetailView {
     let onBoot: () -> Void
     let onShutdown: () -> Void
     let onOpenSimulatorApp: () -> Void
+    let onRename: () -> Void
 
     private var canBoot: Bool {
       device.isAvailable && device.state == .shutdown
@@ -242,6 +248,20 @@ extension DeviceDetailView {
         }
         .disabled(isOpeningSimulatorApp)
         .help("Open Simulator.app")
+
+        Menu {
+          Button {
+            onRename()
+          } label: {
+            Label("Rename", systemImage: "pencil")
+          }
+          .disabled(isLifecycleActionRunning)
+        } label: {
+          Image(systemName: "ellipsis.circle")
+            .accessibilityLabel("More device actions")
+        }
+        .disabled(isLifecycleActionRunning)
+        .help("More device actions")
       }
       .buttonStyle(.bordered)
     }

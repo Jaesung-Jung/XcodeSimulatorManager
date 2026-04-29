@@ -70,4 +70,71 @@ struct WorkspaceFeatureTests {
       $0.inspector.selectedApp = MainWindowTestFixtures.app
     }
   }
+
+  @Test
+  func applySnapshotUsesPreferredSelectedDeviceAndClearsSelectedApp() {
+    let oldSnapshot = MainWindowTestFixtures.makeSnapshot(
+      devices: [
+        MainWindowTestFixtures.device,
+        MainWindowTestFixtures.secondDevice
+      ],
+      installedAppsByDeviceID: [
+        MainWindowTestFixtures.device.id: [MainWindowTestFixtures.app],
+        MainWindowTestFixtures.secondDevice.id: [MainWindowTestFixtures.secondApp]
+      ]
+    )
+    let newSnapshot = MainWindowTestFixtures.makeSnapshot(
+      devices: [
+        MainWindowTestFixtures.device,
+        MainWindowTestFixtures.secondDevice
+      ],
+      installedAppsByDeviceID: [
+        MainWindowTestFixtures.device.id: [MainWindowTestFixtures.app],
+        MainWindowTestFixtures.secondDevice.id: [MainWindowTestFixtures.secondApp]
+      ]
+    )
+    var state = WorkspaceFeature.State(
+      snapshot: oldSnapshot,
+      selectedDeviceID: MainWindowTestFixtures.device.id,
+      selectedAppID: MainWindowTestFixtures.app.id,
+      installedAppsAvailability: .loaded
+    )
+
+    state.applySnapshot(
+      newSnapshot,
+      refreshState: .idle,
+      commandResults: [],
+      preferredSelectedDeviceID: MainWindowTestFixtures.secondDevice.id
+    )
+
+    #expect(state.deviceList.selectedDeviceID == MainWindowTestFixtures.secondDevice.id)
+    #expect(state.deviceDetail.device == MainWindowTestFixtures.secondDevice)
+    #expect(state.deviceDetail.installedApps.selectedAppID == nil)
+    #expect(state.inspector.device == MainWindowTestFixtures.secondDevice)
+  }
+
+  @Test
+  func applySnapshotFallsBackWhenPreferredSelectedDeviceIsMissing() {
+    let snapshot = MainWindowTestFixtures.makeSnapshot(
+      devices: [
+        MainWindowTestFixtures.device,
+        MainWindowTestFixtures.secondDevice
+      ]
+    )
+    var state = WorkspaceFeature.State(
+      snapshot: snapshot,
+      selectedDeviceID: MainWindowTestFixtures.device.id
+    )
+
+    state.applySnapshot(
+      snapshot,
+      refreshState: .idle,
+      commandResults: [],
+      preferredSelectedDeviceID: "MISSING"
+    )
+
+    #expect(state.deviceList.selectedDeviceID == MainWindowTestFixtures.device.id)
+    #expect(state.deviceDetail.device == MainWindowTestFixtures.device)
+    #expect(state.inspector.device == MainWindowTestFixtures.device)
+  }
 }

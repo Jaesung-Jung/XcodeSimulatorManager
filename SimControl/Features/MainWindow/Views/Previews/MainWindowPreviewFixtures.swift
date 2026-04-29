@@ -34,6 +34,15 @@ extension Store where State == MainWindowFeature.State, Action == MainWindowFeat
       $0.coreSimulatorService.shutdownDevice = { _ in
         MainWindowPreviewFixtures.commandResults[1]
       }
+      $0.coreSimulatorService.createDevice = { _, _, _ in
+        MainWindowPreviewFixtures.createDeviceCommandResult
+      }
+      $0.coreSimulatorService.cloneDevice = { _, _ in
+        MainWindowPreviewFixtures.cloneDeviceCommandResult
+      }
+      $0.coreSimulatorService.renameDevice = { _, _ in
+        MainWindowPreviewFixtures.renameDeviceCommandResult
+      }
     }
   }
 }
@@ -123,6 +132,45 @@ enum MainWindowPreviewFixtures {
     exitCode: 0,
     duration: 0.06,
     startedAt: Date(timeIntervalSince1970: 1_003)
+  )
+
+  static let createDeviceCommandResult = CommandResult(
+    id: "preview-create-device",
+    executable: "xcrun",
+    arguments: [
+      "simctl",
+      "create",
+      "iPhone 17 Pro",
+      deviceType.id,
+      runtime.id
+    ],
+    stdout: "PREVIEW-DEVICE-CREATED\n",
+    stderr: "",
+    exitCode: 0,
+    duration: 0.2,
+    startedAt: Date(timeIntervalSince1970: 1_004)
+  )
+
+  static let cloneDeviceCommandResult = CommandResult(
+    id: "preview-clone-device",
+    executable: "xcrun",
+    arguments: ["simctl", "clone", device.id, "iPhone 17 Pro Copy"],
+    stdout: "PREVIEW-DEVICE-CLONED\n",
+    stderr: "",
+    exitCode: 0,
+    duration: 0.2,
+    startedAt: Date(timeIntervalSince1970: 1_005)
+  )
+
+  static let renameDeviceCommandResult = CommandResult(
+    id: "preview-rename-device",
+    executable: "xcrun",
+    arguments: ["simctl", "rename", device.id, "Renamed Simulator"],
+    stdout: "",
+    stderr: "",
+    exitCode: 0,
+    duration: 0.1,
+    startedAt: Date(timeIntervalSince1970: 1_006)
   )
 
   static let snapshot = SimulatorSnapshot(
