@@ -73,6 +73,11 @@ struct WorkspaceFeature {
       rebuildInspector()
     }
 
+    mutating func appendCommandResult(_ result: CommandResult) {
+      commandResults.append(result)
+      deviceDetail.commandResults = commandResults
+    }
+
     private mutating func rebuildDeviceList(selectedDeviceID: String?) {
       deviceList = DeviceListFeature.State(
         devices: devices,

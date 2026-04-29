@@ -66,11 +66,12 @@ enum MainWindowTestFixtures {
   }
 
   static func makeSnapshot(
+    generatedAt: Date = Date(timeIntervalSince1970: 1_000),
     devices: [SimulatorDevice] = [device],
     installedAppsByDeviceID: [String: [InstalledApp]] = [:]
   ) -> SimulatorSnapshot {
     SimulatorSnapshot(
-      generatedAt: Date(timeIntervalSince1970: 1_000),
+      generatedAt: generatedAt,
       xcode: XcodeSelection(
         developerPath: URL(fileURLWithPath: "/Applications/Xcode.app/Contents/Developer"),
         version: nil,
@@ -134,6 +135,24 @@ enum MainWindowTestFixtures {
       duration: 0.1,
       startedAt: Date(timeIntervalSince1970: 100)
     )
+  }
+}
+
+actor MainWindowRefreshRecorder {
+  private let result: SimulatorRepository.RefreshResult
+  private var refreshCalls = 0
+
+  init(result: SimulatorRepository.RefreshResult) {
+    self.result = result
+  }
+
+  func refresh() -> SimulatorRepository.RefreshResult {
+    refreshCalls += 1
+    return result
+  }
+
+  func refreshCallCount() -> Int {
+    refreshCalls
   }
 }
 

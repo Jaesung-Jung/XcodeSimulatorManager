@@ -7,12 +7,12 @@ struct SimControlApp: App {
   @State private var appContainer = AppContainer()
 
   var body: some Scene {
-    WindowGroup {
+    WindowGroup("SimControl", id: AppSceneID.mainWindow) {
       MainWindowView(store: appContainer.mainWindowStore)
     }
 
     MenuBarExtra("SimControl", systemImage: "iphone.gen1") {
-      MenuBarRootView()
+      MenuBarRootView(store: appContainer.mainWindowStore)
     }
 
     Settings {

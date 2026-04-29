@@ -25,6 +25,9 @@ final class AppContainer {
       $0.simulatorRepository.refresh = {
         await simulatorRepository.refresh()
       }
+      $0.coreSimulatorService.openSimulatorApp = {
+        await coreSimulatorService.openSimulatorApp()
+      }
     }
   }
 }

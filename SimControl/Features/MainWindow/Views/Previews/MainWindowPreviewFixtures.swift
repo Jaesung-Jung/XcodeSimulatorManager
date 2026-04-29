@@ -25,6 +25,9 @@ extension Store where State == MainWindowFeature.State, Action == MainWindowFeat
       $0.simulatorRepository.refresh = {
         MainWindowPreviewFixtures.refreshResult
       }
+      $0.coreSimulatorService.openSimulatorApp = {
+        MainWindowPreviewFixtures.openSimulatorCommandResult
+      }
     }
   }
 }
@@ -104,6 +107,17 @@ enum MainWindowPreviewFixtures {
       startedAt: Date(timeIntervalSince1970: 1_002)
     )
   ]
+
+  static let openSimulatorCommandResult = CommandResult(
+    id: "preview-open-simulator",
+    executable: "open",
+    arguments: ["-a", "Simulator"],
+    stdout: "",
+    stderr: "",
+    exitCode: 0,
+    duration: 0.06,
+    startedAt: Date(timeIntervalSince1970: 1_003)
+  )
 
   static let snapshot = SimulatorSnapshot(
     generatedAt: Date(timeIntervalSince1970: 1_020),
