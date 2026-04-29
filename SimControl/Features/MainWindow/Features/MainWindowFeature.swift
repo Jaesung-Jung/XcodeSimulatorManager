@@ -7,7 +7,41 @@ struct MainWindowFeature {
 
   @Dependency(\.appSandboxReset) private var appSandboxReset
   @Dependency(\.coreSimulatorService) private var coreSimulatorService
+  @Dependency(\.pathAction) private var pathAction
   @Dependency(\.simulatorRepository) private var simulatorRepository
+
+  private enum AppContainerPathTarget: Equatable, Sendable {
+    case bundle
+    case data
+    case appGroup(String)
+
+    var simctlContainer: CoreSimulatorService.AppContainerKind {
+      switch self {
+      case .bundle:
+        .app
+      case .data:
+        .data
+      case .appGroup(let groupID):
+        .appGroup(groupID)
+      }
+    }
+
+    var label: String {
+      switch self {
+      case .bundle:
+        "app bundle container"
+      case .data:
+        "app data container"
+      case .appGroup(let groupID):
+        "App Group \(groupID) container"
+      }
+    }
+  }
+
+  private enum PathOperation: Equatable, Sendable {
+    case open
+    case copy
+  }
 
   enum DeviceLifecycleSheet: Equatable, Identifiable {
     case create(CreateDeviceFormState)
@@ -401,6 +435,7 @@ struct MainWindowFeature {
     case installAppOnSimulatorSubmitted(InstallAppTargetFormState)
     case openSimulatorAppButtonTapped
     case openSimulatorAppResponse(CommandResult)
+    case pathActionResults([CommandResult])
     case deviceCommandResponse(DeviceCommandState, CommandResult)
     case deviceCommandRefreshResponse(
       DeviceCommandState,
@@ -552,6 +587,12 @@ struct MainWindowFeature {
       case .openSimulatorAppResponse(let result):
         state.workspace.appendCommandResult(result)
         state.workspace.setOpeningSimulatorApp(false)
+        return .none
+
+      case .pathActionResults(let results):
+        for result in results {
+          state.workspace.appendCommandResult(result)
+        }
         return .none
 
       case .deviceCommandResponse(let deviceCommandState, let result):
@@ -718,6 +759,73 @@ struct MainWindowFeature {
         state.lifecycleSheet = .unpair(confirmationState)
         return .none
 
+      case .workspace(.deviceDetail(.openDeviceDataFolderButtonTapped(let deviceID))),
+           .workspace(.inspector(.openDeviceDataFolderButtonTapped(let deviceID))):
+        return runDevicePathAction(
+          &state,
+          deviceID: deviceID,
+          path: { $0.dataPath },
+          label: "device data folder",
+          operation: .open
+        )
+
+      case .workspace(.deviceDetail(.copyDeviceDataPathButtonTapped(let deviceID))),
+           .workspace(.inspector(.copyDeviceDataPathButtonTapped(let deviceID))):
+        return runDevicePathAction(
+          &state,
+          deviceID: deviceID,
+          path: { $0.dataPath },
+          label: "device data path",
+          operation: .copy
+        )
+
+      case .workspace(.deviceDetail(.openDeviceLogFolderButtonTapped(let deviceID))),
+           .workspace(.inspector(.openDeviceLogFolderButtonTapped(let deviceID))):
+        return runDevicePathAction(
+          &state,
+          deviceID: deviceID,
+          path: { $0.logPath },
+          label: "device log folder",
+          operation: .open
+        )
+
+      case .workspace(.deviceDetail(.copyDeviceLogPathButtonTapped(let deviceID))),
+           .workspace(.inspector(.copyDeviceLogPathButtonTapped(let deviceID))):
+        return runDevicePathAction(
+          &state,
+          deviceID: deviceID,
+          path: { $0.logPath },
+          label: "device log path",
+          operation: .copy
+        )
+
+      case .workspace(.deviceDetail(.copyDeviceUDIDButtonTapped(let deviceID))),
+           .workspace(.inspector(.copyDeviceUDIDButtonTapped(let deviceID))):
+        return runDeviceValueCopyAction(
+          &state,
+          deviceID: deviceID,
+          value: { $0.udid },
+          label: "device UDID"
+        )
+
+      case .workspace(.deviceDetail(.copyRuntimeIdentifierButtonTapped(let deviceID))),
+           .workspace(.inspector(.copyRuntimeIdentifierButtonTapped(let deviceID))):
+        return runDeviceValueCopyAction(
+          &state,
+          deviceID: deviceID,
+          value: { $0.runtimeID },
+          label: "runtime identifier"
+        )
+
+      case .workspace(.deviceDetail(.copyDeviceTypeIdentifierButtonTapped(let deviceID))),
+           .workspace(.inspector(.copyDeviceTypeIdentifierButtonTapped(let deviceID))):
+        return runDeviceValueCopyAction(
+          &state,
+          deviceID: deviceID,
+          value: { $0.deviceTypeID },
+          label: "device type identifier"
+        )
+
       case .workspace(.deviceDetail(.installedApps(.launchButtonTapped(let appID)))):
         return runLaunchAppCommand(&state, appID: appID)
 
@@ -765,6 +873,69 @@ struct MainWindowFeature {
 
         state.lifecycleSheet = .installAppOnSimulator(formState)
         return .none
+
+      case .workspace(.deviceDetail(.installedApps(.openBundleContainerButtonTapped(let appID)))),
+           .workspace(.inspector(.openAppBundleContainerButtonTapped(let appID))):
+        return runAppContainerPathAction(
+          &state,
+          appID: appID,
+          target: .bundle,
+          operation: .open
+        )
+
+      case .workspace(.deviceDetail(.installedApps(.copyBundleContainerButtonTapped(let appID)))),
+           .workspace(.inspector(.copyAppBundleContainerButtonTapped(let appID))):
+        return runAppContainerPathAction(
+          &state,
+          appID: appID,
+          target: .bundle,
+          operation: .copy
+        )
+
+      case .workspace(.deviceDetail(.installedApps(.openDataContainerButtonTapped(let appID)))),
+           .workspace(.inspector(.openAppDataContainerButtonTapped(let appID))):
+        return runAppContainerPathAction(
+          &state,
+          appID: appID,
+          target: .data,
+          operation: .open
+        )
+
+      case .workspace(.deviceDetail(.installedApps(.copyDataContainerButtonTapped(let appID)))),
+           .workspace(.inspector(.copyAppDataContainerButtonTapped(let appID))):
+        return runAppContainerPathAction(
+          &state,
+          appID: appID,
+          target: .data,
+          operation: .copy
+        )
+
+      case .workspace(.deviceDetail(.installedApps(.copyBundleIDButtonTapped(let appID)))),
+           .workspace(.inspector(.copyAppBundleIDButtonTapped(let appID))):
+        return runAppValueCopyAction(
+          &state,
+          appID: appID,
+          value: { $0.bundleID },
+          label: "app bundle identifier"
+        )
+
+      case .workspace(.deviceDetail(.installedApps(.openAppGroupContainerButtonTapped(let appID, let groupID)))),
+           .workspace(.inspector(.openAppGroupContainerButtonTapped(let appID, let groupID))):
+        return runAppContainerPathAction(
+          &state,
+          appID: appID,
+          target: .appGroup(groupID),
+          operation: .open
+        )
+
+      case .workspace(.deviceDetail(.installedApps(.copyAppGroupContainerButtonTapped(let appID, let groupID)))),
+           .workspace(.inspector(.copyAppGroupContainerButtonTapped(let appID, let groupID))):
+        return runAppContainerPathAction(
+          &state,
+          appID: appID,
+          target: .appGroup(groupID),
+          operation: .copy
+        )
 
       case .sidebar, .workspace:
         return .none
@@ -1417,6 +1588,144 @@ struct MainWindowFeature {
         )
       )
     }
+  }
+
+  private func runDevicePathAction(
+    _ state: inout State,
+    deviceID: String,
+    path: (SimulatorDevice) -> URL?,
+    label: String,
+    operation: PathOperation
+  ) -> Effect<Action> {
+    guard let device = device(id: deviceID, in: state) else {
+      return .none
+    }
+
+    let url = path(device)
+    return .run { [pathAction] send in
+      let result: CommandResult
+
+      switch operation {
+      case .open:
+        result = await pathAction.openInFinder(url, label)
+      case .copy:
+        result = await pathAction.copyPath(url, label)
+      }
+
+      await send(.pathActionResults([result]))
+    }
+  }
+
+  private func runDeviceValueCopyAction(
+    _ state: inout State,
+    deviceID: String,
+    value: (SimulatorDevice) -> String?,
+    label: String
+  ) -> Effect<Action> {
+    guard let device = device(id: deviceID, in: state) else {
+      return .none
+    }
+
+    let value = value(device)
+    return .run { [pathAction] send in
+      let result = await pathAction.copy(value, label)
+      await send(.pathActionResults([result]))
+    }
+  }
+
+  private func runAppValueCopyAction(
+    _ state: inout State,
+    appID: String,
+    value: (InstalledApp) -> String?,
+    label: String
+  ) -> Effect<Action> {
+    guard let context = appCommandContext(appID: appID, in: state) else {
+      return .none
+    }
+
+    let value = value(context.app)
+    return .run { [pathAction] send in
+      let result = await pathAction.copy(value, label)
+      await send(.pathActionResults([result]))
+    }
+  }
+
+  private func runAppContainerPathAction(
+    _ state: inout State,
+    appID: String,
+    target: AppContainerPathTarget,
+    operation: PathOperation
+  ) -> Effect<Action> {
+    guard let context = appCommandContext(appID: appID, in: state) else {
+      return .none
+    }
+
+    let deviceID = context.device.id
+    let bundleID = context.app.bundleID
+    let fallbackURL = fallbackContainerURL(for: target, app: context.app)
+    let label = target.label
+    let simctlContainer = target.simctlContainer
+
+    return .run { [coreSimulatorService, pathAction] send in
+      var results: [CommandResult] = []
+      let getContainerResult = await coreSimulatorService.getAppContainer(
+        deviceID,
+        bundleID,
+        simctlContainer
+      )
+      results.append(getContainerResult)
+
+      let resolvedURL = Self.containerURL(
+        from: getContainerResult,
+        target: target
+      ) ?? fallbackURL
+      let actionResult: CommandResult
+
+      switch operation {
+      case .open:
+        actionResult = await pathAction.openInFinder(resolvedURL, label)
+      case .copy:
+        actionResult = await pathAction.copyPath(resolvedURL, label)
+      }
+
+      results.append(actionResult)
+      await send(.pathActionResults(results))
+    }
+  }
+
+  private func fallbackContainerURL(
+    for target: AppContainerPathTarget,
+    app: InstalledApp
+  ) -> URL? {
+    switch target {
+    case .bundle:
+      app.bundleContainer ?? app.appBundlePath?.deletingLastPathComponent()
+    case .data:
+      app.dataContainer
+    case .appGroup(let groupID):
+      app.appGroups.first { $0.groupID == groupID }?.path
+    }
+  }
+
+  private static func containerURL(
+    from result: CommandResult,
+    target: AppContainerPathTarget
+  ) -> URL? {
+    guard result.succeeded else {
+      return nil
+    }
+
+    let path = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !path.isEmpty else {
+      return nil
+    }
+
+    let url = URL(fileURLWithPath: path)
+    if target == .bundle && url.pathExtension == "app" {
+      return url.deletingLastPathComponent()
+    }
+
+    return url
   }
 
   private func snapshotNeedsMenuBarRefresh(

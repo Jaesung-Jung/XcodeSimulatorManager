@@ -6,6 +6,7 @@ final class AppContainer {
   let coreSimulatorService: CoreSimulatorService
   let appContainerScanner: AppContainerScanner
   let appSandboxResetService: AppSandboxResetService
+  let pathActionService: PathActionService
   let simulatorRepository: SimulatorRepository
   let settingsStore: SettingsStore
   let actionLogStore: ActionLogStore
@@ -16,6 +17,7 @@ final class AppContainer {
     let coreSimulatorService = CoreSimulatorService(commandExecutor: commandExecutor)
     let appContainerScanner = AppContainerScanner()
     let appSandboxResetService = AppSandboxResetService()
+    let pathActionService = PathActionService()
     let simulatorRepository = SimulatorRepository(
       coreSimulatorService: coreSimulatorService,
       appContainerScanner: appContainerScanner
@@ -25,6 +27,7 @@ final class AppContainer {
     self.coreSimulatorService = coreSimulatorService
     self.appContainerScanner = appContainerScanner
     self.appSandboxResetService = appSandboxResetService
+    self.pathActionService = pathActionService
     self.simulatorRepository = simulatorRepository
     settingsStore = SettingsStore()
     actionLogStore = ActionLogStore()
@@ -86,8 +89,24 @@ final class AppContainer {
       $0.coreSimulatorService.installApp = { deviceID, appBundlePath in
         await coreSimulatorService.installApp(deviceID: deviceID, appBundlePath: appBundlePath)
       }
+      $0.coreSimulatorService.getAppContainer = { deviceID, bundleID, container in
+        await coreSimulatorService.getAppContainer(
+          deviceID: deviceID,
+          bundleID: bundleID,
+          container: container
+        )
+      }
       $0.appSandboxReset.resetSandbox = { dataContainer in
         await appSandboxResetService.resetSandbox(at: dataContainer)
+      }
+      $0.pathAction.openInFinder = { url, label in
+        await pathActionService.openInFinder(url, label: label)
+      }
+      $0.pathAction.copy = { value, label in
+        await pathActionService.copy(value, label: label)
+      }
+      $0.pathAction.copyPath = { url, label in
+        await pathActionService.copyPath(url, label: label)
       }
     }
   }

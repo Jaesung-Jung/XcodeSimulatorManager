@@ -89,6 +89,10 @@ struct InstalledAppsFeature {
         && !isActionRunning
     }
 
+    var canUseSelectedAppPaths: Bool {
+      selectedApp != nil
+    }
+
     mutating func validateSelection() {
       guard availability == .loaded,
             let selectedAppID
@@ -109,6 +113,13 @@ struct InstalledAppsFeature {
     case uninstallButtonTapped(String)
     case resetSandboxButtonTapped(String)
     case installOnAnotherSimulatorButtonTapped(String)
+    case openBundleContainerButtonTapped(String)
+    case copyBundleContainerButtonTapped(String)
+    case openDataContainerButtonTapped(String)
+    case copyDataContainerButtonTapped(String)
+    case copyBundleIDButtonTapped(String)
+    case openAppGroupContainerButtonTapped(String, String)
+    case copyAppGroupContainerButtonTapped(String, String)
   }
 
   var body: some ReducerOf<Self> {
@@ -122,7 +133,14 @@ struct InstalledAppsFeature {
            .terminateButtonTapped,
            .uninstallButtonTapped,
            .resetSandboxButtonTapped,
-           .installOnAnotherSimulatorButtonTapped:
+           .installOnAnotherSimulatorButtonTapped,
+           .openBundleContainerButtonTapped,
+           .copyBundleContainerButtonTapped,
+           .openDataContainerButtonTapped,
+           .copyDataContainerButtonTapped,
+           .copyBundleIDButtonTapped,
+           .openAppGroupContainerButtonTapped,
+           .copyAppGroupContainerButtonTapped:
         return .none
       }
     }

@@ -68,6 +68,13 @@ struct DeviceDetailFeature {
     case eraseButtonTapped(String)
     case deleteButtonTapped(String)
     case unpairButtonTapped(String)
+    case openDeviceDataFolderButtonTapped(String)
+    case copyDeviceDataPathButtonTapped(String)
+    case openDeviceLogFolderButtonTapped(String)
+    case copyDeviceLogPathButtonTapped(String)
+    case copyDeviceUDIDButtonTapped(String)
+    case copyRuntimeIdentifierButtonTapped(String)
+    case copyDeviceTypeIdentifierButtonTapped(String)
     case installedApps(InstalledAppsFeature.Action)
   }
 
@@ -80,7 +87,14 @@ struct DeviceDetailFeature {
            .renameButtonTapped,
            .eraseButtonTapped,
            .deleteButtonTapped,
-           .unpairButtonTapped:
+           .unpairButtonTapped,
+           .openDeviceDataFolderButtonTapped,
+           .copyDeviceDataPathButtonTapped,
+           .openDeviceLogFolderButtonTapped,
+           .copyDeviceLogPathButtonTapped,
+           .copyDeviceUDIDButtonTapped,
+           .copyRuntimeIdentifierButtonTapped,
+           .copyDeviceTypeIdentifierButtonTapped:
         return .none
 
       case .installedApps:

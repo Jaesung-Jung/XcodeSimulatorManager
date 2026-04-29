@@ -429,6 +429,75 @@ struct CoreSimulatorServiceTests {
     ])
   }
 
+  @Test func getAppContainerRunsExpectedSimctlCommandsAndReturnResults() async {
+    let results = [
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "get_app_container", "DEVICE-1", "com.example.app", "app"],
+        stdout: "/tmp/Bundle/Example.app\n"
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "get_app_container", "DEVICE-1", "com.example.app", "data"],
+        stdout: "/tmp/Data\n"
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: [
+          "simctl",
+          "get_app_container",
+          "DEVICE-1",
+          "com.example.app",
+          "group.com.example.shared"
+        ],
+        stdout: "/tmp/Group\n"
+      )
+    ]
+    let recorder = CommandRecorder(results: results)
+    let service = makeService(recorder: recorder)
+
+    let appResult = await service.getAppContainer(
+      deviceID: "DEVICE-1",
+      bundleID: "com.example.app",
+      container: .app
+    )
+    let dataResult = await service.getAppContainer(
+      deviceID: "DEVICE-1",
+      bundleID: "com.example.app",
+      container: .data
+    )
+    let appGroupResult = await service.getAppContainer(
+      deviceID: "DEVICE-1",
+      bundleID: "com.example.app",
+      container: .appGroup("group.com.example.shared")
+    )
+
+    #expect([appResult, dataResult, appGroupResult] == results)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "get_app_container", "DEVICE-1", "com.example.app", "app"],
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "get_app_container", "DEVICE-1", "com.example.app", "data"],
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: [
+          "simctl",
+          "get_app_container",
+          "DEVICE-1",
+          "com.example.app",
+          "group.com.example.shared"
+        ],
+        timeout: 60
+      )
+    ])
+  }
+
   @Test func customTimeoutsAreForwardedToCommands() async {
     let recorder = CommandRecorder(results: [
       makeCommandResult(executable: "xcode-select", arguments: ["-p"]),
@@ -450,7 +519,11 @@ struct CoreSimulatorServiceTests {
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "launch", "DEVICE-1", "com.example.app"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "terminate", "DEVICE-1", "com.example.app"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "uninstall", "DEVICE-1", "com.example.app"]),
-      makeCommandResult(executable: "xcrun", arguments: ["simctl", "install", "DEVICE-1", "/tmp/Example.app"])
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "install", "DEVICE-1", "/tmp/Example.app"]),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "get_app_container", "DEVICE-1", "com.example.app", "data"]
+      )
     ])
     let service = makeService(
       recorder: recorder,
@@ -483,6 +556,11 @@ struct CoreSimulatorServiceTests {
     _ = await service.installApp(
       deviceID: "DEVICE-1",
       appBundlePath: URL(fileURLWithPath: "/tmp/Example.app")
+    )
+    _ = await service.getAppContainer(
+      deviceID: "DEVICE-1",
+      bundleID: "com.example.app",
+      container: .data
     )
 
     #expect(await recorder.recordedCalls() == [
@@ -569,6 +647,11 @@ struct CoreSimulatorServiceTests {
       CommandCall(
         executable: "xcrun",
         arguments: ["simctl", "install", "DEVICE-1", "/tmp/Example.app"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "get_app_container", "DEVICE-1", "com.example.app", "data"],
         timeout: 4
       )
     ])

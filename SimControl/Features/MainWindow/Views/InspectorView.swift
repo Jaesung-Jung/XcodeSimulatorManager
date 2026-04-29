@@ -10,10 +10,30 @@ struct InspectorView: View {
         if let device = store.device {
           InspectorSection("Device") {
             FieldRow(title: "Name", value: device.name)
-            FieldRow(title: "UDID", value: device.udid)
+            FieldRow(
+              title: "UDID",
+              value: device.udid,
+              onCopy: {
+                store.send(.copyDeviceUDIDButtonTapped(device.id))
+              }
+            )
             FieldRow(title: "State", value: device.state.displayTitle)
             FieldRow(title: "Runtime", value: store.runtime?.name ?? device.runtimeID)
+            FieldRow(
+              title: "Runtime ID",
+              value: device.runtimeID,
+              onCopy: {
+                store.send(.copyRuntimeIdentifierButtonTapped(device.id))
+              }
+            )
             FieldRow(title: "Device Type", value: store.deviceType?.name ?? device.deviceTypeID)
+            FieldRow(
+              title: "Device Type ID",
+              value: device.deviceTypeID,
+              onCopy: {
+                store.send(.copyDeviceTypeIdentifierButtonTapped(device.id))
+              }
+            )
             FieldRow(
               title: "Availability",
               value: device.availabilityTitle
@@ -23,8 +43,26 @@ struct InspectorView: View {
           Divider()
 
           InspectorSection("Folders") {
-            FieldRow(title: "Data", value: device.dataPath?.path)
-            FieldRow(title: "Logs", value: device.logPath?.path)
+            FieldRow(
+              title: "Data",
+              value: device.dataPath?.path,
+              onOpen: {
+                store.send(.openDeviceDataFolderButtonTapped(device.id))
+              },
+              onCopy: {
+                store.send(.copyDeviceDataPathButtonTapped(device.id))
+              }
+            )
+            FieldRow(
+              title: "Logs",
+              value: device.logPath?.path,
+              onOpen: {
+                store.send(.openDeviceLogFolderButtonTapped(device.id))
+              },
+              onCopy: {
+                store.send(.copyDeviceLogPathButtonTapped(device.id))
+              }
+            )
           }
         } else {
           EmptyStateView(
@@ -40,11 +78,35 @@ struct InspectorView: View {
 
           InspectorSection("Selected App") {
             FieldRow(title: "Name", value: selectedApp.displayName)
-            FieldRow(title: "Bundle ID", value: selectedApp.bundleID)
+            FieldRow(
+              title: "Bundle ID",
+              value: selectedApp.bundleID,
+              onCopy: {
+                store.send(.copyAppBundleIDButtonTapped(selectedApp.id))
+              }
+            )
             FieldRow(title: "Version", value: selectedApp.version)
             FieldRow(title: "Build", value: selectedApp.build)
-            FieldRow(title: "Bundle Container", value: selectedApp.bundleContainer?.path)
-            FieldRow(title: "Data Container", value: selectedApp.dataContainer?.path)
+            FieldRow(
+              title: "Bundle Container",
+              value: selectedApp.bundleContainer?.path,
+              onOpen: {
+                store.send(.openAppBundleContainerButtonTapped(selectedApp.id))
+              },
+              onCopy: {
+                store.send(.copyAppBundleContainerButtonTapped(selectedApp.id))
+              }
+            )
+            FieldRow(
+              title: "Data Container",
+              value: selectedApp.dataContainer?.path,
+              onOpen: {
+                store.send(.openAppDataContainerButtonTapped(selectedApp.id))
+              },
+              onCopy: {
+                store.send(.copyAppDataContainerButtonTapped(selectedApp.id))
+              }
+            )
           }
 
           if !selectedApp.appGroups.isEmpty {
@@ -54,7 +116,13 @@ struct InspectorView: View {
               ForEach(selectedApp.appGroups) { appGroup in
                 FieldRow(
                   title: LocalizedStringKey(appGroup.groupID),
-                  value: appGroup.path.path
+                  value: appGroup.path.path,
+                  onOpen: {
+                    store.send(.openAppGroupContainerButtonTapped(selectedApp.id, appGroup.groupID))
+                  },
+                  onCopy: {
+                    store.send(.copyAppGroupContainerButtonTapped(selectedApp.id, appGroup.groupID))
+                  }
                 )
               }
             }
@@ -121,6 +189,8 @@ extension InspectorView {
     let title: LocalizedStringKey
     let value: String?
     let placeholder: LocalizedStringKey
+    let onOpen: (() -> Void)?
+    let onCopy: (() -> Void)?
 
     private var displayValue: String? {
       guard let value, !value.isEmpty else {
@@ -129,38 +199,75 @@ extension InspectorView {
       return value
     }
 
+    private var canActOnValue: Bool {
+      displayValue != nil
+    }
+
     init(
       title: LocalizedStringKey,
       value: String?,
-      placeholder: LocalizedStringKey = "Not available"
+      placeholder: LocalizedStringKey = "Not available",
+      onOpen: (() -> Void)? = nil,
+      onCopy: (() -> Void)? = nil
     ) {
       self.title = title
       self.value = value
       self.placeholder = placeholder
+      self.onOpen = onOpen
+      self.onCopy = onCopy
     }
 
     var body: some View {
-      VStack(alignment: .leading, spacing: 3) {
-        Text(title)
-          .font(.caption)
-          .foregroundStyle(.secondary)
+      HStack(alignment: .top, spacing: 8) {
+        VStack(alignment: .leading, spacing: 3) {
+          Text(title)
+            .font(.caption)
+            .foregroundStyle(.secondary)
 
-        if let displayValue {
-          Text(displayValue)
-            .font(.caption.monospaced())
-            .foregroundStyle(.primary)
-            .lineLimit(2)
-            .truncationMode(.middle)
-            .textSelection(.enabled)
-            .frame(maxWidth: .infinity, alignment: .leading)
-        } else {
-          Text(placeholder)
-            .font(.caption.monospaced())
-            .foregroundStyle(.tertiary)
-            .lineLimit(2)
-            .truncationMode(.middle)
-            .frame(maxWidth: .infinity, alignment: .leading)
+          if let displayValue {
+            Text(displayValue)
+              .font(.caption.monospaced())
+              .foregroundStyle(.primary)
+              .lineLimit(2)
+              .truncationMode(.middle)
+              .textSelection(.enabled)
+              .frame(maxWidth: .infinity, alignment: .leading)
+          } else {
+            Text(placeholder)
+              .font(.caption.monospaced())
+              .foregroundStyle(.tertiary)
+              .lineLimit(2)
+              .truncationMode(.middle)
+              .frame(maxWidth: .infinity, alignment: .leading)
+          }
         }
+
+        Spacer(minLength: 4)
+
+        HStack(spacing: 4) {
+          if let onOpen {
+            Button {
+              onOpen()
+            } label: {
+              Image(systemName: "arrow.up.forward.square")
+                .accessibilityLabel("Open")
+            }
+            .disabled(!canActOnValue)
+            .help("Open")
+          }
+
+          if let onCopy {
+            Button {
+              onCopy()
+            } label: {
+              Image(systemName: "doc.on.doc")
+                .accessibilityLabel("Copy")
+            }
+            .disabled(!canActOnValue)
+            .help("Copy")
+          }
+        }
+        .buttonStyle(.borderless)
       }
       .accessibilityElement(children: .combine)
     }

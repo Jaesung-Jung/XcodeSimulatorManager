@@ -25,9 +25,26 @@ struct InspectorFeature {
     }
   }
 
-  enum Action: Equatable {}
+  enum Action: Equatable {
+    case openDeviceDataFolderButtonTapped(String)
+    case copyDeviceDataPathButtonTapped(String)
+    case openDeviceLogFolderButtonTapped(String)
+    case copyDeviceLogPathButtonTapped(String)
+    case copyDeviceUDIDButtonTapped(String)
+    case copyRuntimeIdentifierButtonTapped(String)
+    case copyDeviceTypeIdentifierButtonTapped(String)
+    case openAppBundleContainerButtonTapped(String)
+    case copyAppBundleContainerButtonTapped(String)
+    case openAppDataContainerButtonTapped(String)
+    case copyAppDataContainerButtonTapped(String)
+    case copyAppBundleIDButtonTapped(String)
+    case openAppGroupContainerButtonTapped(String, String)
+    case copyAppGroupContainerButtonTapped(String, String)
+  }
 
   var body: some ReducerOf<Self> {
-    EmptyReducer()
+    Reduce { _, _ in
+      .none
+    }
   }
 }

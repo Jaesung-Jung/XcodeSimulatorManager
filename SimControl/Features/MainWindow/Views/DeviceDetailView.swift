@@ -45,6 +45,27 @@ struct DeviceDetailView: View {
             },
             onUnpair: { pairID in
               store.send(.unpairButtonTapped(pairID))
+            },
+            onOpenDataFolder: {
+              store.send(.openDeviceDataFolderButtonTapped(device.id))
+            },
+            onCopyDataPath: {
+              store.send(.copyDeviceDataPathButtonTapped(device.id))
+            },
+            onOpenLogFolder: {
+              store.send(.openDeviceLogFolderButtonTapped(device.id))
+            },
+            onCopyLogPath: {
+              store.send(.copyDeviceLogPathButtonTapped(device.id))
+            },
+            onCopyUDID: {
+              store.send(.copyDeviceUDIDButtonTapped(device.id))
+            },
+            onCopyRuntimeIdentifier: {
+              store.send(.copyRuntimeIdentifierButtonTapped(device.id))
+            },
+            onCopyDeviceTypeIdentifier: {
+              store.send(.copyDeviceTypeIdentifierButtonTapped(device.id))
             }
           )
 
@@ -134,6 +155,13 @@ extension DeviceDetailView {
     let onErase: () -> Void
     let onDelete: () -> Void
     let onUnpair: (String) -> Void
+    let onOpenDataFolder: () -> Void
+    let onCopyDataPath: () -> Void
+    let onOpenLogFolder: () -> Void
+    let onCopyLogPath: () -> Void
+    let onCopyUDID: () -> Void
+    let onCopyRuntimeIdentifier: () -> Void
+    let onCopyDeviceTypeIdentifier: () -> Void
 
     private var subtitle: String {
       let runtimeName = runtime?.name ?? device.runtimeID
@@ -189,7 +217,14 @@ extension DeviceDetailView {
             onRename: onRename,
             onErase: onErase,
             onDelete: onDelete,
-            onUnpair: onUnpair
+            onUnpair: onUnpair,
+            onOpenDataFolder: onOpenDataFolder,
+            onCopyDataPath: onCopyDataPath,
+            onOpenLogFolder: onOpenLogFolder,
+            onCopyLogPath: onCopyLogPath,
+            onCopyUDID: onCopyUDID,
+            onCopyRuntimeIdentifier: onCopyRuntimeIdentifier,
+            onCopyDeviceTypeIdentifier: onCopyDeviceTypeIdentifier
           )
         }
       }
@@ -212,6 +247,13 @@ extension DeviceDetailView {
     let onErase: () -> Void
     let onDelete: () -> Void
     let onUnpair: (String) -> Void
+    let onOpenDataFolder: () -> Void
+    let onCopyDataPath: () -> Void
+    let onOpenLogFolder: () -> Void
+    let onCopyLogPath: () -> Void
+    let onCopyUDID: () -> Void
+    let onCopyRuntimeIdentifier: () -> Void
+    let onCopyDeviceTypeIdentifier: () -> Void
 
     private var canBoot: Bool {
       device.isAvailable && device.state == .shutdown
@@ -306,6 +348,56 @@ extension DeviceDetailView {
               Label("Unpair...", systemImage: "link.badge.minus")
             }
             .disabled(isLifecycleActionRunning)
+          }
+
+          Divider()
+
+          Button {
+            onOpenDataFolder()
+          } label: {
+            Label("Open Data Folder", systemImage: "folder")
+          }
+          .disabled(device.dataPath == nil)
+
+          Button {
+            onCopyDataPath()
+          } label: {
+            Label("Copy Data Path", systemImage: "doc.on.doc")
+          }
+          .disabled(device.dataPath == nil)
+
+          Button {
+            onOpenLogFolder()
+          } label: {
+            Label("Open Log Folder", systemImage: "folder")
+          }
+          .disabled(device.logPath == nil)
+
+          Button {
+            onCopyLogPath()
+          } label: {
+            Label("Copy Log Path", systemImage: "doc.on.doc")
+          }
+          .disabled(device.logPath == nil)
+
+          Divider()
+
+          Button {
+            onCopyUDID()
+          } label: {
+            Label("Copy UDID", systemImage: "doc.on.doc")
+          }
+
+          Button {
+            onCopyRuntimeIdentifier()
+          } label: {
+            Label("Copy Runtime Identifier", systemImage: "doc.on.doc")
+          }
+
+          Button {
+            onCopyDeviceTypeIdentifier()
+          } label: {
+            Label("Copy Device Type Identifier", systemImage: "doc.on.doc")
           }
         } label: {
           Image(systemName: "ellipsis.circle")

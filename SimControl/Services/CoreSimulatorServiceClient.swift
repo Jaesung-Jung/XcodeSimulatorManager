@@ -17,6 +17,7 @@ struct CoreSimulatorServiceClient: Sendable {
   var terminateApp: @Sendable (_ deviceID: String, _ bundleID: String) async -> CommandResult
   var uninstallApp: @Sendable (_ deviceID: String, _ bundleID: String) async -> CommandResult
   var installApp: @Sendable (_ deviceID: String, _ appBundlePath: URL) async -> CommandResult
+  var getAppContainer: @Sendable (_ deviceID: String, _ bundleID: String, _ container: CoreSimulatorService.AppContainerKind) async -> CommandResult
 }
 
 extension CoreSimulatorServiceClient: DependencyKey {
@@ -75,6 +76,13 @@ extension CoreSimulatorServiceClient: DependencyKey {
       },
       installApp: { deviceID, appBundlePath in
         await service.installApp(deviceID: deviceID, appBundlePath: appBundlePath)
+      },
+      getAppContainer: { deviceID, bundleID, container in
+        await service.getAppContainer(
+          deviceID: deviceID,
+          bundleID: bundleID,
+          container: container
+        )
       }
     )
   }
