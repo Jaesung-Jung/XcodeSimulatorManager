@@ -264,6 +264,86 @@ struct CoreSimulatorServiceTests {
     ])
   }
 
+  @Test func eraseDeviceRunsSimctlEraseCommandAndReturnsResult() async {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: ["simctl", "erase", "DEVICE-1"]
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.eraseDevice(id: "DEVICE-1")
+
+    #expect(result == commandResult)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "erase", "DEVICE-1"],
+        timeout: 60
+      )
+    ])
+  }
+
+  @Test func deleteDeviceRunsSimctlDeleteCommandAndReturnsResult() async {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: ["simctl", "delete", "DEVICE-1"]
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.deleteDevice(id: "DEVICE-1")
+
+    #expect(result == commandResult)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "delete", "DEVICE-1"],
+        timeout: 60
+      )
+    ])
+  }
+
+  @Test func pairDevicesRunsSimctlPairCommandAndReturnsResult() async {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: ["simctl", "pair", "WATCH-1", "PHONE-1"]
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.pairDevices(watchDeviceID: "WATCH-1", phoneDeviceID: "PHONE-1")
+
+    #expect(result == commandResult)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "pair", "WATCH-1", "PHONE-1"],
+        timeout: 60
+      )
+    ])
+  }
+
+  @Test func unpairDeviceRunsSimctlUnpairCommandAndReturnsResult() async {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: ["simctl", "unpair", "PAIR-1"]
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.unpairDevice(pairID: "PAIR-1")
+
+    #expect(result == commandResult)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "unpair", "PAIR-1"],
+        timeout: 60
+      )
+    ])
+  }
+
   @Test func customTimeoutsAreForwardedToCommands() async {
     let recorder = CommandRecorder(results: [
       makeCommandResult(executable: "xcode-select", arguments: ["-p"]),
@@ -276,7 +356,11 @@ struct CoreSimulatorServiceTests {
         arguments: ["simctl", "create", "iPhone 17 Pro", "device-type-iphone", "runtime-ios"]
       ),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "clone", "DEVICE-1", "Device Copy"]),
-      makeCommandResult(executable: "xcrun", arguments: ["simctl", "rename", "DEVICE-1", "Renamed Device"])
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "rename", "DEVICE-1", "Renamed Device"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "erase", "DEVICE-1"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "delete", "DEVICE-1"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "pair", "WATCH-1", "PHONE-1"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "unpair", "PAIR-1"])
     ])
     let service = makeService(
       recorder: recorder,
@@ -298,6 +382,10 @@ struct CoreSimulatorServiceTests {
     )
     _ = await service.cloneDevice(id: "DEVICE-1", name: "Device Copy")
     _ = await service.renameDevice(id: "DEVICE-1", name: "Renamed Device")
+    _ = await service.eraseDevice(id: "DEVICE-1")
+    _ = await service.deleteDevice(id: "DEVICE-1")
+    _ = await service.pairDevices(watchDeviceID: "WATCH-1", phoneDeviceID: "PHONE-1")
+    _ = await service.unpairDevice(pairID: "PAIR-1")
 
     #expect(await recorder.recordedCalls() == [
       CommandCall(
@@ -338,6 +426,26 @@ struct CoreSimulatorServiceTests {
       CommandCall(
         executable: "xcrun",
         arguments: ["simctl", "rename", "DEVICE-1", "Renamed Device"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "erase", "DEVICE-1"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "delete", "DEVICE-1"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "pair", "WATCH-1", "PHONE-1"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "unpair", "PAIR-1"],
         timeout: 4
       )
     ])

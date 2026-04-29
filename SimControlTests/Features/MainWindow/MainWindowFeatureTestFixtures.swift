@@ -20,6 +20,23 @@ enum MainWindowTestFixtures {
     modelIdentifier: "iPhone18,1"
   )
 
+  static let watchRuntime = SimulatorRuntime(
+    id: "runtime-watchos",
+    name: "watchOS 26.4",
+    version: "26.4",
+    buildVersion: "23T244",
+    platform: .watchOS,
+    isAvailable: true,
+    supportedDeviceTypeIDs: ["device-type-watch"]
+  )
+
+  static let watchDeviceType = SimulatorDeviceType(
+    id: "device-type-watch",
+    name: "Apple Watch Series 11",
+    productFamily: "Apple Watch",
+    modelIdentifier: "Watch7,1"
+  )
+
   static let device = makeDevice(id: "DEVICE-1")
   static let secondDevice = makeDevice(id: "DEVICE-2")
 
@@ -67,7 +84,10 @@ enum MainWindowTestFixtures {
 
   static func makeSnapshot(
     generatedAt: Date = Date(timeIntervalSince1970: 1_000),
+    runtimes: [SimulatorRuntime] = [runtime],
+    deviceTypes: [SimulatorDeviceType] = [deviceType],
     devices: [SimulatorDevice] = [device],
+    pairs: [DevicePair] = [],
     installedAppsByDeviceID: [String: [InstalledApp]] = [:]
   ) -> SimulatorSnapshot {
     SimulatorSnapshot(
@@ -77,10 +97,10 @@ enum MainWindowTestFixtures {
         version: nil,
         isValid: true
       ),
-      runtimes: [runtime],
-      deviceTypes: [deviceType],
+      runtimes: runtimes,
+      deviceTypes: deviceTypes,
       devices: devices,
-      pairs: [],
+      pairs: pairs,
       installedAppsByDeviceID: installedAppsByDeviceID,
       warnings: []
     )
@@ -90,15 +110,18 @@ enum MainWindowTestFixtures {
     id: String,
     name: String? = nil,
     state: SimulatorDevice.State = .shutdown,
-    isAvailable: Bool = true
+    isAvailable: Bool = true,
+    runtimeID: String = runtime.id,
+    deviceTypeID: String = deviceType.id,
+    platform: SimulatorPlatform = .iOS
   ) -> SimulatorDevice {
     SimulatorDevice(
       id: id,
       udid: id,
       name: name ?? "Device \(id)",
-      runtimeID: runtime.id,
-      deviceTypeID: deviceType.id,
-      platform: .iOS,
+      runtimeID: runtimeID,
+      deviceTypeID: deviceTypeID,
+      platform: platform,
       state: state,
       isAvailable: isAvailable,
       dataPath: URL(fileURLWithPath: "/tmp/\(id)/data"),

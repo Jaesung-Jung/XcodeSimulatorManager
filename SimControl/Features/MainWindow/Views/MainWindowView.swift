@@ -65,6 +65,16 @@ struct MainWindowView: View {
 
       ToolbarItem(placement: .primaryAction) {
         Button {
+          store.send(.pairDevicesButtonTapped)
+        } label: {
+          Label("Pair Simulators", systemImage: "link")
+        }
+        .disabled(!store.canPairDevices)
+        .help("Pair watch and phone simulators")
+      }
+
+      ToolbarItem(placement: .primaryAction) {
+        Button {
           store.send(.refreshButtonTapped)
         } label: {
           if isRefreshing {
@@ -99,6 +109,38 @@ struct MainWindowView: View {
       case .rename(let formState):
         RenameDeviceView(formState: formState) { formState in
           store.send(.renameDeviceSubmitted(formState))
+        }
+      case .erase(let confirmationState):
+        DeviceDestructiveConfirmationView(
+          title: "Erase Simulator",
+          message: "Erase this simulator's contents and settings.",
+          actionTitle: "Erase",
+          systemImage: "eraser",
+          confirmationState: confirmationState
+        ) { confirmationState in
+          store.send(.eraseDeviceConfirmed(confirmationState))
+        }
+      case .delete(let confirmationState):
+        DeviceDestructiveConfirmationView(
+          title: "Delete Simulator",
+          message: "Delete this simulator.",
+          actionTitle: "Delete",
+          systemImage: "trash",
+          confirmationState: confirmationState
+        ) { confirmationState in
+          store.send(.deleteDeviceConfirmed(confirmationState))
+        }
+      case .pair(let formState):
+        PairDevicesView(
+          formState: formState,
+          phoneCandidates: store.pairPhoneCandidates,
+          watchCandidates: store.pairWatchCandidates
+        ) { formState in
+          store.send(.pairDevicesSubmitted(formState))
+        }
+      case .unpair(let confirmationState):
+        UnpairDeviceConfirmationView(confirmationState: confirmationState) { confirmationState in
+          store.send(.unpairDeviceConfirmed(confirmationState))
         }
       }
     }

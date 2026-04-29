@@ -21,6 +21,7 @@ struct DeviceDetailView: View {
             device: device,
             runtime: store.runtime,
             deviceType: store.deviceType,
+            pairSummary: store.pairSummary,
             deviceCommandState: store.deviceCommandState,
             isOpeningSimulatorApp: store.isOpeningSimulatorApp,
             onBoot: {
@@ -34,6 +35,15 @@ struct DeviceDetailView: View {
             },
             onRename: {
               store.send(.renameButtonTapped(device.id))
+            },
+            onErase: {
+              store.send(.eraseButtonTapped(device.id))
+            },
+            onDelete: {
+              store.send(.deleteButtonTapped(device.id))
+            },
+            onUnpair: { pairID in
+              store.send(.unpairButtonTapped(pairID))
             }
           )
 
@@ -112,12 +122,16 @@ extension DeviceDetailView {
     let device: SimulatorDevice
     let runtime: SimulatorRuntime?
     let deviceType: SimulatorDeviceType?
+    let pairSummary: DeviceDetailFeature.DevicePairSummary?
     let deviceCommandState: DeviceCommandState?
     let isOpeningSimulatorApp: Bool
     let onBoot: () -> Void
     let onShutdown: () -> Void
     let onOpenSimulatorApp: () -> Void
     let onRename: () -> Void
+    let onErase: () -> Void
+    let onDelete: () -> Void
+    let onUnpair: (String) -> Void
 
     private var subtitle: String {
       let runtimeName = runtime?.name ?? device.runtimeID
@@ -163,12 +177,16 @@ extension DeviceDetailView {
 
           DeviceCommandControls(
             device: device,
+            pairSummary: pairSummary,
             deviceCommandState: deviceCommandState,
             isOpeningSimulatorApp: isOpeningSimulatorApp,
             onBoot: onBoot,
             onShutdown: onShutdown,
             onOpenSimulatorApp: onOpenSimulatorApp,
-            onRename: onRename
+            onRename: onRename,
+            onErase: onErase,
+            onDelete: onDelete,
+            onUnpair: onUnpair
           )
         }
       }
@@ -180,12 +198,16 @@ extension DeviceDetailView {
 extension DeviceDetailView {
   private struct DeviceCommandControls: View {
     let device: SimulatorDevice
+    let pairSummary: DeviceDetailFeature.DevicePairSummary?
     let deviceCommandState: DeviceCommandState?
     let isOpeningSimulatorApp: Bool
     let onBoot: () -> Void
     let onShutdown: () -> Void
     let onOpenSimulatorApp: () -> Void
     let onRename: () -> Void
+    let onErase: () -> Void
+    let onDelete: () -> Void
+    let onUnpair: (String) -> Void
 
     private var canBoot: Bool {
       device.isAvailable && device.state == .shutdown
@@ -256,6 +278,31 @@ extension DeviceDetailView {
             Label("Rename", systemImage: "pencil")
           }
           .disabled(isLifecycleActionRunning)
+
+          Button(role: .destructive) {
+            onErase()
+          } label: {
+            Label("Erase...", systemImage: "eraser")
+          }
+          .disabled(isLifecycleActionRunning || !device.isAvailable)
+
+          Button(role: .destructive) {
+            onDelete()
+          } label: {
+            Label("Delete...", systemImage: "trash")
+          }
+          .disabled(isLifecycleActionRunning)
+
+          if let pairSummary {
+            Divider()
+
+            Button(role: .destructive) {
+              onUnpair(pairSummary.id)
+            } label: {
+              Label("Unpair...", systemImage: "link.badge.minus")
+            }
+            .disabled(isLifecycleActionRunning)
+          }
         } label: {
           Image(systemName: "ellipsis.circle")
             .accessibilityLabel("More device actions")

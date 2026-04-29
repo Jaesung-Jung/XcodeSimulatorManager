@@ -209,6 +209,42 @@ struct CoreSimulatorService {
     )
   }
 
+  /// Erases the contents and settings of a simulator device.
+  func eraseDevice(id: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "erase", id],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Deletes a simulator device.
+  func deleteDevice(id: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "delete", id],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Creates a watch and phone simulator pair.
+  func pairDevices(watchDeviceID: String, phoneDeviceID: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "pair", watchDeviceID, phoneDeviceID],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Removes an existing watch and phone simulator pair.
+  func unpairDevice(pairID: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "unpair", pairID],
+      deviceCommandTimeout
+    )
+  }
+
   private func commandFailureDiagnostic(command: String, result: CommandResult) -> String {
     let summary = "\(command) failed with exit code \(result.exitCode)."
     let stderr = result.stderr.trimmingCharacters(in: .whitespacesAndNewlines)

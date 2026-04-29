@@ -116,6 +116,7 @@ struct WorkspaceFeature {
         device: selectedDevice,
         runtime: selectedRuntime,
         deviceType: selectedDeviceType,
+        pairSummary: selectedPairSummary,
         installedApps: InstalledAppsFeature.State(
           apps: installedApps,
           availability: installedAppsAvailability,
@@ -173,6 +174,10 @@ struct WorkspaceFeature {
       Dictionary(uniqueKeysWithValues: (snapshot?.deviceTypes ?? []).map { ($0.id, $0) })
     }
 
+    private var deviceByID: [String: SimulatorDevice] {
+      Dictionary(uniqueKeysWithValues: devices.map { ($0.id, $0) })
+    }
+
     var selectedDevice: SimulatorDevice? {
       guard let selectedDeviceID = deviceList.selectedDeviceID else {
         return nil
@@ -195,6 +200,33 @@ struct WorkspaceFeature {
       }
 
       return deviceTypeByID[selectedDevice.deviceTypeID]
+    }
+
+    var selectedPairSummary: DeviceDetailFeature.DevicePairSummary? {
+      guard let selectedDevice, let snapshot else {
+        return nil
+      }
+
+      let selectedDeviceID = selectedDevice.id
+      guard let pair = snapshot.pairs.first(where: {
+        $0.phoneDeviceID == selectedDeviceID || $0.watchDeviceID == selectedDeviceID
+      }),
+        let phoneDevice = deviceByID[pair.phoneDeviceID],
+        let watchDevice = deviceByID[pair.watchDeviceID]
+      else {
+        return nil
+      }
+
+      return DeviceDetailFeature.DevicePairSummary(
+        id: pair.id,
+        phoneDeviceID: phoneDevice.id,
+        phoneName: phoneDevice.name,
+        phoneUDID: phoneDevice.udid,
+        watchDeviceID: watchDevice.id,
+        watchName: watchDevice.name,
+        watchUDID: watchDevice.udid,
+        state: pair.state
+      )
     }
   }
 

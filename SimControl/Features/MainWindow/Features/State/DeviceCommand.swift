@@ -4,4 +4,8 @@ enum DeviceCommand {
   case create
   case clone
   case rename
+  case erase
+  case delete
+  case pair
+  case unpair
 }

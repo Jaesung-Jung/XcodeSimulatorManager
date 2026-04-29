@@ -43,6 +43,18 @@ extension Store where State == MainWindowFeature.State, Action == MainWindowFeat
       $0.coreSimulatorService.renameDevice = { _, _ in
         MainWindowPreviewFixtures.renameDeviceCommandResult
       }
+      $0.coreSimulatorService.eraseDevice = { _ in
+        MainWindowPreviewFixtures.eraseDeviceCommandResult
+      }
+      $0.coreSimulatorService.deleteDevice = { _ in
+        MainWindowPreviewFixtures.deleteDeviceCommandResult
+      }
+      $0.coreSimulatorService.pairDevices = { _, _ in
+        MainWindowPreviewFixtures.pairDevicesCommandResult
+      }
+      $0.coreSimulatorService.unpairDevice = { _ in
+        MainWindowPreviewFixtures.unpairDeviceCommandResult
+      }
     }
   }
 }
@@ -171,6 +183,50 @@ enum MainWindowPreviewFixtures {
     exitCode: 0,
     duration: 0.1,
     startedAt: Date(timeIntervalSince1970: 1_006)
+  )
+
+  static let eraseDeviceCommandResult = CommandResult(
+    id: "preview-erase-device",
+    executable: "xcrun",
+    arguments: ["simctl", "erase", device.id],
+    stdout: "",
+    stderr: "",
+    exitCode: 0,
+    duration: 0.4,
+    startedAt: Date(timeIntervalSince1970: 1_007)
+  )
+
+  static let deleteDeviceCommandResult = CommandResult(
+    id: "preview-delete-device",
+    executable: "xcrun",
+    arguments: ["simctl", "delete", device.id],
+    stdout: "",
+    stderr: "",
+    exitCode: 0,
+    duration: 0.3,
+    startedAt: Date(timeIntervalSince1970: 1_008)
+  )
+
+  static let pairDevicesCommandResult = CommandResult(
+    id: "preview-pair-devices",
+    executable: "xcrun",
+    arguments: ["simctl", "pair", "PREVIEW-WATCH-1", device.id],
+    stdout: "",
+    stderr: "",
+    exitCode: 0,
+    duration: 0.2,
+    startedAt: Date(timeIntervalSince1970: 1_009)
+  )
+
+  static let unpairDeviceCommandResult = CommandResult(
+    id: "preview-unpair-device",
+    executable: "xcrun",
+    arguments: ["simctl", "unpair", "PREVIEW-PAIR-1"],
+    stdout: "",
+    stderr: "",
+    exitCode: 0,
+    duration: 0.2,
+    startedAt: Date(timeIntervalSince1970: 1_010)
   )
 
   static let snapshot = SimulatorSnapshot(

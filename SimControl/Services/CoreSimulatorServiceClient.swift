@@ -7,6 +7,10 @@ struct CoreSimulatorServiceClient: Sendable {
   var createDevice: @Sendable (_ name: String, _ deviceTypeID: String, _ runtimeID: String) async -> CommandResult
   var cloneDevice: @Sendable (_ id: String, _ name: String) async -> CommandResult
   var renameDevice: @Sendable (_ id: String, _ name: String) async -> CommandResult
+  var eraseDevice: @Sendable (_ id: String) async -> CommandResult
+  var deleteDevice: @Sendable (_ id: String) async -> CommandResult
+  var pairDevices: @Sendable (_ watchDeviceID: String, _ phoneDeviceID: String) async -> CommandResult
+  var unpairDevice: @Sendable (_ pairID: String) async -> CommandResult
 }
 
 extension CoreSimulatorServiceClient: DependencyKey {
@@ -35,6 +39,21 @@ extension CoreSimulatorServiceClient: DependencyKey {
       },
       renameDevice: { id, name in
         await service.renameDevice(id: id, name: name)
+      },
+      eraseDevice: { id in
+        await service.eraseDevice(id: id)
+      },
+      deleteDevice: { id in
+        await service.deleteDevice(id: id)
+      },
+      pairDevices: { watchDeviceID, phoneDeviceID in
+        await service.pairDevices(
+          watchDeviceID: watchDeviceID,
+          phoneDeviceID: phoneDeviceID
+        )
+      },
+      unpairDevice: { pairID in
+        await service.unpairDevice(pairID: pairID)
       }
     )
   }
