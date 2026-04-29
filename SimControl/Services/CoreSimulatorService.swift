@@ -169,6 +169,15 @@ struct CoreSimulatorService {
     )
   }
 
+  /// Boots the simulator if needed and waits until it finishes booting.
+  func bootDeviceIfNeeded(id: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "bootstatus", id, "-b"],
+      deviceCommandTimeout
+    )
+  }
+
   /// Shuts down the simulator device identified by CoreSimulator UDID.
   func shutdownDevice(id: String) async -> CommandResult {
     await runCommand(
@@ -241,6 +250,42 @@ struct CoreSimulatorService {
     await runCommand(
       "xcrun",
       ["simctl", "unpair", pairID],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Launches an installed app on a simulator device.
+  func launchApp(deviceID: String, bundleID: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "launch", deviceID, bundleID],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Terminates an installed app on a simulator device.
+  func terminateApp(deviceID: String, bundleID: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "terminate", deviceID, bundleID],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Uninstalls an app from a simulator device.
+  func uninstallApp(deviceID: String, bundleID: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "uninstall", deviceID, bundleID],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Installs an app bundle on a simulator device.
+  func installApp(deviceID: String, appBundlePath: URL) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "install", deviceID, appBundlePath.path],
       deviceCommandTimeout
     )
   }

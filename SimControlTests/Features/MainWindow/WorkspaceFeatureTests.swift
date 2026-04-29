@@ -36,7 +36,9 @@ struct WorkspaceFeatureTests {
         deviceType: MainWindowTestFixtures.deviceType,
         installedApps: InstalledAppsFeature.State(
           apps: [MainWindowTestFixtures.secondApp],
-          availability: .loaded
+          availability: .loaded,
+          device: MainWindowTestFixtures.secondDevice,
+          compatibleInstallTargetCount: 1
         )
       )
       $0.inspector = InspectorFeature.State(

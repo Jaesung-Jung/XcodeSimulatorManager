@@ -131,7 +131,12 @@ enum MainWindowTestFixtures {
     )
   }
 
-  static func makeInstalledApp(deviceID: String, bundleID: String) -> InstalledApp {
+  static func makeInstalledApp(
+    deviceID: String,
+    bundleID: String,
+    dataContainer: URL? = nil,
+    appBundlePath: URL? = nil
+  ) -> InstalledApp {
     InstalledApp(
       id: "\(deviceID):\(bundleID)",
       bundleID: bundleID,
@@ -140,8 +145,8 @@ enum MainWindowTestFixtures {
       build: "100",
       deviceID: deviceID,
       bundleContainer: nil,
-      dataContainer: nil,
-      appBundlePath: nil,
+      dataContainer: dataContainer,
+      appBundlePath: appBundlePath,
       appGroups: [],
       iconPath: nil
     )

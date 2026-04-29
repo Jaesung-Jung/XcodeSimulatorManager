@@ -23,6 +23,7 @@ struct DeviceDetailView: View {
             deviceType: store.deviceType,
             pairSummary: store.pairSummary,
             deviceCommandState: store.deviceCommandState,
+            appCommandState: store.appCommandState,
             isOpeningSimulatorApp: store.isOpeningSimulatorApp,
             onBoot: {
               store.send(.bootButtonTapped(device.id))
@@ -124,6 +125,7 @@ extension DeviceDetailView {
     let deviceType: SimulatorDeviceType?
     let pairSummary: DeviceDetailFeature.DevicePairSummary?
     let deviceCommandState: DeviceCommandState?
+    let appCommandState: AppCommandState?
     let isOpeningSimulatorApp: Bool
     let onBoot: () -> Void
     let onShutdown: () -> Void
@@ -179,6 +181,7 @@ extension DeviceDetailView {
             device: device,
             pairSummary: pairSummary,
             deviceCommandState: deviceCommandState,
+            appCommandState: appCommandState,
             isOpeningSimulatorApp: isOpeningSimulatorApp,
             onBoot: onBoot,
             onShutdown: onShutdown,
@@ -200,6 +203,7 @@ extension DeviceDetailView {
     let device: SimulatorDevice
     let pairSummary: DeviceDetailFeature.DevicePairSummary?
     let deviceCommandState: DeviceCommandState?
+    let appCommandState: AppCommandState?
     let isOpeningSimulatorApp: Bool
     let onBoot: () -> Void
     let onShutdown: () -> Void
@@ -218,7 +222,7 @@ extension DeviceDetailView {
     }
 
     private var isLifecycleActionRunning: Bool {
-      deviceCommandState != nil
+      deviceCommandState != nil || appCommandState != nil
     }
 
     private var isBootRunning: Bool {

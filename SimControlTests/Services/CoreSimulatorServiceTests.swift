@@ -344,12 +344,98 @@ struct CoreSimulatorServiceTests {
     ])
   }
 
+  @Test func bootDeviceIfNeededRunsSimctlBootstatusCommandAndReturnsResult() async {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: ["simctl", "bootstatus", "DEVICE-1", "-b"]
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.bootDeviceIfNeeded(id: "DEVICE-1")
+
+    #expect(result == commandResult)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "bootstatus", "DEVICE-1", "-b"],
+        timeout: 60
+      )
+    ])
+  }
+
+  @Test func appCommandsRunExpectedSimctlCommandsAndReturnResults() async {
+    let appBundlePath = URL(fileURLWithPath: "/tmp/Example.app")
+    let results = [
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "launch", "DEVICE-1", "com.example.app"]
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "terminate", "DEVICE-1", "com.example.app"]
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "uninstall", "DEVICE-1", "com.example.app"]
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "install", "DEVICE-2", appBundlePath.path]
+      )
+    ]
+    let recorder = CommandRecorder(results: results)
+    let service = makeService(recorder: recorder)
+
+    let launchResult = await service.launchApp(
+      deviceID: "DEVICE-1",
+      bundleID: "com.example.app"
+    )
+    let terminateResult = await service.terminateApp(
+      deviceID: "DEVICE-1",
+      bundleID: "com.example.app"
+    )
+    let uninstallResult = await service.uninstallApp(
+      deviceID: "DEVICE-1",
+      bundleID: "com.example.app"
+    )
+    let installResult = await service.installApp(
+      deviceID: "DEVICE-2",
+      appBundlePath: appBundlePath
+    )
+
+    #expect([launchResult, terminateResult, uninstallResult, installResult] == results)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "launch", "DEVICE-1", "com.example.app"],
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "terminate", "DEVICE-1", "com.example.app"],
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "uninstall", "DEVICE-1", "com.example.app"],
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "install", "DEVICE-2", appBundlePath.path],
+        timeout: 60
+      )
+    ])
+  }
+
   @Test func customTimeoutsAreForwardedToCommands() async {
     let recorder = CommandRecorder(results: [
       makeCommandResult(executable: "xcode-select", arguments: ["-p"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "list", "-j"]),
       makeCommandResult(executable: "open", arguments: ["-a", "Simulator"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "boot", "DEVICE-1"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "bootstatus", "DEVICE-1", "-b"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "shutdown", "DEVICE-1"]),
       makeCommandResult(
         executable: "xcrun",
@@ -360,7 +446,11 @@ struct CoreSimulatorServiceTests {
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "erase", "DEVICE-1"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "delete", "DEVICE-1"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "pair", "WATCH-1", "PHONE-1"]),
-      makeCommandResult(executable: "xcrun", arguments: ["simctl", "unpair", "PAIR-1"])
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "unpair", "PAIR-1"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "launch", "DEVICE-1", "com.example.app"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "terminate", "DEVICE-1", "com.example.app"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "uninstall", "DEVICE-1", "com.example.app"]),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "install", "DEVICE-1", "/tmp/Example.app"])
     ])
     let service = makeService(
       recorder: recorder,
@@ -374,6 +464,7 @@ struct CoreSimulatorServiceTests {
     _ = await service.list()
     _ = await service.openSimulatorApp()
     _ = await service.bootDevice(id: "DEVICE-1")
+    _ = await service.bootDeviceIfNeeded(id: "DEVICE-1")
     _ = await service.shutdownDevice(id: "DEVICE-1")
     _ = await service.createDevice(
       name: "iPhone 17 Pro",
@@ -386,6 +477,13 @@ struct CoreSimulatorServiceTests {
     _ = await service.deleteDevice(id: "DEVICE-1")
     _ = await service.pairDevices(watchDeviceID: "WATCH-1", phoneDeviceID: "PHONE-1")
     _ = await service.unpairDevice(pairID: "PAIR-1")
+    _ = await service.launchApp(deviceID: "DEVICE-1", bundleID: "com.example.app")
+    _ = await service.terminateApp(deviceID: "DEVICE-1", bundleID: "com.example.app")
+    _ = await service.uninstallApp(deviceID: "DEVICE-1", bundleID: "com.example.app")
+    _ = await service.installApp(
+      deviceID: "DEVICE-1",
+      appBundlePath: URL(fileURLWithPath: "/tmp/Example.app")
+    )
 
     #expect(await recorder.recordedCalls() == [
       CommandCall(
@@ -406,6 +504,11 @@ struct CoreSimulatorServiceTests {
       CommandCall(
         executable: "xcrun",
         arguments: ["simctl", "boot", "DEVICE-1"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "bootstatus", "DEVICE-1", "-b"],
         timeout: 4
       ),
       CommandCall(
@@ -446,6 +549,26 @@ struct CoreSimulatorServiceTests {
       CommandCall(
         executable: "xcrun",
         arguments: ["simctl", "unpair", "PAIR-1"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "launch", "DEVICE-1", "com.example.app"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "terminate", "DEVICE-1", "com.example.app"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "uninstall", "DEVICE-1", "com.example.app"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "install", "DEVICE-1", "/tmp/Example.app"],
         timeout: 4
       )
     ])

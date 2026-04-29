@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import Foundation
 import Testing
 
 @testable import SimControl
@@ -58,5 +59,54 @@ struct InstalledAppsFeatureTests {
     )
 
     #expect(state.selectedAppID == MainWindowTestFixtures.app.id)
+  }
+
+  @Test
+  func selectedAppActionAvailabilityFollowsDeviceStateAndPaths() {
+    let app = MainWindowTestFixtures.makeInstalledApp(
+      deviceID: MainWindowTestFixtures.device.id,
+      bundleID: "com.example.app",
+      dataContainer: URL(fileURLWithPath: "/tmp/Data"),
+      appBundlePath: URL(fileURLWithPath: "/tmp/Example.app")
+    )
+    let state = InstalledAppsFeature.State(
+      apps: [app],
+      availability: .loaded,
+      device: MainWindowTestFixtures.makeDevice(
+        id: MainWindowTestFixtures.device.id,
+        state: .booted
+      ),
+      selectedAppID: app.id,
+      compatibleInstallTargetCount: 1
+    )
+
+    #expect(state.canLaunchSelectedApp)
+    #expect(state.canTerminateSelectedApp)
+    #expect(state.canUninstallSelectedApp)
+    #expect(state.canResetSelectedAppSandbox)
+    #expect(state.canInstallSelectedAppOnAnotherSimulator)
+  }
+
+  @Test
+  func runningCommandDisablesSelectedAppActions() {
+    let appCommandState = AppCommandState(
+      command: .launch,
+      sourceDeviceID: MainWindowTestFixtures.device.id,
+      appID: MainWindowTestFixtures.app.id
+    )
+    let state = InstalledAppsFeature.State(
+      apps: [MainWindowTestFixtures.app],
+      availability: .loaded,
+      device: MainWindowTestFixtures.device,
+      selectedAppID: MainWindowTestFixtures.app.id,
+      appCommandState: appCommandState,
+      compatibleInstallTargetCount: 1
+    )
+
+    #expect(!state.canLaunchSelectedApp)
+    #expect(!state.canTerminateSelectedApp)
+    #expect(!state.canUninstallSelectedApp)
+    #expect(!state.canResetSelectedAppSandbox)
+    #expect(!state.canInstallSelectedAppOnAnotherSimulator)
   }
 }

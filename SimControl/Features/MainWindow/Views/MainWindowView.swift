@@ -142,6 +142,33 @@ struct MainWindowView: View {
         UnpairDeviceConfirmationView(confirmationState: confirmationState) { confirmationState in
           store.send(.unpairDeviceConfirmed(confirmationState))
         }
+      case .uninstallApp(let confirmationState):
+        AppDestructiveConfirmationView(
+          title: "Uninstall App",
+          message: "Uninstall this app from the selected simulator.",
+          actionTitle: "Uninstall",
+          systemImage: "trash",
+          confirmationState: confirmationState
+        ) { confirmationState in
+          store.send(.uninstallAppConfirmed(confirmationState))
+        }
+      case .resetAppSandbox(let confirmationState):
+        AppDestructiveConfirmationView(
+          title: "Reset Sandbox",
+          message: "Delete this app's sandbox contents while keeping the app installed.",
+          actionTitle: "Reset",
+          systemImage: "folder.badge.minus",
+          confirmationState: confirmationState
+        ) { confirmationState in
+          store.send(.resetAppSandboxConfirmed(confirmationState))
+        }
+      case .installAppOnSimulator(let formState):
+        InstallAppOnSimulatorView(
+          formState: formState,
+          targetCandidates: store.presentedInstallAppTargetCandidates
+        ) { formState in
+          store.send(.installAppOnSimulatorSubmitted(formState))
+        }
       }
     }
     .task {

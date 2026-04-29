@@ -12,6 +12,7 @@ struct WorkspaceFeature {
     var commandResults: [CommandResult]
     var installedAppsAvailability: InstalledAppsAvailability
     var deviceCommandState: DeviceCommandState?
+    var appCommandState: AppCommandState?
     var isOpeningSimulatorApp: Bool
 
     init(
@@ -22,6 +23,7 @@ struct WorkspaceFeature {
       commandResults: [CommandResult] = [],
       installedAppsAvailability: InstalledAppsAvailability? = nil,
       deviceCommandState: DeviceCommandState? = nil,
+      appCommandState: AppCommandState? = nil,
       isOpeningSimulatorApp: Bool = false
     ) {
       self.snapshot = snapshot
@@ -32,6 +34,7 @@ struct WorkspaceFeature {
       self.commandResults = commandResults
       self.installedAppsAvailability = installedAppsAvailability ?? (snapshot == nil ? .notLoaded : .loaded)
       self.deviceCommandState = deviceCommandState
+      self.appCommandState = appCommandState
       self.isOpeningSimulatorApp = isOpeningSimulatorApp
       rebuildDeviceList(selectedDeviceID: selectedDeviceID)
       rebuildDetail(selectedAppID: selectedAppID)
@@ -54,11 +57,16 @@ struct WorkspaceFeature {
       _ snapshot: SimulatorSnapshot,
       refreshState: InventoryRefreshState,
       commandResults: [CommandResult],
-      preferredSelectedDeviceID: String? = nil
+      preferredSelectedDeviceID: String? = nil,
+      preferredSelectedAppID: String? = nil
     ) {
       let previousSelectedDeviceID = deviceList.selectedDeviceID
       let selectedDeviceID = validPreferredSelectedDeviceID(preferredSelectedDeviceID, in: snapshot) ?? validSelectedDeviceID(in: snapshot)
-      let selectedAppID = selectedDeviceID == previousSelectedDeviceID ? deviceDetail.installedApps.selectedAppID : nil
+      let selectedAppID = validPreferredSelectedAppID(
+        preferredSelectedAppID,
+        selectedDeviceID: selectedDeviceID,
+        in: snapshot
+      ) ?? (selectedDeviceID == previousSelectedDeviceID ? deviceDetail.installedApps.selectedAppID : nil)
 
       self.snapshot = snapshot
       self.refreshState = refreshState
@@ -90,6 +98,13 @@ struct WorkspaceFeature {
     mutating func setDeviceCommandState(_ deviceCommandState: DeviceCommandState?) {
       self.deviceCommandState = deviceCommandState
       deviceDetail.deviceCommandState = deviceCommandState
+      deviceDetail.installedApps.isDeviceCommandRunning = deviceCommandState != nil
+    }
+
+    mutating func setAppCommandState(_ appCommandState: AppCommandState?) {
+      self.appCommandState = appCommandState
+      deviceDetail.appCommandState = appCommandState
+      deviceDetail.installedApps.appCommandState = appCommandState
     }
 
     mutating func setOpeningSimulatorApp(_ isOpeningSimulatorApp: Bool) {
@@ -121,10 +136,15 @@ struct WorkspaceFeature {
         installedApps: InstalledAppsFeature.State(
           apps: installedApps,
           availability: installedAppsAvailability,
-          selectedAppID: selectedAppID
+          device: selectedDevice,
+          selectedAppID: selectedAppID,
+          appCommandState: appCommandState,
+          isDeviceCommandRunning: deviceCommandState != nil,
+          compatibleInstallTargetCount: compatibleInstallTargetCount(for: selectedDevice)
         ),
         commandResults: commandResults,
         deviceCommandState: deviceCommandState,
+        appCommandState: appCommandState,
         isOpeningSimulatorApp: isOpeningSimulatorApp
       )
       rebuildInspector()
@@ -161,6 +181,36 @@ struct WorkspaceFeature {
       return snapshot.devices.contains(where: { $0.id == preferredSelectedDeviceID })
         ? preferredSelectedDeviceID
         : nil
+    }
+
+    private func validPreferredSelectedAppID(
+      _ preferredSelectedAppID: String?,
+      selectedDeviceID: String?,
+      in snapshot: SimulatorSnapshot
+    ) -> String? {
+      guard let preferredSelectedAppID,
+            let selectedDeviceID,
+            snapshot.installedAppsByDeviceID[selectedDeviceID]?.contains(where: {
+              $0.id == preferredSelectedAppID
+            }) == true
+      else {
+        return nil
+      }
+
+      return preferredSelectedAppID
+    }
+
+    private func compatibleInstallTargetCount(for sourceDevice: SimulatorDevice?) -> Int {
+      guard let sourceDevice else {
+        return 0
+      }
+
+      return devices.filter { target in
+        target.id != sourceDevice.id
+          && target.isAvailable
+          && target.platform == sourceDevice.platform
+          && (target.state == .booted || target.state == .shutdown)
+      }.count
     }
 
     private var devices: [SimulatorDevice] {

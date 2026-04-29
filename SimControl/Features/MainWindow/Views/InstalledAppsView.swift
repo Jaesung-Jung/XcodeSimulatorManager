@@ -24,21 +24,50 @@ struct InstalledAppsView: View {
           )
           .frame(maxWidth: .infinity)
         } else {
-          VStack(spacing: 0) {
-            ForEach(store.apps) { app in
-              Button {
-                store.send(.selectionChanged(app.id))
-              } label: {
-                AppRow(app: app, isSelected: app.id == store.selectedAppID)
-              }
-              .buttonStyle(.plain)
+          VStack(alignment: .leading, spacing: 10) {
+            VStack(spacing: 0) {
+              ForEach(store.apps) { app in
+                Button {
+                  store.send(.selectionChanged(app.id))
+                } label: {
+                  AppRow(app: app, isSelected: app.id == store.selectedAppID)
+                }
+                .buttonStyle(.plain)
 
-              if app.id != store.apps.last?.id {
-                Divider()
+                if app.id != store.apps.last?.id {
+                  Divider()
+                }
               }
             }
+            .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 8))
+
+            if let selectedApp = store.selectedApp {
+              SelectedAppActions(
+                app: selectedApp,
+                appCommandState: store.appCommandState,
+                canLaunch: store.canLaunchSelectedApp,
+                canTerminate: store.canTerminateSelectedApp,
+                canUninstall: store.canUninstallSelectedApp,
+                canResetSandbox: store.canResetSelectedAppSandbox,
+                canInstallOnAnotherSimulator: store.canInstallSelectedAppOnAnotherSimulator,
+                onLaunch: {
+                  store.send(.launchButtonTapped(selectedApp.id))
+                },
+                onTerminate: {
+                  store.send(.terminateButtonTapped(selectedApp.id))
+                },
+                onUninstall: {
+                  store.send(.uninstallButtonTapped(selectedApp.id))
+                },
+                onResetSandbox: {
+                  store.send(.resetSandboxButtonTapped(selectedApp.id))
+                },
+                onInstallOnAnotherSimulator: {
+                  store.send(.installOnAnotherSimulatorButtonTapped(selectedApp.id))
+                }
+              )
+            }
           }
-          .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 8))
         }
       }
     }
@@ -101,6 +130,142 @@ extension InstalledAppsView {
       .padding(10)
       .contentShape(Rectangle())
       .accessibilityElement(children: .combine)
+    }
+  }
+}
+
+extension InstalledAppsView {
+  private struct SelectedAppActions: View {
+    let app: InstalledApp
+    let appCommandState: AppCommandState?
+    let canLaunch: Bool
+    let canTerminate: Bool
+    let canUninstall: Bool
+    let canResetSandbox: Bool
+    let canInstallOnAnotherSimulator: Bool
+    let onLaunch: () -> Void
+    let onTerminate: () -> Void
+    let onUninstall: () -> Void
+    let onResetSandbox: () -> Void
+    let onInstallOnAnotherSimulator: () -> Void
+
+    var body: some View {
+      VStack(alignment: .leading, spacing: 10) {
+        HStack(spacing: 8) {
+          Image(systemName: "app")
+            .foregroundStyle(.secondary)
+            .accessibilityHidden(true)
+
+          VStack(alignment: .leading, spacing: 2) {
+            Text(app.displayName)
+              .font(.subheadline.weight(.medium))
+              .lineLimit(1)
+
+            Text(app.bundleID)
+              .font(.caption.monospaced())
+              .foregroundStyle(.secondary)
+              .lineLimit(1)
+              .truncationMode(.middle)
+          }
+
+          Spacer()
+        }
+
+        LazyVGrid(
+          columns: [
+            GridItem(.adaptive(minimum: 132), spacing: 8)
+          ],
+          alignment: .leading,
+          spacing: 8
+        ) {
+          Button {
+            onLaunch()
+          } label: {
+            ActionButtonLabel(
+              title: isRunning(.launch) ? "Launching" : "Launch",
+              systemImage: "play.fill",
+              isRunning: isRunning(.launch)
+            )
+          }
+          .disabled(!canLaunch)
+
+          Button {
+            onTerminate()
+          } label: {
+            ActionButtonLabel(
+              title: isRunning(.terminate) ? "Terminating" : "Terminate",
+              systemImage: "stop.fill",
+              isRunning: isRunning(.terminate)
+            )
+          }
+          .disabled(!canTerminate)
+
+          Button(role: .destructive) {
+            onUninstall()
+          } label: {
+            ActionButtonLabel(
+              title: isRunning(.uninstall) ? "Uninstalling" : "Uninstall...",
+              systemImage: "trash",
+              isRunning: isRunning(.uninstall)
+            )
+          }
+          .disabled(!canUninstall)
+
+          Button(role: .destructive) {
+            onResetSandbox()
+          } label: {
+            ActionButtonLabel(
+              title: isRunning(.resetSandbox) ? "Resetting" : "Reset Sandbox...",
+              systemImage: "folder.badge.minus",
+              isRunning: isRunning(.resetSandbox)
+            )
+          }
+          .disabled(!canResetSandbox)
+
+          Button {
+            onInstallOnAnotherSimulator()
+          } label: {
+            ActionButtonLabel(
+              title: isRunning(.installOnSimulator) ? "Installing" : "Install...",
+              systemImage: "square.and.arrow.down",
+              isRunning: isRunning(.installOnSimulator)
+            )
+          }
+          .disabled(!canInstallOnAnotherSimulator)
+        }
+        .buttonStyle(.bordered)
+      }
+      .padding(10)
+      .background(.quaternary.opacity(0.25), in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    private func isRunning(_ command: AppCommand) -> Bool {
+      appCommandState?.command == command && appCommandState?.appID == app.id
+    }
+  }
+}
+
+extension InstalledAppsView {
+  private struct ActionButtonLabel: View {
+    let title: LocalizedStringKey
+    let systemImage: String
+    let isRunning: Bool
+
+    var body: some View {
+      HStack(spacing: 6) {
+        if isRunning {
+          ProgressView()
+            .controlSize(.small)
+            .frame(width: 14, height: 14)
+        } else {
+          Image(systemName: systemImage)
+            .accessibilityHidden(true)
+        }
+
+        Text(title)
+          .lineLimit(1)
+      }
+      .frame(maxWidth: .infinity)
     }
   }
 }

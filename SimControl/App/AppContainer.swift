@@ -5,6 +5,7 @@ final class AppContainer {
   let commandExecutor: CommandExecutor
   let coreSimulatorService: CoreSimulatorService
   let appContainerScanner: AppContainerScanner
+  let appSandboxResetService: AppSandboxResetService
   let simulatorRepository: SimulatorRepository
   let settingsStore: SettingsStore
   let actionLogStore: ActionLogStore
@@ -14,6 +15,7 @@ final class AppContainer {
     let commandExecutor = CommandExecutor()
     let coreSimulatorService = CoreSimulatorService(commandExecutor: commandExecutor)
     let appContainerScanner = AppContainerScanner()
+    let appSandboxResetService = AppSandboxResetService()
     let simulatorRepository = SimulatorRepository(
       coreSimulatorService: coreSimulatorService,
       appContainerScanner: appContainerScanner
@@ -22,6 +24,7 @@ final class AppContainer {
     self.commandExecutor = commandExecutor
     self.coreSimulatorService = coreSimulatorService
     self.appContainerScanner = appContainerScanner
+    self.appSandboxResetService = appSandboxResetService
     self.simulatorRepository = simulatorRepository
     settingsStore = SettingsStore()
     actionLogStore = ActionLogStore()
@@ -36,6 +39,9 @@ final class AppContainer {
       }
       $0.coreSimulatorService.bootDevice = { id in
         await coreSimulatorService.bootDevice(id: id)
+      }
+      $0.coreSimulatorService.bootDeviceIfNeeded = { id in
+        await coreSimulatorService.bootDeviceIfNeeded(id: id)
       }
       $0.coreSimulatorService.shutdownDevice = { id in
         await coreSimulatorService.shutdownDevice(id: id)
@@ -67,6 +73,21 @@ final class AppContainer {
       }
       $0.coreSimulatorService.unpairDevice = { pairID in
         await coreSimulatorService.unpairDevice(pairID: pairID)
+      }
+      $0.coreSimulatorService.launchApp = { deviceID, bundleID in
+        await coreSimulatorService.launchApp(deviceID: deviceID, bundleID: bundleID)
+      }
+      $0.coreSimulatorService.terminateApp = { deviceID, bundleID in
+        await coreSimulatorService.terminateApp(deviceID: deviceID, bundleID: bundleID)
+      }
+      $0.coreSimulatorService.uninstallApp = { deviceID, bundleID in
+        await coreSimulatorService.uninstallApp(deviceID: deviceID, bundleID: bundleID)
+      }
+      $0.coreSimulatorService.installApp = { deviceID, appBundlePath in
+        await coreSimulatorService.installApp(deviceID: deviceID, appBundlePath: appBundlePath)
+      }
+      $0.appSandboxReset.resetSandbox = { dataContainer in
+        await appSandboxResetService.resetSandbox(at: dataContainer)
       }
     }
   }

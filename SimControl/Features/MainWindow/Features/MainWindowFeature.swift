@@ -5,6 +5,7 @@ import Foundation
 struct MainWindowFeature {
   private static let menuBarAutoRefreshInterval: TimeInterval = 60
 
+  @Dependency(\.appSandboxReset) private var appSandboxReset
   @Dependency(\.coreSimulatorService) private var coreSimulatorService
   @Dependency(\.simulatorRepository) private var simulatorRepository
 
@@ -16,6 +17,9 @@ struct MainWindowFeature {
     case delete(DeviceDestructiveConfirmationState)
     case pair(PairDevicesFormState)
     case unpair(UnpairDeviceConfirmationState)
+    case uninstallApp(AppDestructiveConfirmationState)
+    case resetAppSandbox(AppDestructiveConfirmationState)
+    case installAppOnSimulator(InstallAppTargetFormState)
 
     var id: String {
       switch self {
@@ -33,6 +37,12 @@ struct MainWindowFeature {
         "pair"
       case .unpair(let confirmationState):
         "unpair-\(confirmationState.pairID)"
+      case .uninstallApp(let confirmationState):
+        "uninstall-app-\(confirmationState.appID)"
+      case .resetAppSandbox(let confirmationState):
+        "reset-app-sandbox-\(confirmationState.appID)"
+      case .installAppOnSimulator(let formState):
+        "install-app-\(formState.sourceAppID)"
       }
     }
   }
@@ -96,6 +106,40 @@ struct MainWindowFeature {
     let watchUDID: String
   }
 
+  struct AppDestructiveConfirmationState: Equatable {
+    let appID: String
+    let appName: String
+    let bundleID: String
+    let deviceID: String
+    let deviceName: String
+    let deviceUDID: String
+    let dataContainerPath: String?
+  }
+
+  struct InstallAppTargetCandidate: Equatable, Identifiable {
+    let id: String
+    let name: String
+    let udid: String
+    let state: SimulatorDevice.State
+
+    init(device: SimulatorDevice) {
+      self.id = device.id
+      self.name = device.name
+      self.udid = device.udid
+      self.state = device.state
+    }
+  }
+
+  struct InstallAppTargetFormState: Equatable {
+    let sourceAppID: String
+    let sourceDeviceID: String
+    let appName: String
+    let bundleID: String
+    let appBundlePath: URL
+    var targetDeviceID: String
+    var launchAfterInstall: Bool
+  }
+
   @ObservableState
   struct State: Equatable {
     var lastMenuBarAutoRefreshAttemptAt: Date?
@@ -111,6 +155,7 @@ struct MainWindowFeature {
       lastCommandResults: [CommandResult] = [],
       installedAppsAvailability: InstalledAppsAvailability? = nil,
       deviceCommandState: DeviceCommandState? = nil,
+      appCommandState: AppCommandState? = nil,
       isOpeningSimulatorApp: Bool = false,
       lastMenuBarAutoRefreshAttemptAt: Date? = nil,
       lifecycleSheet: DeviceLifecycleSheet? = nil
@@ -129,20 +174,27 @@ struct MainWindowFeature {
         commandResults: lastCommandResults,
         installedAppsAvailability: installedAppsAvailability,
         deviceCommandState: deviceCommandState,
+        appCommandState: appCommandState,
         isOpeningSimulatorApp: isOpeningSimulatorApp
       )
     }
 
     var canCreateDevice: Bool {
-      workspace.deviceCommandState == nil && initialCreateDeviceFormState != nil
+      workspace.deviceCommandState == nil
+        && workspace.appCommandState == nil
+        && initialCreateDeviceFormState != nil
     }
 
     var canCloneSelectedDevice: Bool {
-      workspace.deviceCommandState == nil && workspace.selectedDevice != nil
+      workspace.deviceCommandState == nil
+        && workspace.appCommandState == nil
+        && workspace.selectedDevice != nil
     }
 
     var canPairDevices: Bool {
-      workspace.deviceCommandState == nil && initialPairDevicesFormState != nil
+      workspace.deviceCommandState == nil
+        && workspace.appCommandState == nil
+        && initialPairDevicesFormState != nil
     }
 
     var initialCreateDeviceFormState: CreateDeviceFormState? {
@@ -178,6 +230,29 @@ struct MainWindowFeature {
       }
 
       return Self.pairWatchCandidates(in: snapshot)
+    }
+
+    var presentedInstallAppTargetCandidates: [InstallAppTargetCandidate] {
+      guard case .installAppOnSimulator(let formState) = lifecycleSheet else {
+        return []
+      }
+
+      return installAppTargetCandidates(for: formState)
+    }
+
+    func installAppTargetCandidates(
+      for formState: InstallAppTargetFormState
+    ) -> [InstallAppTargetCandidate] {
+      guard let snapshot,
+            let sourceDevice = snapshot.devices.first(where: { $0.id == formState.sourceDeviceID })
+      else {
+        return []
+      }
+
+      return Self.installAppTargetCandidates(
+        in: snapshot,
+        sourceDevice: sourceDevice
+      )
     }
 
     private var snapshot: SimulatorSnapshot? {
@@ -289,6 +364,20 @@ struct MainWindowFeature {
 
       return deviceType.productFamily == "Apple Watch"
     }
+
+    private static func installAppTargetCandidates(
+      in snapshot: SimulatorSnapshot,
+      sourceDevice: SimulatorDevice
+    ) -> [InstallAppTargetCandidate] {
+      snapshot.devices
+        .filter { target in
+          target.id != sourceDevice.id
+            && target.isAvailable
+            && target.platform == sourceDevice.platform
+            && (target.state == .booted || target.state == .shutdown)
+        }
+        .map { InstallAppTargetCandidate(device: $0) }
+    }
   }
 
   enum Action: Equatable {
@@ -307,6 +396,9 @@ struct MainWindowFeature {
     case deleteDeviceConfirmed(DeviceDestructiveConfirmationState)
     case pairDevicesSubmitted(PairDevicesFormState)
     case unpairDeviceConfirmed(UnpairDeviceConfirmationState)
+    case uninstallAppConfirmed(AppDestructiveConfirmationState)
+    case resetAppSandboxConfirmed(AppDestructiveConfirmationState)
+    case installAppOnSimulatorSubmitted(InstallAppTargetFormState)
     case openSimulatorAppButtonTapped
     case openSimulatorAppResponse(CommandResult)
     case deviceCommandResponse(DeviceCommandState, CommandResult)
@@ -314,6 +406,18 @@ struct MainWindowFeature {
       DeviceCommandState,
       SimulatorRepository.RefreshResult,
       preferredSelectedDeviceID: String?
+    )
+    case appCommandCommandsCompleted(
+      AppCommandState,
+      [CommandResult],
+      preferredSelectedDeviceID: String?,
+      preferredSelectedAppID: String?
+    )
+    case appCommandRefreshResponse(
+      AppCommandState,
+      SimulatorRepository.RefreshResult,
+      preferredSelectedDeviceID: String?,
+      preferredSelectedAppID: String?
     )
     case sidebar(SidebarFeature.Action)
     case workspace(WorkspaceFeature.Action)
@@ -361,6 +465,7 @@ struct MainWindowFeature {
 
       case .createSimulatorButtonTapped:
         guard state.workspace.deviceCommandState == nil,
+              state.workspace.appCommandState == nil,
               let formState = state.initialCreateDeviceFormState
         else {
           return .none
@@ -371,6 +476,7 @@ struct MainWindowFeature {
 
       case .cloneSelectedSimulatorButtonTapped:
         guard state.workspace.deviceCommandState == nil,
+              state.workspace.appCommandState == nil,
               let device = state.workspace.selectedDevice
         else {
           return .none
@@ -387,6 +493,7 @@ struct MainWindowFeature {
 
       case .pairDevicesButtonTapped:
         guard state.workspace.deviceCommandState == nil,
+              state.workspace.appCommandState == nil,
               let formState = state.initialPairDevicesFormState
         else {
           return .none
@@ -426,6 +533,18 @@ struct MainWindowFeature {
       case .unpairDeviceConfirmed(let confirmationState):
         state.lifecycleSheet = nil
         return runUnpairDeviceCommand(&state, confirmationState: confirmationState)
+
+      case .uninstallAppConfirmed(let confirmationState):
+        state.lifecycleSheet = nil
+        return runUninstallAppCommand(&state, confirmationState: confirmationState)
+
+      case .resetAppSandboxConfirmed(let confirmationState):
+        state.lifecycleSheet = nil
+        return runResetAppSandboxCommand(&state, confirmationState: confirmationState)
+
+      case .installAppOnSimulatorSubmitted(let formState):
+        state.lifecycleSheet = nil
+        return runInstallAppOnSimulatorCommand(&state, formState: formState)
 
       case .openSimulatorAppButtonTapped:
         return openSimulatorApp(&state)
@@ -475,6 +594,59 @@ struct MainWindowFeature {
         state.workspace.setDeviceCommandState(nil)
         return .none
 
+      case .appCommandCommandsCompleted(
+        let appCommandState,
+        let commandResults,
+        preferredSelectedDeviceID: _,
+        preferredSelectedAppID: _
+      ):
+        guard state.workspace.appCommandState == appCommandState else {
+          return .none
+        }
+
+        for commandResult in commandResults {
+          state.workspace.appendCommandResult(commandResult)
+        }
+        state.sidebar.refreshState = .refreshing
+        state.workspace.setRefreshState(.refreshing)
+        return .none
+
+      case .appCommandRefreshResponse(
+        let appCommandState,
+        let result,
+        let preferredSelectedDeviceID,
+        let preferredSelectedAppID
+      ):
+        guard state.workspace.appCommandState == appCommandState else {
+          return .none
+        }
+
+        let commandResults = state.workspace.commandResults + commandResults(from: result)
+
+        if let snapshot = result.snapshot, result.diagnostic == nil {
+          state.sidebar.snapshot = snapshot
+          state.sidebar.refreshState = .idle
+          state.workspace.applySnapshot(
+            snapshot,
+            refreshState: .idle,
+            commandResults: commandResults,
+            preferredSelectedDeviceID: preferredSelectedDeviceID,
+            preferredSelectedAppID: preferredSelectedAppID
+          )
+        } else {
+          let refreshState = InventoryRefreshState.failed(
+            diagnostic: result.diagnostic ?? "Unable to refresh simulator inventory."
+          )
+          state.sidebar.refreshState = refreshState
+          state.workspace.applyRefreshFailure(
+            refreshState,
+            commandResults: commandResults
+          )
+        }
+
+        state.workspace.setAppCommandState(nil)
+        return .none
+
       case .workspace(.deviceDetail(.bootButtonTapped(let deviceID))):
         return runDeviceCommand(
           &state,
@@ -492,6 +664,7 @@ struct MainWindowFeature {
 
       case .workspace(.deviceDetail(.renameButtonTapped(let deviceID))):
         guard state.workspace.deviceCommandState == nil,
+              state.workspace.appCommandState == nil,
               let device = device(id: deviceID, in: state)
         else {
           return .none
@@ -508,6 +681,7 @@ struct MainWindowFeature {
 
       case .workspace(.deviceDetail(.eraseButtonTapped(let deviceID))):
         guard state.workspace.deviceCommandState == nil,
+              state.workspace.appCommandState == nil,
               let confirmationState = deviceDestructiveConfirmationState(
                 deviceID: deviceID,
                 in: state
@@ -521,6 +695,7 @@ struct MainWindowFeature {
 
       case .workspace(.deviceDetail(.deleteButtonTapped(let deviceID))):
         guard state.workspace.deviceCommandState == nil,
+              state.workspace.appCommandState == nil,
               let confirmationState = deviceDestructiveConfirmationState(
                 deviceID: deviceID,
                 in: state
@@ -534,12 +709,61 @@ struct MainWindowFeature {
 
       case .workspace(.deviceDetail(.unpairButtonTapped(let pairID))):
         guard state.workspace.deviceCommandState == nil,
+              state.workspace.appCommandState == nil,
               let confirmationState = unpairConfirmationState(pairID: pairID, in: state)
         else {
           return .none
         }
 
         state.lifecycleSheet = .unpair(confirmationState)
+        return .none
+
+      case .workspace(.deviceDetail(.installedApps(.launchButtonTapped(let appID)))):
+        return runLaunchAppCommand(&state, appID: appID)
+
+      case .workspace(.deviceDetail(.installedApps(.terminateButtonTapped(let appID)))):
+        return runTerminateAppCommand(&state, appID: appID)
+
+      case .workspace(.deviceDetail(.installedApps(.uninstallButtonTapped(let appID)))):
+        guard state.workspace.deviceCommandState == nil,
+              state.workspace.appCommandState == nil,
+              let confirmationState = appDestructiveConfirmationState(
+                appID: appID,
+                in: state,
+                includesDataContainer: false
+              )
+        else {
+          return .none
+        }
+
+        state.lifecycleSheet = .uninstallApp(confirmationState)
+        return .none
+
+      case .workspace(.deviceDetail(.installedApps(.resetSandboxButtonTapped(let appID)))):
+        guard state.workspace.deviceCommandState == nil,
+              state.workspace.appCommandState == nil,
+              let confirmationState = appDestructiveConfirmationState(
+                appID: appID,
+                in: state,
+                includesDataContainer: true
+              ),
+              confirmationState.dataContainerPath != nil
+        else {
+          return .none
+        }
+
+        state.lifecycleSheet = .resetAppSandbox(confirmationState)
+        return .none
+
+      case .workspace(.deviceDetail(.installedApps(.installOnAnotherSimulatorButtonTapped(let appID)))):
+        guard state.workspace.deviceCommandState == nil,
+              state.workspace.appCommandState == nil,
+              let formState = installAppTargetFormState(appID: appID, in: state)
+        else {
+          return .none
+        }
+
+        state.lifecycleSheet = .installAppOnSimulator(formState)
         return .none
 
       case .sidebar, .workspace:
@@ -601,6 +825,7 @@ struct MainWindowFeature {
     _ deviceCommandState: DeviceCommandState
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
           let deviceID = deviceCommandState.deviceID,
           let device = device(id: deviceID, in: state),
           canRun(deviceCommandState.command, on: device)
@@ -639,6 +864,7 @@ struct MainWindowFeature {
     formState: CreateDeviceFormState
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
           let snapshot = state.workspace.snapshot,
           let runtime = snapshot.runtimes.first(where: { $0.id == formState.runtimeID && $0.isAvailable }),
           let deviceType = compatibleDeviceTypes(for: runtime, in: snapshot.deviceTypes)
@@ -679,6 +905,7 @@ struct MainWindowFeature {
     formState: CloneDeviceFormState
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
           device(id: formState.sourceDeviceID, in: state) != nil,
           let name = nonEmpty(formState.name)
     else {
@@ -714,6 +941,7 @@ struct MainWindowFeature {
     formState: RenameDeviceFormState
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
           device(id: formState.deviceID, in: state) != nil,
           let name = nonEmpty(formState.name),
           name != formState.currentName
@@ -750,6 +978,7 @@ struct MainWindowFeature {
     confirmationState: DeviceDestructiveConfirmationState
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
           let device = device(id: confirmationState.deviceID, in: state),
           device.isAvailable,
           device.udid == confirmationState.deviceUDID
@@ -783,6 +1012,7 @@ struct MainWindowFeature {
     confirmationState: DeviceDestructiveConfirmationState
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
           let device = device(id: confirmationState.deviceID, in: state),
           device.udid == confirmationState.deviceUDID
     else {
@@ -815,6 +1045,7 @@ struct MainWindowFeature {
     formState: PairDevicesFormState
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
           state.pairPhoneCandidates.contains(where: { $0.id == formState.phoneDeviceID }),
           state.pairWatchCandidates.contains(where: { $0.id == formState.watchDeviceID })
     else {
@@ -847,6 +1078,7 @@ struct MainWindowFeature {
     confirmationState: UnpairDeviceConfirmationState
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
           unpairConfirmationState(pairID: confirmationState.pairID, in: state) == confirmationState
     else {
       return .none
@@ -865,6 +1097,323 @@ struct MainWindowFeature {
           deviceCommandState,
           refreshResult,
           preferredSelectedDeviceID: nil
+        )
+      )
+    }
+  }
+
+  private func runLaunchAppCommand(
+    _ state: inout State,
+    appID: String
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
+          let context = appCommandContext(appID: appID, in: state),
+          canLaunchApp(context.app, on: context.device)
+    else {
+      return .none
+    }
+
+    let appCommandState = AppCommandState(
+      command: .launch,
+      sourceDeviceID: context.device.id,
+      appID: context.app.id
+    )
+    state.workspace.setAppCommandState(appCommandState)
+
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      var commandResults: [CommandResult] = []
+
+      if context.device.state == .shutdown {
+        let bootResult = await coreSimulatorService.bootDeviceIfNeeded(context.device.id)
+        commandResults.append(bootResult)
+
+        guard bootResult.succeeded else {
+          await send(
+            .appCommandCommandsCompleted(
+              appCommandState,
+              commandResults,
+              preferredSelectedDeviceID: context.device.id,
+              preferredSelectedAppID: context.app.id
+            )
+          )
+          let refreshResult = await simulatorRepository.refresh()
+          await send(
+            .appCommandRefreshResponse(
+              appCommandState,
+              refreshResult,
+              preferredSelectedDeviceID: context.device.id,
+              preferredSelectedAppID: context.app.id
+            )
+          )
+          return
+        }
+      }
+
+      commandResults.append(
+        await coreSimulatorService.launchApp(
+          context.device.id,
+          context.app.bundleID
+        )
+      )
+      await send(
+        .appCommandCommandsCompleted(
+          appCommandState,
+          commandResults,
+          preferredSelectedDeviceID: context.device.id,
+          preferredSelectedAppID: context.app.id
+        )
+      )
+
+      let refreshResult = await simulatorRepository.refresh()
+      await send(
+        .appCommandRefreshResponse(
+          appCommandState,
+          refreshResult,
+          preferredSelectedDeviceID: context.device.id,
+          preferredSelectedAppID: context.app.id
+        )
+      )
+    }
+  }
+
+  private func runTerminateAppCommand(
+    _ state: inout State,
+    appID: String
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
+          let context = appCommandContext(appID: appID, in: state),
+          canTerminateApp(context.app, on: context.device)
+    else {
+      return .none
+    }
+
+    let appCommandState = AppCommandState(
+      command: .terminate,
+      sourceDeviceID: context.device.id,
+      appID: context.app.id
+    )
+    state.workspace.setAppCommandState(appCommandState)
+
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      let commandResults = [
+        await coreSimulatorService.terminateApp(
+          context.device.id,
+          context.app.bundleID
+        )
+      ]
+      await send(
+        .appCommandCommandsCompleted(
+          appCommandState,
+          commandResults,
+          preferredSelectedDeviceID: context.device.id,
+          preferredSelectedAppID: context.app.id
+        )
+      )
+
+      let refreshResult = await simulatorRepository.refresh()
+      await send(
+        .appCommandRefreshResponse(
+          appCommandState,
+          refreshResult,
+          preferredSelectedDeviceID: context.device.id,
+          preferredSelectedAppID: context.app.id
+        )
+      )
+    }
+  }
+
+  private func runUninstallAppCommand(
+    _ state: inout State,
+    confirmationState: AppDestructiveConfirmationState
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
+          let context = appCommandContext(appID: confirmationState.appID, in: state),
+          canUninstallApp(context.app, on: context.device),
+          appDestructiveConfirmationState(
+            appID: confirmationState.appID,
+            in: state,
+            includesDataContainer: false
+          ) == confirmationState
+    else {
+      return .none
+    }
+
+    let appCommandState = AppCommandState(
+      command: .uninstall,
+      sourceDeviceID: context.device.id,
+      appID: context.app.id
+    )
+    state.workspace.setAppCommandState(appCommandState)
+
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      let uninstallResult = await coreSimulatorService.uninstallApp(
+        context.device.id,
+        context.app.bundleID
+      )
+      let preferredSelectedAppID = uninstallResult.succeeded ? nil : context.app.id
+
+      await send(
+        .appCommandCommandsCompleted(
+          appCommandState,
+          [uninstallResult],
+          preferredSelectedDeviceID: context.device.id,
+          preferredSelectedAppID: preferredSelectedAppID
+        )
+      )
+
+      let refreshResult = await simulatorRepository.refresh()
+      await send(
+        .appCommandRefreshResponse(
+          appCommandState,
+          refreshResult,
+          preferredSelectedDeviceID: context.device.id,
+          preferredSelectedAppID: preferredSelectedAppID
+        )
+      )
+    }
+  }
+
+  private func runResetAppSandboxCommand(
+    _ state: inout State,
+    confirmationState: AppDestructiveConfirmationState
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
+          let context = appCommandContext(appID: confirmationState.appID, in: state),
+          let dataContainer = context.app.dataContainer,
+          appDestructiveConfirmationState(
+            appID: confirmationState.appID,
+            in: state,
+            includesDataContainer: true
+          ) == confirmationState
+    else {
+      return .none
+    }
+
+    let appCommandState = AppCommandState(
+      command: .resetSandbox,
+      sourceDeviceID: context.device.id,
+      appID: context.app.id
+    )
+    state.workspace.setAppCommandState(appCommandState)
+
+    return .run { [appSandboxReset, simulatorRepository] send in
+      let resetResult = await appSandboxReset.resetSandbox(dataContainer)
+      await send(
+        .appCommandCommandsCompleted(
+          appCommandState,
+          [resetResult],
+          preferredSelectedDeviceID: context.device.id,
+          preferredSelectedAppID: context.app.id
+        )
+      )
+
+      let refreshResult = await simulatorRepository.refresh()
+      await send(
+        .appCommandRefreshResponse(
+          appCommandState,
+          refreshResult,
+          preferredSelectedDeviceID: context.device.id,
+          preferredSelectedAppID: context.app.id
+        )
+      )
+    }
+  }
+
+  private func runInstallAppOnSimulatorCommand(
+    _ state: inout State,
+    formState: InstallAppTargetFormState
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
+          let context = appCommandContext(appID: formState.sourceAppID, in: state),
+          let appBundlePath = context.app.appBundlePath,
+          appBundlePath == formState.appBundlePath,
+          context.app.bundleID == formState.bundleID,
+          context.device.id == formState.sourceDeviceID,
+          let targetDevice = installTargetDevice(id: formState.targetDeviceID, sourceDevice: context.device, in: state)
+    else {
+      return .none
+    }
+
+    let appCommandState = AppCommandState(
+      command: .installOnSimulator,
+      sourceDeviceID: context.device.id,
+      appID: context.app.id,
+      targetDeviceID: targetDevice.id
+    )
+    state.workspace.setAppCommandState(appCommandState)
+
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      var commandResults: [CommandResult] = []
+      var installed = false
+
+      if targetDevice.state == .shutdown {
+        let bootResult = await coreSimulatorService.bootDeviceIfNeeded(targetDevice.id)
+        commandResults.append(bootResult)
+
+        guard bootResult.succeeded else {
+          await send(
+            .appCommandCommandsCompleted(
+              appCommandState,
+              commandResults,
+              preferredSelectedDeviceID: nil,
+              preferredSelectedAppID: nil
+            )
+          )
+          let refreshResult = await simulatorRepository.refresh()
+          await send(
+            .appCommandRefreshResponse(
+              appCommandState,
+              refreshResult,
+              preferredSelectedDeviceID: nil,
+              preferredSelectedAppID: nil
+            )
+          )
+          return
+        }
+      }
+
+      let installResult = await coreSimulatorService.installApp(
+        targetDevice.id,
+        appBundlePath
+      )
+      commandResults.append(installResult)
+      installed = installResult.succeeded
+
+      if installed, formState.launchAfterInstall {
+        commandResults.append(
+          await coreSimulatorService.launchApp(
+            targetDevice.id,
+            context.app.bundleID
+          )
+        )
+      }
+
+      let preferredSelectedDeviceID = installed ? targetDevice.id : nil
+      let preferredSelectedAppID = installed
+        ? "\(targetDevice.id):\(context.app.bundleID)"
+        : nil
+
+      await send(
+        .appCommandCommandsCompleted(
+          appCommandState,
+          commandResults,
+          preferredSelectedDeviceID: preferredSelectedDeviceID,
+          preferredSelectedAppID: preferredSelectedAppID
+        )
+      )
+
+      let refreshResult = await simulatorRepository.refresh()
+      await send(
+        .appCommandRefreshResponse(
+          appCommandState,
+          refreshResult,
+          preferredSelectedDeviceID: preferredSelectedDeviceID,
+          preferredSelectedAppID: preferredSelectedAppID
         )
       )
     }
@@ -930,6 +1479,116 @@ struct MainWindowFeature {
       watchName: watchDevice.name,
       watchUDID: watchDevice.udid
     )
+  }
+
+  private struct AppCommandContext {
+    let device: SimulatorDevice
+    let app: InstalledApp
+  }
+
+  private func appCommandContext(
+    appID: String,
+    in state: State
+  ) -> AppCommandContext? {
+    guard let selectedDevice = state.workspace.selectedDevice,
+          let app = state.workspace.snapshot?.installedAppsByDeviceID[selectedDevice.id]?
+            .first(where: { $0.id == appID }),
+          app.deviceID == selectedDevice.id
+    else {
+      return nil
+    }
+
+    return AppCommandContext(device: selectedDevice, app: app)
+  }
+
+  private func appDestructiveConfirmationState(
+    appID: String,
+    in state: State,
+    includesDataContainer: Bool
+  ) -> AppDestructiveConfirmationState? {
+    guard let context = appCommandContext(appID: appID, in: state) else {
+      return nil
+    }
+
+    return AppDestructiveConfirmationState(
+      appID: context.app.id,
+      appName: context.app.displayName,
+      bundleID: context.app.bundleID,
+      deviceID: context.device.id,
+      deviceName: context.device.name,
+      deviceUDID: context.device.udid,
+      dataContainerPath: includesDataContainer ? context.app.dataContainer?.path : nil
+    )
+  }
+
+  private func installAppTargetFormState(
+    appID: String,
+    in state: State
+  ) -> InstallAppTargetFormState? {
+    guard let context = appCommandContext(appID: appID, in: state),
+          let appBundlePath = context.app.appBundlePath,
+          let targetDevice = installTargetCandidates(sourceDevice: context.device, in: state).first
+    else {
+      return nil
+    }
+
+    return InstallAppTargetFormState(
+      sourceAppID: context.app.id,
+      sourceDeviceID: context.device.id,
+      appName: context.app.displayName,
+      bundleID: context.app.bundleID,
+      appBundlePath: appBundlePath,
+      targetDeviceID: targetDevice.id,
+      launchAfterInstall: true
+    )
+  }
+
+  private func installTargetDevice(
+    id: String,
+    sourceDevice: SimulatorDevice,
+    in state: State
+  ) -> SimulatorDevice? {
+    installTargetCandidates(sourceDevice: sourceDevice, in: state)
+      .first { $0.id == id }
+  }
+
+  private func installTargetCandidates(
+    sourceDevice: SimulatorDevice,
+    in state: State
+  ) -> [SimulatorDevice] {
+    (state.workspace.snapshot?.devices ?? []).filter { target in
+      target.id != sourceDevice.id
+        && target.isAvailable
+        && target.platform == sourceDevice.platform
+        && (target.state == .booted || target.state == .shutdown)
+    }
+  }
+
+  private func canLaunchApp(
+    _ app: InstalledApp,
+    on device: SimulatorDevice
+  ) -> Bool {
+    !app.bundleID.isEmpty
+      && device.isAvailable
+      && (device.state == .booted || device.state == .shutdown)
+  }
+
+  private func canTerminateApp(
+    _ app: InstalledApp,
+    on device: SimulatorDevice
+  ) -> Bool {
+    !app.bundleID.isEmpty
+      && device.isAvailable
+      && device.state == .booted
+  }
+
+  private func canUninstallApp(
+    _ app: InstalledApp,
+    on device: SimulatorDevice
+  ) -> Bool {
+    !app.bundleID.isEmpty
+      && device.isAvailable
+      && (device.state == .booted || device.state == .shutdown)
   }
 
   private func canRun(

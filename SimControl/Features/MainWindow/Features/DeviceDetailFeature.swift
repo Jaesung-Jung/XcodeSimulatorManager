@@ -22,6 +22,7 @@ struct DeviceDetailFeature {
     var installedApps: InstalledAppsFeature.State
     var commandResults: [CommandResult]
     var deviceCommandState: DeviceCommandState?
+    var appCommandState: AppCommandState?
     var isOpeningSimulatorApp: Bool
 
     init(
@@ -32,8 +33,13 @@ struct DeviceDetailFeature {
       installedApps: InstalledAppsFeature.State = InstalledAppsFeature.State(),
       commandResults: [CommandResult] = [],
       deviceCommandState: DeviceCommandState? = nil,
+      appCommandState: AppCommandState? = nil,
       isOpeningSimulatorApp: Bool = false
     ) {
+      var installedApps = installedApps
+      installedApps.appCommandState = appCommandState
+      installedApps.isDeviceCommandRunning = deviceCommandState != nil
+
       self.device = device
       self.runtime = runtime
       self.deviceType = deviceType
@@ -41,6 +47,7 @@ struct DeviceDetailFeature {
       self.installedApps = installedApps
       self.commandResults = commandResults
       self.deviceCommandState = deviceCommandState
+      self.appCommandState = appCommandState
       self.isOpeningSimulatorApp = isOpeningSimulatorApp
     }
 
