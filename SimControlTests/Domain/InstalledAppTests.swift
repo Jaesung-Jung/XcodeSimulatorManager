@@ -22,7 +22,10 @@ struct InstalledAppTests {
       dataContainer: URL(fileURLWithPath: "/tmp/Data/Application/app"),
       appBundlePath: URL(fileURLWithPath: "/tmp/Bundle/Application/app/App.app"),
       appGroups: [appGroup],
-      iconPath: URL(fileURLWithPath: "/tmp/Bundle/Application/app/App.app/AppIcon.png")
+      iconPath: URL(fileURLWithPath: "/tmp/Bundle/Application/app/App.app/AppIcon.png"),
+      isSystemApp: true,
+      databaseFiles: [URL(fileURLWithPath: "/tmp/Data/Application/app/Documents/store.sqlite")],
+      dataContainerSize: 256
     )
 
     #expect(app.id == "device-1:com.example.app")
@@ -36,6 +39,9 @@ struct InstalledAppTests {
     #expect(app.appBundlePath == URL(fileURLWithPath: "/tmp/Bundle/Application/app/App.app"))
     #expect(app.appGroups == [appGroup])
     #expect(app.iconPath == URL(fileURLWithPath: "/tmp/Bundle/Application/app/App.app/AppIcon.png"))
+    #expect(app.isSystemApp)
+    #expect(app.databaseFiles == [URL(fileURLWithPath: "/tmp/Data/Application/app/Documents/store.sqlite")])
+    #expect(app.dataContainerSize == 256)
   }
 
   @Test func supportsMissingOptionalMetadataAndPaths() {
@@ -60,5 +66,8 @@ struct InstalledAppTests {
     #expect(app.appBundlePath == nil)
     #expect(app.appGroups.isEmpty)
     #expect(app.iconPath == nil)
+    #expect(app.isSystemApp == false)
+    #expect(app.databaseFiles.isEmpty)
+    #expect(app.dataContainerSize == nil)
   }
 }

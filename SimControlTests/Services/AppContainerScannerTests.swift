@@ -21,10 +21,15 @@ struct AppContainerScannerTests {
     )
     let appBundle = bundleContainer.appendingPathComponent("Example.app", isDirectory: true)
     let iconPath = appBundle.appendingPathComponent("AppIcon60x60@2x.png")
+    let databasePath = dataContainer.appendingPathComponent("Documents/Cache.sqlite")
+    let databaseWriteAheadLogPath = dataContainer.appendingPathComponent("Documents/Cache.sqlite-wal")
+    let realmPath = dataContainer.appendingPathComponent("Library/Model.realm")
 
     try createDirectory(appBundle)
     try createDirectory(dataContainer)
     try createDirectory(appGroupContainer)
+    try createDirectory(databasePath.deletingLastPathComponent())
+    try createDirectory(realmPath.deletingLastPathComponent())
     try writeMetadata(bundleID: "com.example.app", to: bundleContainer)
     try writeMetadata(bundleID: "com.example.app", to: dataContainer)
     try writeMetadata(bundleID: "group.com.example.shared", to: appGroupContainer)
@@ -49,6 +54,10 @@ struct AppContainerScannerTests {
       to: appBundle.appendingPathComponent("archived-expanded-entitlements.xcent")
     )
     try Data().write(to: iconPath)
+    try Data("sqlite".utf8).write(to: databasePath)
+    try Data("wal".utf8).write(to: databaseWriteAheadLogPath)
+    try Data("realm".utf8).write(to: realmPath)
+    let expectedDataContainerSize = try directorySize(dataContainer)
 
     let scanner = AppContainerScanner()
     let result = scanner.scanInstalledApps(for: makeDevice(dataPath: dataPath, state: .shutdown))
@@ -63,6 +72,8 @@ struct AppContainerScannerTests {
     #expect(app.dataContainer?.resolvingSymlinksInPath() == dataContainer.resolvingSymlinksInPath())
     #expect(app.appBundlePath?.resolvingSymlinksInPath() == appBundle.resolvingSymlinksInPath())
     #expect(app.iconPath?.resolvingSymlinksInPath() == iconPath.resolvingSymlinksInPath())
+    #expect(Set(app.databaseFiles.map(\.lastPathComponent)) == Set(["Cache.sqlite", "Cache.sqlite-wal", "Model.realm"]))
+    #expect(app.dataContainerSize == expectedDataContainerSize)
     let normalizedAppGroups = app.appGroups.map { appGroup in
       AppGroupContainer(
         id: appGroup.id,
@@ -79,7 +90,7 @@ struct AppContainerScannerTests {
     ])
   }
 
-  @Test func hidesSystemAppsByDefault() throws {
+  @Test func includesSystemAppsAndMarksThemByDefault() throws {
     let temporaryDirectory = try TemporaryDirectory()
     let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
     let bundleContainer = dataPath.appendingPathComponent(
@@ -101,6 +112,35 @@ struct AppContainerScannerTests {
     )
 
     let scanner = AppContainerScanner()
+    let result = scanner.scanInstalledApps(for: makeDevice(dataPath: dataPath))
+
+    let app = try #require(result.apps.first)
+    #expect(app.bundleID == "com.apple.Preferences")
+    #expect(app.isSystemApp)
+  }
+
+  @Test func hidesSystemAppsWhenConfigured() throws {
+    let temporaryDirectory = try TemporaryDirectory()
+    let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
+    let bundleContainer = dataPath.appendingPathComponent(
+      "Containers/Bundle/Application/SYSTEM-BUNDLE",
+      isDirectory: true
+    )
+    let appBundle = bundleContainer.appendingPathComponent("Preferences.app", isDirectory: true)
+
+    try createDirectory(appBundle)
+    try createDirectory(dataPath.appendingPathComponent("Containers/Data/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Shared/AppGroup", isDirectory: true))
+    try writeMetadata(bundleID: "com.apple.Preferences", to: bundleContainer)
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.Preferences",
+        "CFBundleName": "Settings"
+      ],
+      to: appBundle
+    )
+
+    let scanner = AppContainerScanner(hidesSystemApps: true)
     let result = scanner.scanInstalledApps(for: makeDevice(dataPath: dataPath))
 
     #expect(result.apps.isEmpty)
@@ -266,4 +306,21 @@ private func writePropertyList(_ values: [String: Any], to url: URL) throws {
     options: 0
   )
   try data.write(to: url)
+}
+
+private func directorySize(_ url: URL) throws -> Int64 {
+  let fileManager = FileManager.default
+  let subpaths = try fileManager.subpathsOfDirectory(atPath: url.path)
+  return try subpaths.reduce(Int64(0)) { size, subpath in
+    let fileURL = url.appendingPathComponent(subpath)
+    var isDirectory: ObjCBool = false
+    guard fileManager.fileExists(atPath: fileURL.path, isDirectory: &isDirectory),
+          !isDirectory.boolValue
+    else {
+      return size
+    }
+
+    let attributes = try fileManager.attributesOfItem(atPath: fileURL.path)
+    return size + Int64((attributes[.size] as? NSNumber)?.int64Value ?? 0)
+  }
 }

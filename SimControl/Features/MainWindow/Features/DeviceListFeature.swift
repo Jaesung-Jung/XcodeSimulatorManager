@@ -10,6 +10,8 @@ struct DeviceListFeature {
     var installedAppsByDeviceID: [String: [InstalledApp]]
     var installedAppsAvailability: InstalledAppsAvailability
     var selectedDeviceID: String?
+    var filters: SimulatorFilters
+    var totalDeviceCount: Int
 
     init(
       devices: [SimulatorDevice] = [],
@@ -17,7 +19,9 @@ struct DeviceListFeature {
       deviceTypeByID: [String: SimulatorDeviceType] = [:],
       installedAppsByDeviceID: [String: [InstalledApp]] = [:],
       installedAppsAvailability: InstalledAppsAvailability = .notLoaded,
-      selectedDeviceID: String? = nil
+      selectedDeviceID: String? = nil,
+      filters: SimulatorFilters = SimulatorFilters(),
+      totalDeviceCount: Int? = nil
     ) {
       self.devices = devices
       self.runtimeByID = runtimeByID
@@ -25,11 +29,19 @@ struct DeviceListFeature {
       self.installedAppsByDeviceID = installedAppsByDeviceID
       self.installedAppsAvailability = installedAppsAvailability
       self.selectedDeviceID = selectedDeviceID
+      self.filters = filters
+      self.totalDeviceCount = totalDeviceCount ?? devices.count
     }
   }
 
   enum Action: Equatable {
     case selectionChanged(String?)
+    case pinButtonTapped(String)
+    case deviceAvailabilityFilterChanged(SimulatorFilters.DeviceAvailabilityFilter)
+    case deviceAppPresenceFilterChanged(SimulatorFilters.DeviceAppPresenceFilter)
+    case deviceSortChanged(SimulatorFilters.DeviceSort)
+    case deviceSortDirectionChanged(SimulatorFilters.SortDirection)
+    case clearDeviceFiltersButtonTapped
   }
 
   var body: some ReducerOf<Self> {
@@ -37,6 +49,14 @@ struct DeviceListFeature {
       switch action {
       case .selectionChanged(let id):
         state.selectedDeviceID = id
+        return .none
+
+      case .pinButtonTapped,
+           .deviceAvailabilityFilterChanged,
+           .deviceAppPresenceFilterChanged,
+           .deviceSortChanged,
+           .deviceSortDirectionChanged,
+           .clearDeviceFiltersButtonTapped:
         return .none
       }
     }

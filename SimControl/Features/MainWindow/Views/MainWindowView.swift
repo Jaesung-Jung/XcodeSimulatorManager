@@ -20,10 +20,21 @@ struct MainWindowView: View {
     )
   }
 
+  private var searchQuery: Binding<String> {
+    Binding(
+      get: { store.workspace.filters.searchQuery },
+      set: { store.send(.workspace(.searchQueryChanged($0))) }
+    )
+  }
+
   var body: some View {
     NavigationSplitView {
       Sidebar(
-        store: store.scope(state: \.sidebar, action: \.sidebar)
+        store: store.scope(state: \.sidebar, action: \.sidebar),
+        filters: store.workspace.filters,
+        onScopeSelected: { scope in
+          store.send(.workspace(.sidebarScopeChanged(scope)))
+        }
       )
       .navigationSplitViewColumnWidth(min: 220, ideal: 240, max: 300)
     } content: {
@@ -43,6 +54,13 @@ struct MainWindowView: View {
     .frame(minWidth: 1_120, minHeight: 720)
     .background(.windowBackground)
     .toolbar {
+      ToolbarItem(placement: .principal) {
+        TextField("Search", text: searchQuery)
+          .textFieldStyle(.roundedBorder)
+          .frame(width: 260)
+          .help("Search devices, apps, identifiers, and known paths")
+      }
+
       ToolbarItem(placement: .primaryAction) {
         Button {
           store.send(.createSimulatorButtonTapped)

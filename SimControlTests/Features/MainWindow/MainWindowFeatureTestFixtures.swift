@@ -137,7 +137,10 @@ enum MainWindowTestFixtures {
     bundleContainer: URL? = nil,
     dataContainer: URL? = nil,
     appBundlePath: URL? = nil,
-    appGroups: [AppGroupContainer] = []
+    appGroups: [AppGroupContainer] = [],
+    isSystemApp: Bool = false,
+    databaseFiles: [URL] = [],
+    dataContainerSize: Int64? = nil
   ) -> InstalledApp {
     InstalledApp(
       id: "\(deviceID):\(bundleID)",
@@ -150,7 +153,10 @@ enum MainWindowTestFixtures {
       dataContainer: dataContainer,
       appBundlePath: appBundlePath,
       appGroups: appGroups,
-      iconPath: nil
+      iconPath: nil,
+      isSystemApp: isSystemApp,
+      databaseFiles: databaseFiles,
+      dataContainerSize: dataContainerSize
     )
   }
 

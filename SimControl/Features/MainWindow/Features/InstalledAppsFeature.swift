@@ -11,6 +11,8 @@ struct InstalledAppsFeature {
     var appCommandState: AppCommandState?
     var isDeviceCommandRunning: Bool
     var compatibleInstallTargetCount: Int
+    var filters: SimulatorFilters
+    var allAppsCount: Int
 
     init(
       apps: [InstalledApp] = [],
@@ -19,7 +21,9 @@ struct InstalledAppsFeature {
       selectedAppID: String? = nil,
       appCommandState: AppCommandState? = nil,
       isDeviceCommandRunning: Bool = false,
-      compatibleInstallTargetCount: Int = 0
+      compatibleInstallTargetCount: Int = 0,
+      filters: SimulatorFilters = SimulatorFilters(),
+      allAppsCount: Int? = nil
     ) {
       self.apps = apps
       self.availability = availability
@@ -28,6 +32,8 @@ struct InstalledAppsFeature {
       self.appCommandState = appCommandState
       self.isDeviceCommandRunning = isDeviceCommandRunning
       self.compatibleInstallTargetCount = compatibleInstallTargetCount
+      self.filters = filters
+      self.allAppsCount = allAppsCount ?? apps.count
       validateSelection()
     }
 
@@ -120,6 +126,13 @@ struct InstalledAppsFeature {
     case copyBundleIDButtonTapped(String)
     case openAppGroupContainerButtonTapped(String, String)
     case copyAppGroupContainerButtonTapped(String, String)
+    case pinButtonTapped(String)
+    case appSystemFilterChanged(SimulatorFilters.AppSystemFilter)
+    case appGroupFilterChanged(SimulatorFilters.PresenceFilter)
+    case appDatabaseFilterChanged(SimulatorFilters.PresenceFilter)
+    case appSortChanged(SimulatorFilters.AppSort)
+    case appSortDirectionChanged(SimulatorFilters.SortDirection)
+    case clearAppFiltersButtonTapped
   }
 
   var body: some ReducerOf<Self> {
@@ -140,7 +153,14 @@ struct InstalledAppsFeature {
            .copyDataContainerButtonTapped,
            .copyBundleIDButtonTapped,
            .openAppGroupContainerButtonTapped,
-           .copyAppGroupContainerButtonTapped:
+           .copyAppGroupContainerButtonTapped,
+           .pinButtonTapped,
+           .appSystemFilterChanged,
+           .appGroupFilterChanged,
+           .appDatabaseFilterChanged,
+           .appSortChanged,
+           .appSortDirectionChanged,
+           .clearAppFiltersButtonTapped:
         return .none
       }
     }

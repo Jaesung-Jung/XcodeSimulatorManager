@@ -16,16 +16,22 @@ struct AppContainerScanner {
     let appGroupIDs: [String]
   }
 
+  private struct DataContainerDetails {
+    let databaseFiles: [URL]
+    let size: Int64?
+  }
+
   private static let metadataPlistName = ".com.apple.mobile_container_manager.metadata.plist"
   private static let metadataIdentifierKey = "MCMMetadataIdentifier"
   private static let appGroupEntitlementKey = "com.apple.security.application-groups"
+  private static let databaseFileExtensions = Set(["db", "realm", "sqlite", "sqlite3"])
 
   private let fileManager: FileManager
   private let hidesSystemApps: Bool
 
   init(
     fileManager: FileManager = .default,
-    hidesSystemApps: Bool = true
+    hidesSystemApps: Bool = false
   ) {
     self.fileManager = fileManager
     self.hidesSystemApps = hidesSystemApps
@@ -132,6 +138,12 @@ struct AppContainerScanner {
         continue
       }
 
+      let dataContainer = dataContainersByBundleID[bundleID]
+      let dataContainerDetails = dataContainerDetails(
+        at: dataContainer,
+        device: device,
+        warnings: &warnings
+      )
       let appGroups = bundleMetadata.appGroupIDs.compactMap { appGroupsByID[$0] }
       let app = InstalledApp(
         id: "\(device.id):\(bundleID)",
@@ -141,10 +153,13 @@ struct AppContainerScanner {
         build: nonEmpty(bundleMetadata.build),
         deviceID: device.id,
         bundleContainer: bundleContainer,
-        dataContainer: dataContainersByBundleID[bundleID],
+        dataContainer: dataContainer,
         appBundlePath: appBundlePath,
         appGroups: appGroups,
-        iconPath: bundleMetadata.iconPath
+        iconPath: bundleMetadata.iconPath,
+        isSystemApp: isSystemBundleID(bundleID),
+        databaseFiles: dataContainerDetails.databaseFiles,
+        dataContainerSize: dataContainerDetails.size
       )
       apps.append(app)
     }
@@ -566,6 +581,69 @@ struct AppContainerScanner {
       }
       .sorted { $0.lastPathComponent > $1.lastPathComponent }
       .first
+  }
+
+  private func dataContainerDetails(
+    at dataContainer: URL?,
+    device: SimulatorDevice,
+    warnings: inout [SimulatorWarning]
+  ) -> DataContainerDetails {
+    guard let dataContainer else {
+      return DataContainerDetails(databaseFiles: [], size: nil)
+    }
+
+    do {
+      let subpaths = try fileManager.subpathsOfDirectory(atPath: dataContainer.path)
+      var databaseFiles: [URL] = []
+      var size: Int64 = 0
+
+      for subpath in subpaths {
+        let url = dataContainer.appendingPathComponent(subpath)
+        var isDirectory: ObjCBool = false
+        guard fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory),
+              !isDirectory.boolValue
+        else {
+          continue
+        }
+
+        let resourceValues = try? url.resourceValues(forKeys: [.fileSizeKey])
+        if let fileSize = resourceValues?.fileSize {
+          size += Int64(fileSize)
+        }
+
+        if isDatabaseFile(url) {
+          databaseFiles.append(url)
+        }
+      }
+
+      return DataContainerDetails(
+        databaseFiles: databaseFiles.sorted {
+          $0.path.localizedStandardCompare($1.path) == .orderedAscending
+        },
+        size: size
+      )
+    } catch {
+      warnings.append(fileWarning(
+        id: "apps-\(device.id)-data-\(dataContainer.lastPathComponent)-scan-failed",
+        message: "App data container \(dataContainer.lastPathComponent) in \(device.name) could not be scanned: \(error.localizedDescription)",
+        relatedID: device.id,
+        error: error
+      ))
+      return DataContainerDetails(databaseFiles: [], size: nil)
+    }
+  }
+
+  private func isDatabaseFile(_ url: URL) -> Bool {
+    let fileExtension = url.pathExtension.lowercased()
+    if Self.databaseFileExtensions.contains(fileExtension) {
+      return true
+    }
+
+    let fileName = url.lastPathComponent.lowercased()
+    return fileName.hasSuffix(".db-shm")
+      || fileName.hasSuffix(".db-wal")
+      || fileName.hasSuffix(".sqlite-shm")
+      || fileName.hasSuffix(".sqlite-wal")
   }
 
   private func directoryExists(at url: URL) -> Bool {

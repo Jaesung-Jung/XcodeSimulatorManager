@@ -4,9 +4,74 @@ import SwiftUI
 struct InstalledAppsView: View {
   let store: StoreOf<InstalledAppsFeature>
 
+  private var appSystemFilter: Binding<SimulatorFilters.AppSystemFilter> {
+    Binding(
+      get: { store.filters.appSystemFilter },
+      set: { store.send(.appSystemFilterChanged($0)) }
+    )
+  }
+
+  private var appGroupFilter: Binding<SimulatorFilters.PresenceFilter> {
+    Binding(
+      get: { store.filters.appGroupFilter },
+      set: { store.send(.appGroupFilterChanged($0)) }
+    )
+  }
+
+  private var appDatabaseFilter: Binding<SimulatorFilters.PresenceFilter> {
+    Binding(
+      get: { store.filters.appDatabaseFilter },
+      set: { store.send(.appDatabaseFilterChanged($0)) }
+    )
+  }
+
+  private var appSort: Binding<SimulatorFilters.AppSort> {
+    Binding(
+      get: { store.filters.appSort },
+      set: { store.send(.appSortChanged($0)) }
+    )
+  }
+
+  private var appSortDirection: Binding<SimulatorFilters.SortDirection> {
+    Binding(
+      get: { store.filters.appSortDirection },
+      set: { store.send(.appSortDirectionChanged($0)) }
+    )
+  }
+
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {
-      SectionHeader(title: "Installed Apps", systemImage: "app")
+      HStack(spacing: 8) {
+        SectionHeader(title: "Installed Apps", systemImage: "app")
+
+        Spacer()
+
+        if store.availability == .loaded {
+          Text("\(store.apps.count) of \(store.allAppsCount)")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+
+          AppFilterMenu(
+            systemFilter: appSystemFilter,
+            appGroupFilter: appGroupFilter,
+            databaseFilter: appDatabaseFilter
+          )
+
+          AppSortMenu(
+            sort: appSort,
+            direction: appSortDirection
+          )
+        }
+      }
+
+      if store.filters.hasActiveAppFilters {
+        ActiveAppFilters(
+          filters: store.filters,
+          onClear: {
+            store.send(.clearAppFiltersButtonTapped)
+          }
+        )
+      }
 
       switch store.availability {
       case .notLoaded:
@@ -16,11 +81,18 @@ struct InstalledAppsView: View {
           systemImage: "app.badge"
         )
       case .loaded:
-        if store.apps.isEmpty {
+        if store.allAppsCount == 0 {
           EmptyStateView(
             title: "No Installed Apps",
             message: "Installed app scanning completed and did not find apps for this simulator.",
             systemImage: "app"
+          )
+          .frame(maxWidth: .infinity)
+        } else if store.apps.isEmpty {
+          EmptyStateView(
+            title: "No Matching Apps",
+            message: "No installed apps match the current search and filters.",
+            systemImage: "line.3.horizontal.decrease.circle"
           )
           .frame(maxWidth: .infinity)
         } else {
@@ -30,7 +102,14 @@ struct InstalledAppsView: View {
                 Button {
                   store.send(.selectionChanged(app.id))
                 } label: {
-                  AppRow(app: app, isSelected: app.id == store.selectedAppID)
+                  AppRow(
+                    app: app,
+                    isSelected: app.id == store.selectedAppID,
+                    isPinned: store.filters.pinnedAppIDs.contains(app.id),
+                    onPin: {
+                      store.send(.pinButtonTapped(app.id))
+                    }
+                  )
                 }
                 .buttonStyle(.plain)
 
@@ -97,9 +176,132 @@ struct InstalledAppsView: View {
 }
 
 extension InstalledAppsView {
+  private struct AppFilterMenu: View {
+    @Binding var systemFilter: SimulatorFilters.AppSystemFilter
+    @Binding var appGroupFilter: SimulatorFilters.PresenceFilter
+    @Binding var databaseFilter: SimulatorFilters.PresenceFilter
+
+    var body: some View {
+      Menu {
+        Picker("App Type", selection: $systemFilter) {
+          Text(SimulatorFilters.AppSystemFilter.user.displayTitle)
+            .tag(SimulatorFilters.AppSystemFilter.user)
+          Text(SimulatorFilters.AppSystemFilter.system.displayTitle)
+            .tag(SimulatorFilters.AppSystemFilter.system)
+          Text(SimulatorFilters.AppSystemFilter.all.displayTitle)
+            .tag(SimulatorFilters.AppSystemFilter.all)
+        }
+
+        Picker("App Groups", selection: $appGroupFilter) {
+          Text(SimulatorFilters.PresenceFilter.all.appGroupDisplayTitle)
+            .tag(SimulatorFilters.PresenceFilter.all)
+          Text(SimulatorFilters.PresenceFilter.present.appGroupDisplayTitle)
+            .tag(SimulatorFilters.PresenceFilter.present)
+          Text(SimulatorFilters.PresenceFilter.absent.appGroupDisplayTitle)
+            .tag(SimulatorFilters.PresenceFilter.absent)
+        }
+
+        Picker("Databases", selection: $databaseFilter) {
+          Text(SimulatorFilters.PresenceFilter.all.databaseDisplayTitle)
+            .tag(SimulatorFilters.PresenceFilter.all)
+          Text(SimulatorFilters.PresenceFilter.present.databaseDisplayTitle)
+            .tag(SimulatorFilters.PresenceFilter.present)
+          Text(SimulatorFilters.PresenceFilter.absent.databaseDisplayTitle)
+            .tag(SimulatorFilters.PresenceFilter.absent)
+        }
+      } label: {
+        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+      }
+      .help("Filter installed apps")
+    }
+  }
+}
+
+extension InstalledAppsView {
+  private struct AppSortMenu: View {
+    @Binding var sort: SimulatorFilters.AppSort
+    @Binding var direction: SimulatorFilters.SortDirection
+
+    var body: some View {
+      Menu {
+        Picker("Sort By", selection: $sort) {
+          Text(SimulatorFilters.AppSort.name.displayTitle)
+            .tag(SimulatorFilters.AppSort.name)
+          Text(SimulatorFilters.AppSort.bundleID.displayTitle)
+            .tag(SimulatorFilters.AppSort.bundleID)
+          Text(SimulatorFilters.AppSort.version.displayTitle)
+            .tag(SimulatorFilters.AppSort.version)
+          Text(SimulatorFilters.AppSort.dataSize.displayTitle)
+            .tag(SimulatorFilters.AppSort.dataSize)
+        }
+
+        Divider()
+
+        Picker("Direction", selection: $direction) {
+          Text(SimulatorFilters.SortDirection.ascending.displayTitle)
+            .tag(SimulatorFilters.SortDirection.ascending)
+          Text(SimulatorFilters.SortDirection.descending.displayTitle)
+            .tag(SimulatorFilters.SortDirection.descending)
+        }
+      } label: {
+        Label("Sort", systemImage: "arrow.up.arrow.down")
+      }
+      .help("Sort installed apps")
+    }
+  }
+}
+
+extension InstalledAppsView {
+  private struct ActiveAppFilters: View {
+    let filters: SimulatorFilters
+    let onClear: () -> Void
+
+    var body: some View {
+      HStack(spacing: 6) {
+        if filters.appSystemFilter != .user {
+          FilterChip(title: filters.appSystemFilter.displayTitle)
+        }
+
+        if filters.appGroupFilter != .all {
+          FilterChip(title: filters.appGroupFilter.appGroupDisplayTitle)
+        }
+
+        if filters.appDatabaseFilter != .all {
+          FilterChip(title: filters.appDatabaseFilter.databaseDisplayTitle)
+        }
+
+        Spacer(minLength: 4)
+
+        Button("Clear") {
+          onClear()
+        }
+        .buttonStyle(.plain)
+        .font(.caption)
+      }
+    }
+  }
+}
+
+extension InstalledAppsView {
+  private struct FilterChip: View {
+    let title: String
+
+    var body: some View {
+      Text(title)
+        .font(.caption)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(.quaternary.opacity(0.45), in: Capsule())
+    }
+  }
+}
+
+extension InstalledAppsView {
   private struct AppRow: View {
     let app: InstalledApp
     let isSelected: Bool
+    let isPinned: Bool
+    let onPin: () -> Void
 
     private var versionSummary: String? {
       switch (app.version, app.build) {
@@ -143,10 +345,44 @@ extension InstalledAppsView {
 
         Spacer()
 
-        if isSelected {
-          Image(systemName: "checkmark")
-            .foregroundStyle(.tint)
-            .accessibilityHidden(true)
+        VStack(alignment: .trailing, spacing: 6) {
+          HStack(spacing: 8) {
+            if isSelected {
+              Image(systemName: "checkmark")
+                .foregroundStyle(.tint)
+                .accessibilityHidden(true)
+            }
+
+            Button {
+              onPin()
+            } label: {
+              Image(systemName: isPinned ? "pin.fill" : "pin")
+                .foregroundStyle(isPinned ? Color.accentColor : Color.secondary)
+            }
+            .buttonStyle(.plain)
+            .help(isPinned ? "Unpin app" : "Pin app")
+          }
+
+          HStack(spacing: 4) {
+            if app.isSystemApp {
+              StatusBadge(title: "System")
+            }
+
+            if !app.appGroups.isEmpty {
+              StatusBadge(title: "\(app.appGroups.count) groups")
+            }
+
+            if !app.databaseFiles.isEmpty {
+              StatusBadge(title: "\(app.databaseFiles.count) db")
+            }
+          }
+
+          if app.dataContainerSize != nil {
+            Text(app.dataContainerSizeTitle)
+              .font(.caption2)
+              .foregroundStyle(.secondary)
+              .lineLimit(1)
+          }
         }
       }
       .padding(10)

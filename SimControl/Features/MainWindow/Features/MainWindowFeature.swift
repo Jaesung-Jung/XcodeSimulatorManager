@@ -191,6 +191,7 @@ struct MainWindowFeature {
       deviceCommandState: DeviceCommandState? = nil,
       appCommandState: AppCommandState? = nil,
       isOpeningSimulatorApp: Bool = false,
+      filters: SimulatorFilters = SimulatorFilters(),
       lastMenuBarAutoRefreshAttemptAt: Date? = nil,
       lifecycleSheet: DeviceLifecycleSheet? = nil
     ) {
@@ -209,7 +210,8 @@ struct MainWindowFeature {
         installedAppsAvailability: installedAppsAvailability,
         deviceCommandState: deviceCommandState,
         appCommandState: appCommandState,
-        isOpeningSimulatorApp: isOpeningSimulatorApp
+        isOpeningSimulatorApp: isOpeningSimulatorApp,
+        filters: filters
       )
     }
 
