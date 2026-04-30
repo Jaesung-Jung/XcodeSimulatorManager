@@ -77,6 +77,15 @@ struct Sidebar: View {
     return snapshot.xcode.developerPath?.lastPathComponent ?? "Unknown"
   }
 
+  private var warnedDeviceCount: Int {
+    guard let snapshot = store.snapshot else {
+      return 0
+    }
+
+    let warningRelatedIDs = Set(snapshot.warnings.compactMap(\.relatedID))
+    return snapshot.devices.filter { warningRelatedIDs.contains($0.id) }.count
+  }
+
   var body: some View {
     List {
       Section("Inventory") {
@@ -107,18 +116,14 @@ struct Sidebar: View {
           onScopeSelected(.recent)
         }
 
-        BarItem(
-          title: "Runtimes",
-          systemImage: "shippingbox",
-          value: "\(store.snapshot?.runtimes.count ?? 0)",
-          isSelected: false
-        )
-        BarItem(
+        ScopeButton(
           title: "Warnings",
           systemImage: "exclamationmark.triangle",
-          value: "\(store.snapshot?.warnings.count ?? 0)",
-          isSelected: false
-        )
+          value: "\(warnedDeviceCount)",
+          isSelected: filters.sidebarScope == .warnings
+        ) {
+          onScopeSelected(.warnings)
+        }
       }
 
       Section("Platforms") {

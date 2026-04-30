@@ -318,6 +318,43 @@ struct WorkspaceFeatureTests {
   }
 
   @Test
+  func warningsSidebarScopeProjectsDevicesWithRelatedWarnings() {
+    let deviceWarning = SimulatorWarning(
+      id: "device-warning",
+      severity: .warning,
+      category: .device,
+      message: "Device warning",
+      relatedID: MainWindowTestFixtures.secondDevice.id
+    )
+    let runtimeWarning = SimulatorWarning(
+      id: "runtime-warning",
+      severity: .warning,
+      category: .runtime,
+      message: "Runtime warning",
+      relatedID: MainWindowTestFixtures.runtime.id
+    )
+    let snapshot = MainWindowTestFixtures.makeSnapshot(
+      devices: [
+        MainWindowTestFixtures.device,
+        MainWindowTestFixtures.secondDevice
+      ],
+      warnings: [
+        deviceWarning,
+        runtimeWarning
+      ]
+    )
+    var state = WorkspaceFeature.State(
+      snapshot: snapshot,
+      selectedDeviceID: MainWindowTestFixtures.device.id
+    )
+
+    state.setSidebarScope(.warnings)
+
+    #expect(state.deviceList.devices.map(\.id) == [MainWindowTestFixtures.secondDevice.id])
+    #expect(state.deviceList.selectedDeviceID == MainWindowTestFixtures.secondDevice.id)
+  }
+
+  @Test
   func appSystemGroupDatabaseFiltersAndSortProjectVisibleApps() {
     let appGroup = AppGroupContainer(
       id: "\(MainWindowTestFixtures.device.id):group.com.example.shared",

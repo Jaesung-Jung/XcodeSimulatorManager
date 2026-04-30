@@ -123,6 +123,8 @@ extension SimulatorFilters.SidebarScope {
       "Pinned"
     case .recent:
       "Recent"
+    case .warnings:
+      "Warnings"
     case .platform(let platform):
       platform.displayTitle
     case .runtime(let runtimeID):

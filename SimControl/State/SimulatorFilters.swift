@@ -5,6 +5,7 @@ struct SimulatorFilters: Equatable {
     case all
     case pinned
     case recent
+    case warnings
     case platform(SimulatorPlatform)
     case runtime(String)
     case state(SimulatorDevice.State)

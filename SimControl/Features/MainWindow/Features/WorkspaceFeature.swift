@@ -476,6 +476,8 @@ struct WorkspaceFeature {
         filters.pinnedDeviceIDs.contains(device.id)
       case .recent:
         filters.recentDeviceIDs.contains(device.id)
+      case .warnings:
+        snapshot?.warnings.contains { $0.relatedID == device.id } == true
       case .platform(let platform):
         device.platform == platform
       case .runtime(let runtimeID):

@@ -88,7 +88,8 @@ enum MainWindowTestFixtures {
     deviceTypes: [SimulatorDeviceType] = [deviceType],
     devices: [SimulatorDevice] = [device],
     pairs: [DevicePair] = [],
-    installedAppsByDeviceID: [String: [InstalledApp]] = [:]
+    installedAppsByDeviceID: [String: [InstalledApp]] = [:],
+    warnings: [SimulatorWarning] = []
   ) -> SimulatorSnapshot {
     SimulatorSnapshot(
       generatedAt: generatedAt,
@@ -102,7 +103,7 @@ enum MainWindowTestFixtures {
       devices: devices,
       pairs: pairs,
       installedAppsByDeviceID: installedAppsByDeviceID,
-      warnings: []
+      warnings: warnings
     )
   }
 
