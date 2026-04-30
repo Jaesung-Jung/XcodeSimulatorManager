@@ -86,82 +86,81 @@ struct Sidebar: View {
     return snapshot.devices.filter { warningRelatedIDs.contains($0.id) }.count
   }
 
+  private var sidebarScopeSelection: Binding<SimulatorFilters.SidebarScope?> {
+    Binding(
+      get: { filters.sidebarScope },
+      set: { scope in
+        guard let scope else {
+          return
+        }
+
+        onScopeSelected(scope)
+      }
+    )
+  }
+
   var body: some View {
-    List {
+    List(selection: sidebarScopeSelection) {
       Section("Inventory") {
-        ScopeButton(
+        BarItem(
           title: "All Devices",
           systemImage: "iphone",
-          value: "\(store.snapshot?.devices.count ?? 0)",
-          isSelected: filters.sidebarScope == .all
-        ) {
-          onScopeSelected(.all)
-        }
+          value: "\(store.snapshot?.devices.count ?? 0)"
+        )
+        .tag(SimulatorFilters.SidebarScope.all)
 
-        ScopeButton(
+        BarItem(
           title: "Pinned",
           systemImage: "pin",
-          value: "\(visiblePinnedDeviceCount)",
-          isSelected: filters.sidebarScope == .pinned
-        ) {
-          onScopeSelected(.pinned)
-        }
+          value: "\(visiblePinnedDeviceCount)"
+        )
+        .tag(SimulatorFilters.SidebarScope.pinned)
 
-        ScopeButton(
+        BarItem(
           title: "Recent",
           systemImage: "clock",
-          value: "\(visibleRecentDeviceCount)",
-          isSelected: filters.sidebarScope == .recent
-        ) {
-          onScopeSelected(.recent)
-        }
+          value: "\(visibleRecentDeviceCount)"
+        )
+        .tag(SimulatorFilters.SidebarScope.recent)
 
-        ScopeButton(
+        BarItem(
           title: "Warnings",
           systemImage: "exclamationmark.triangle",
-          value: "\(warnedDeviceCount)",
-          isSelected: filters.sidebarScope == .warnings
-        ) {
-          onScopeSelected(.warnings)
-        }
+          value: "\(warnedDeviceCount)"
+        )
+        .tag(SimulatorFilters.SidebarScope.warnings)
       }
 
       Section("Platforms") {
         ForEach(platformCounts, id: \.title) { item in
-          ScopeButton(
+          BarItem(
             title: LocalizedStringKey(item.title),
             systemImage: item.systemImage,
-            value: "\(item.count)",
-            isSelected: filters.sidebarScope == .platform(platform(for: item.title))
-          ) {
-            onScopeSelected(.platform(platform(for: item.title)))
-          }
+            value: "\(item.count)"
+          )
+          .tag(SimulatorFilters.SidebarScope.platform(platform(for: item.title)))
         }
       }
 
       Section("Runtimes") {
         ForEach(runtimeCounts, id: \.runtime.id) { item in
-          ScopeButton(
+          BarItem(
             title: LocalizedStringKey(item.runtime.name),
             systemImage: item.runtime.platform.symbolName,
-            value: "\(item.count)",
-            isSelected: filters.sidebarScope == .runtime(item.runtime.id)
-          ) {
-            onScopeSelected(.runtime(item.runtime.id))
-          }
+            value: "\(item.count)"
+          )
+          .tag(SimulatorFilters.SidebarScope.runtime(item.runtime.id))
         }
       }
 
       Section("Device State") {
         ForEach(stateCounts, id: \.title) { item in
-          ScopeButton(
+          BarItem(
             title: LocalizedStringKey(item.title),
             systemImage: "circle.fill",
-            value: "\(item.count)",
-            isSelected: filters.sidebarScope == .state(state(for: item.title))
-          ) {
-            onScopeSelected(.state(state(for: item.title)))
-          }
+            value: "\(item.count)"
+          )
+          .tag(SimulatorFilters.SidebarScope.state(state(for: item.title)))
           .tint(item.tint)
         }
       }
@@ -170,8 +169,7 @@ struct Sidebar: View {
         BarItem(
           title: LocalizedStringKey(xcodeTitle),
           systemImage: "hammer",
-          value: xcodeValue,
-          isSelected: false
+          value: xcodeValue
         )
 
         if case .failed(let diagnostic) = store.refreshState {
@@ -208,7 +206,6 @@ extension Sidebar {
     let title: LocalizedStringKey
     let systemImage: String
     let value: String
-    let isSelected: Bool
 
     var body: some View {
       HStack(spacing: 8) {
@@ -225,39 +222,8 @@ extension Sidebar {
         Text(value)
           .font(.caption.monospacedDigit())
           .foregroundStyle(.secondary)
-
-        if isSelected {
-          Image(systemName: "checkmark")
-            .font(.caption)
-            .foregroundStyle(.tint)
-            .accessibilityHidden(true)
-        }
       }
       .accessibilityElement(children: .combine)
-    }
-  }
-}
-
-extension Sidebar {
-  private struct ScopeButton: View {
-    let title: LocalizedStringKey
-    let systemImage: String
-    let value: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-      Button {
-        action()
-      } label: {
-        BarItem(
-          title: title,
-          systemImage: systemImage,
-          value: value,
-          isSelected: isSelected
-        )
-      }
-      .buttonStyle(.plain)
     }
   }
 }

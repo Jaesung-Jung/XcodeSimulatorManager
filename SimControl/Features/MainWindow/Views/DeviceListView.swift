@@ -106,7 +106,7 @@ struct DeviceListView: View {
                 store.send(.pinButtonTapped(device.id))
               }
             )
-            .tag(Optional(device.id))
+            .tag(device.id)
           }
         }
         .listStyle(.inset)
