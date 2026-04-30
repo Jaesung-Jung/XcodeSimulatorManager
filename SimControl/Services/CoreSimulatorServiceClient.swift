@@ -23,6 +23,8 @@ struct CoreSimulatorServiceClient: Sendable {
   var setPrivacyPermission: @Sendable (_ deviceID: String, _ action: String, _ service: String, _ bundleID: String?) async -> CommandResult
   var setLocation: @Sendable (_ deviceID: String, _ coordinate: String) async -> CommandResult
   var clearLocation: @Sendable (_ deviceID: String) async -> CommandResult
+  var setStatusBarOverride: @Sendable (_ deviceID: String, _ arguments: [String]) async -> CommandResult
+  var clearStatusBarOverride: @Sendable (_ deviceID: String) async -> CommandResult
 }
 
 extension CoreSimulatorServiceClient: DependencyKey {
@@ -112,6 +114,12 @@ extension CoreSimulatorServiceClient: DependencyKey {
       },
       clearLocation: { deviceID in
         await service.clearLocation(deviceID: deviceID)
+      },
+      setStatusBarOverride: { deviceID, arguments in
+        await service.setStatusBarOverride(deviceID: deviceID, arguments: arguments)
+      },
+      clearStatusBarOverride: { deviceID in
+        await service.clearStatusBarOverride(deviceID: deviceID)
       }
     )
   }

@@ -223,6 +223,165 @@ struct DeveloperToolsFeature {
     }
   }
 
+  enum StatusBarDataNetwork: String, CaseIterable, Equatable, Identifiable {
+    case hide
+    case wifi
+    case threeG
+    case fourG
+    case lte
+    case lteA
+    case ltePlus
+    case fiveG
+    case fiveGPlus
+    case fiveGUWB
+    case fiveGUC
+
+    var id: String {
+      rawValue
+    }
+
+    var displayTitle: String {
+      switch self {
+      case .hide:
+        "Hide"
+      case .wifi:
+        "Wi-Fi"
+      case .threeG:
+        "3G"
+      case .fourG:
+        "4G"
+      case .lte:
+        "LTE"
+      case .lteA:
+        "LTE-A"
+      case .ltePlus:
+        "LTE+"
+      case .fiveG:
+        "5G"
+      case .fiveGPlus:
+        "5G+"
+      case .fiveGUWB:
+        "5G UWB"
+      case .fiveGUC:
+        "5G UC"
+      }
+    }
+
+    var simctlArgument: String {
+      switch self {
+      case .hide:
+        "hide"
+      case .wifi:
+        "wifi"
+      case .threeG:
+        "3g"
+      case .fourG:
+        "4g"
+      case .lte:
+        "lte"
+      case .lteA:
+        "lte-a"
+      case .ltePlus:
+        "lte+"
+      case .fiveG:
+        "5g"
+      case .fiveGPlus:
+        "5g+"
+      case .fiveGUWB:
+        "5g-uwb"
+      case .fiveGUC:
+        "5g-uc"
+      }
+    }
+  }
+
+  enum StatusBarWifiMode: String, CaseIterable, Equatable, Identifiable {
+    case searching
+    case failed
+    case active
+
+    var id: String {
+      rawValue
+    }
+
+    var displayTitle: String {
+      switch self {
+      case .searching:
+        "Searching"
+      case .failed:
+        "Failed"
+      case .active:
+        "Active"
+      }
+    }
+
+    var simctlArgument: String {
+      rawValue
+    }
+  }
+
+  enum StatusBarCellularMode: String, CaseIterable, Equatable, Identifiable {
+    case notSupported
+    case searching
+    case failed
+    case active
+
+    var id: String {
+      rawValue
+    }
+
+    var displayTitle: String {
+      switch self {
+      case .notSupported:
+        "Not Supported"
+      case .searching:
+        "Searching"
+      case .failed:
+        "Failed"
+      case .active:
+        "Active"
+      }
+    }
+
+    var simctlArgument: String {
+      switch self {
+      case .notSupported:
+        "notSupported"
+      case .searching:
+        "searching"
+      case .failed:
+        "failed"
+      case .active:
+        "active"
+      }
+    }
+  }
+
+  enum StatusBarBatteryState: String, CaseIterable, Equatable, Identifiable {
+    case charging
+    case charged
+    case discharging
+
+    var id: String {
+      rawValue
+    }
+
+    var displayTitle: String {
+      switch self {
+      case .charging:
+        "Charging"
+      case .charged:
+        "Charged"
+      case .discharging:
+        "Discharging"
+      }
+    }
+
+    var simctlArgument: String {
+      rawValue
+    }
+  }
+
   @ObservableState
   struct State: Equatable {
     var device: SimulatorDevice?
@@ -241,6 +400,16 @@ struct DeveloperToolsFeature {
     var customLatitude: String
     var customLongitude: String
     var recentLocations: [LocationCoordinateInput]
+    var statusBarTime: String
+    var statusBarDataNetwork: StatusBarDataNetwork?
+    var statusBarWifiMode: StatusBarWifiMode?
+    var statusBarWifiBars: String
+    var statusBarCellularMode: StatusBarCellularMode?
+    var statusBarCellularBars: String
+    var statusBarOperatorNameIncluded: Bool
+    var statusBarOperatorName: String
+    var statusBarBatteryState: StatusBarBatteryState?
+    var statusBarBatteryLevel: String
 
     init(
       device: SimulatorDevice? = nil,
@@ -258,7 +427,17 @@ struct DeveloperToolsFeature {
       locationPreset: LocationPreset = .applePark,
       customLatitude: String = "",
       customLongitude: String = "",
-      recentLocations: [LocationCoordinateInput] = []
+      recentLocations: [LocationCoordinateInput] = [],
+      statusBarTime: String = "",
+      statusBarDataNetwork: StatusBarDataNetwork? = nil,
+      statusBarWifiMode: StatusBarWifiMode? = nil,
+      statusBarWifiBars: String = "",
+      statusBarCellularMode: StatusBarCellularMode? = nil,
+      statusBarCellularBars: String = "",
+      statusBarOperatorNameIncluded: Bool = false,
+      statusBarOperatorName: String = "",
+      statusBarBatteryState: StatusBarBatteryState? = nil,
+      statusBarBatteryLevel: String = ""
     ) {
       self.device = device
       self.installedApps = installedApps
@@ -276,6 +455,16 @@ struct DeveloperToolsFeature {
       self.customLatitude = customLatitude
       self.customLongitude = customLongitude
       self.recentLocations = recentLocations
+      self.statusBarTime = statusBarTime
+      self.statusBarDataNetwork = statusBarDataNetwork
+      self.statusBarWifiMode = statusBarWifiMode
+      self.statusBarWifiBars = statusBarWifiBars
+      self.statusBarCellularMode = statusBarCellularMode
+      self.statusBarCellularBars = statusBarCellularBars
+      self.statusBarOperatorNameIncluded = statusBarOperatorNameIncluded
+      self.statusBarOperatorName = statusBarOperatorName
+      self.statusBarBatteryState = statusBarBatteryState
+      self.statusBarBatteryLevel = statusBarBatteryLevel
       applySelectedAppBundleIfNeeded()
     }
 
@@ -334,6 +523,15 @@ struct DeveloperToolsFeature {
       runnableDeviceDisabledReason
     }
 
+    var setStatusBarOverrideDisabledReason: String? {
+      bootedDeviceDisabledReason
+        ?? statusBarOverrideValidationError
+    }
+
+    var clearStatusBarOverrideDisabledReason: String? {
+      bootedDeviceDisabledReason
+    }
+
     var selectedLocationCoordinate: LocationCoordinateInput? {
       switch locationPreset {
       case .custom:
@@ -351,6 +549,52 @@ struct DeveloperToolsFeature {
       }
     }
 
+    var statusBarOverrideArguments: [String] {
+      var arguments: [String] = []
+      let time = Self.trimmed(statusBarTime)
+      let wifiBars = Self.trimmed(statusBarWifiBars)
+      let cellularBars = Self.trimmed(statusBarCellularBars)
+      let batteryLevel = Self.trimmed(statusBarBatteryLevel)
+
+      if !time.isEmpty {
+        arguments.append(contentsOf: ["--time", time])
+      }
+
+      if let statusBarDataNetwork {
+        arguments.append(contentsOf: ["--dataNetwork", statusBarDataNetwork.simctlArgument])
+      }
+
+      if let statusBarWifiMode {
+        arguments.append(contentsOf: ["--wifiMode", statusBarWifiMode.simctlArgument])
+      }
+
+      if !wifiBars.isEmpty {
+        arguments.append(contentsOf: ["--wifiBars", wifiBars])
+      }
+
+      if let statusBarCellularMode {
+        arguments.append(contentsOf: ["--cellularMode", statusBarCellularMode.simctlArgument])
+      }
+
+      if !cellularBars.isEmpty {
+        arguments.append(contentsOf: ["--cellularBars", cellularBars])
+      }
+
+      if statusBarOperatorNameIncluded {
+        arguments.append(contentsOf: ["--operatorName", Self.trimmed(statusBarOperatorName)])
+      }
+
+      if let statusBarBatteryState {
+        arguments.append(contentsOf: ["--batteryState", statusBarBatteryState.simctlArgument])
+      }
+
+      if !batteryLevel.isEmpty {
+        arguments.append(contentsOf: ["--batteryLevel", batteryLevel])
+      }
+
+      return arguments
+    }
+
     private var selectedLocationValidationError: String? {
       guard let selectedLocationCoordinate else {
         return "Select a location preset."
@@ -359,6 +603,26 @@ struct DeveloperToolsFeature {
       return Self.coordinateValidationError(
         latitude: selectedLocationCoordinate.latitude,
         longitude: selectedLocationCoordinate.longitude
+      )
+    }
+
+    private var statusBarOverrideValidationError: String? {
+      if statusBarOverrideArguments.isEmpty {
+        return "Enter at least one status bar override."
+      }
+
+      return Self.integerValidationError(
+        statusBarWifiBars,
+        label: "Wi-Fi bars",
+        range: 0...3
+      ) ?? Self.integerValidationError(
+        statusBarCellularBars,
+        label: "Cellular bars",
+        range: 0...4
+      ) ?? Self.integerValidationError(
+        statusBarBatteryLevel,
+        label: "Battery level",
+        range: 0...100
       )
     }
 
@@ -381,6 +645,30 @@ struct DeveloperToolsFeature {
 
       guard device.state == .booted || device.state == .shutdown else {
         return "Selected simulator must be booted or shutdown."
+      }
+
+      return nil
+    }
+
+    private var bootedDeviceDisabledReason: String? {
+      if deviceCommandState != nil {
+        return "Another simulator command is running."
+      }
+
+      if appCommandState != nil {
+        return "An app command is running."
+      }
+
+      guard let device else {
+        return "Select a simulator."
+      }
+
+      guard device.isAvailable else {
+        return "Selected simulator is unavailable."
+      }
+
+      guard device.state == .booted else {
+        return "Selected simulator must be booted."
       }
 
       return nil
@@ -540,6 +828,27 @@ struct DeveloperToolsFeature {
       return nil
     }
 
+    static func integerValidationError(
+      _ value: String,
+      label: String,
+      range: ClosedRange<Int>
+    ) -> String? {
+      let value = Self.trimmed(value)
+      guard !value.isEmpty else {
+        return nil
+      }
+
+      guard let integer = Int(value) else {
+        return "\(label) must be a whole number."
+      }
+
+      guard range.contains(integer) else {
+        return "\(label) must be between \(range.lowerBound) and \(range.upperBound)."
+      }
+
+      return nil
+    }
+
     static func trimmed(_ value: String) -> String {
       value.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -571,6 +880,18 @@ struct DeveloperToolsFeature {
     case recentLocationSelected(LocationCoordinateInput)
     case setLocationButtonTapped
     case clearLocationButtonTapped
+    case statusBarTimeChanged(String)
+    case statusBarDataNetworkChanged(StatusBarDataNetwork?)
+    case statusBarWifiModeChanged(StatusBarWifiMode?)
+    case statusBarWifiBarsChanged(String)
+    case statusBarCellularModeChanged(StatusBarCellularMode?)
+    case statusBarCellularBarsChanged(String)
+    case statusBarOperatorNameIncludedChanged(Bool)
+    case statusBarOperatorNameChanged(String)
+    case statusBarBatteryStateChanged(StatusBarBatteryState?)
+    case statusBarBatteryLevelChanged(String)
+    case setStatusBarOverrideButtonTapped
+    case clearStatusBarOverrideButtonTapped
   }
 
   var body: some ReducerOf<Self> {
@@ -626,11 +947,53 @@ struct DeveloperToolsFeature {
         state.customLongitude = location.longitude
         return .none
 
+      case .statusBarTimeChanged(let time):
+        state.statusBarTime = time
+        return .none
+
+      case .statusBarDataNetworkChanged(let dataNetwork):
+        state.statusBarDataNetwork = dataNetwork
+        return .none
+
+      case .statusBarWifiModeChanged(let wifiMode):
+        state.statusBarWifiMode = wifiMode
+        return .none
+
+      case .statusBarWifiBarsChanged(let wifiBars):
+        state.statusBarWifiBars = wifiBars
+        return .none
+
+      case .statusBarCellularModeChanged(let cellularMode):
+        state.statusBarCellularMode = cellularMode
+        return .none
+
+      case .statusBarCellularBarsChanged(let cellularBars):
+        state.statusBarCellularBars = cellularBars
+        return .none
+
+      case .statusBarOperatorNameIncludedChanged(let isIncluded):
+        state.statusBarOperatorNameIncluded = isIncluded
+        return .none
+
+      case .statusBarOperatorNameChanged(let operatorName):
+        state.statusBarOperatorName = operatorName
+        return .none
+
+      case .statusBarBatteryStateChanged(let batteryState):
+        state.statusBarBatteryState = batteryState
+        return .none
+
+      case .statusBarBatteryLevelChanged(let batteryLevel):
+        state.statusBarBatteryLevel = batteryLevel
+        return .none
+
       case .openDeepLinkButtonTapped,
            .sendPushButtonTapped,
            .applyPrivacyButtonTapped,
            .setLocationButtonTapped,
-           .clearLocationButtonTapped:
+           .clearLocationButtonTapped,
+           .setStatusBarOverrideButtonTapped,
+           .clearStatusBarOverrideButtonTapped:
         return .none
       }
     }

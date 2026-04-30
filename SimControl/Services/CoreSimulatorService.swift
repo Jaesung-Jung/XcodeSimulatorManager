@@ -437,6 +437,24 @@ struct CoreSimulatorService {
     )
   }
 
+  /// Applies simulator status bar override arguments.
+  func setStatusBarOverride(deviceID: String, arguments overrideArguments: [String]) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "status_bar", deviceID, "override"] + overrideArguments,
+      deviceCommandTimeout
+    )
+  }
+
+  /// Clears all simulator status bar overrides.
+  func clearStatusBarOverride(deviceID: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "status_bar", deviceID, "clear"],
+      deviceCommandTimeout
+    )
+  }
+
   private func commandFailureDiagnostic(command: String, result: CommandResult) -> String {
     let summary = "\(command) failed with exit code \(result.exitCode)."
     let stderr = result.stderr.trimmingCharacters(in: .whitespacesAndNewlines)

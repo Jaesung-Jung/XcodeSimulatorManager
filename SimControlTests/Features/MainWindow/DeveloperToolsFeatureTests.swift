@@ -118,6 +118,113 @@ struct DeveloperToolsFeatureTests {
   }
 
   @Test
+  func statusBarOverrideValidationAllowsFullOverrideAndBuildsOrderedArguments() {
+    let state = DeveloperToolsFeature.State(
+      device: MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted),
+      statusBarTime: " 09:41 ",
+      statusBarDataNetwork: .fiveG,
+      statusBarWifiMode: .active,
+      statusBarWifiBars: "3",
+      statusBarCellularMode: .active,
+      statusBarCellularBars: "4",
+      statusBarOperatorNameIncluded: true,
+      statusBarOperatorName: " Example ",
+      statusBarBatteryState: .charging,
+      statusBarBatteryLevel: "100"
+    )
+
+    #expect(state.setStatusBarOverrideDisabledReason == nil)
+    #expect(state.clearStatusBarOverrideDisabledReason == nil)
+    #expect(state.statusBarOverrideArguments == [
+      "--time",
+      "09:41",
+      "--dataNetwork",
+      "5g",
+      "--wifiMode",
+      "active",
+      "--wifiBars",
+      "3",
+      "--cellularMode",
+      "active",
+      "--cellularBars",
+      "4",
+      "--operatorName",
+      "Example",
+      "--batteryState",
+      "charging",
+      "--batteryLevel",
+      "100"
+    ])
+  }
+
+  @Test
+  func statusBarOverrideRequiresAtLeastOneOverride() {
+    let state = DeveloperToolsFeature.State(
+      device: MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
+    )
+    let emptyOperatorState = DeveloperToolsFeature.State(
+      device: MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted),
+      statusBarOperatorNameIncluded: true,
+      statusBarOperatorName: ""
+    )
+
+    #expect(
+      state.setStatusBarOverrideDisabledReason
+        == "Enter at least one status bar override."
+    )
+    #expect(emptyOperatorState.setStatusBarOverrideDisabledReason == nil)
+    #expect(emptyOperatorState.statusBarOverrideArguments == ["--operatorName", ""])
+  }
+
+  @Test
+  func statusBarOverrideRequiresBootedAvailableDevice() {
+    let noDeviceState = DeveloperToolsFeature.State(statusBarTime: "09:41")
+    let shutdownState = DeveloperToolsFeature.State(
+      device: MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .shutdown),
+      statusBarTime: "09:41"
+    )
+    let unavailableState = DeveloperToolsFeature.State(
+      device: MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted, isAvailable: false),
+      statusBarTime: "09:41"
+    )
+
+    #expect(noDeviceState.setStatusBarOverrideDisabledReason == "Select a simulator.")
+    #expect(shutdownState.setStatusBarOverrideDisabledReason == "Selected simulator must be booted.")
+    #expect(shutdownState.clearStatusBarOverrideDisabledReason == "Selected simulator must be booted.")
+    #expect(unavailableState.setStatusBarOverrideDisabledReason == "Selected simulator is unavailable.")
+  }
+
+  @Test
+  func statusBarOverrideValidatesBarsAndBatteryLevel() {
+    let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
+    let invalidWifiBarsState = DeveloperToolsFeature.State(
+      device: device,
+      statusBarWifiBars: "4"
+    )
+    let invalidCellularBarsState = DeveloperToolsFeature.State(
+      device: device,
+      statusBarCellularBars: "-1"
+    )
+    let invalidBatteryLevelState = DeveloperToolsFeature.State(
+      device: device,
+      statusBarBatteryLevel: "101"
+    )
+
+    #expect(
+      invalidWifiBarsState.setStatusBarOverrideDisabledReason
+        == "Wi-Fi bars must be between 0 and 3."
+    )
+    #expect(
+      invalidCellularBarsState.setStatusBarOverrideDisabledReason
+        == "Cellular bars must be between 0 and 4."
+    )
+    #expect(
+      invalidBatteryLevelState.setStatusBarOverrideDisabledReason
+        == "Battery level must be between 0 and 100."
+    )
+  }
+
+  @Test
   func selectedAppBundleCanFillPushAndPrivacyTargets() async {
     let store = TestStore(
       initialState: DeveloperToolsFeature.State(

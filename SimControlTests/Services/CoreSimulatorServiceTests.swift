@@ -501,6 +501,7 @@ struct CoreSimulatorServiceTests {
   @Test func developerToolCommandsRunExpectedSimctlCommandsAndReturnResults() async {
     let payloadURL = URL(fileURLWithPath: "/tmp/SimControlTests-PushPayload.json")
     let payloadJSON = #"{"aps":{"alert":"Hello"}}"#
+    let statusBarArguments = ["--time", "09:41", "--batteryLevel", "100"]
     let results = [
       makeCommandResult(
         executable: "xcrun",
@@ -527,6 +528,14 @@ struct CoreSimulatorServiceTests {
       makeCommandResult(
         executable: "xcrun",
         arguments: ["simctl", "location", "DEVICE-1", "clear"]
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "status_bar", "DEVICE-1", "override"] + statusBarArguments
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "status_bar", "DEVICE-1", "clear"]
       )
     ]
     let recorder = CommandRecorder(results: results)
@@ -557,6 +566,11 @@ struct CoreSimulatorServiceTests {
       coordinate: "37.334900,-122.009020"
     )
     let clearLocationResult = await service.clearLocation(deviceID: "DEVICE-1")
+    let statusBarResult = await service.setStatusBarOverride(
+      deviceID: "DEVICE-1",
+      arguments: statusBarArguments
+    )
+    let clearStatusBarResult = await service.clearStatusBarOverride(deviceID: "DEVICE-1")
 
     #expect(
       [
@@ -564,7 +578,9 @@ struct CoreSimulatorServiceTests {
         pushResult,
         privacyResult,
         setLocationResult,
-        clearLocationResult
+        clearLocationResult,
+        statusBarResult,
+        clearStatusBarResult
       ] == results
     )
     #expect(await recorder.recordedCalls() == [
@@ -597,6 +613,16 @@ struct CoreSimulatorServiceTests {
       CommandCall(
         executable: "xcrun",
         arguments: ["simctl", "location", "DEVICE-1", "clear"],
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "status_bar", "DEVICE-1", "override"] + statusBarArguments,
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "status_bar", "DEVICE-1", "clear"],
         timeout: 60
       )
     ])
@@ -642,7 +668,12 @@ struct CoreSimulatorServiceTests {
         executable: "xcrun",
         arguments: ["simctl", "location", "DEVICE-1", "set", "37.334900,-122.009020"]
       ),
-      makeCommandResult(executable: "xcrun", arguments: ["simctl", "location", "DEVICE-1", "clear"])
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "location", "DEVICE-1", "clear"]),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "status_bar", "DEVICE-1", "override", "--time", "09:41"]
+      ),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "status_bar", "DEVICE-1", "clear"])
     ])
     let service = makeService(
       recorder: recorder,
@@ -699,6 +730,11 @@ struct CoreSimulatorServiceTests {
       coordinate: "37.334900,-122.009020"
     )
     _ = await service.clearLocation(deviceID: "DEVICE-1")
+    _ = await service.setStatusBarOverride(
+      deviceID: "DEVICE-1",
+      arguments: ["--time", "09:41"]
+    )
+    _ = await service.clearStatusBarOverride(deviceID: "DEVICE-1")
 
     #expect(await recorder.recordedCalls() == [
       CommandCall(
@@ -814,6 +850,16 @@ struct CoreSimulatorServiceTests {
       CommandCall(
         executable: "xcrun",
         arguments: ["simctl", "location", "DEVICE-1", "clear"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "status_bar", "DEVICE-1", "override", "--time", "09:41"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "status_bar", "DEVICE-1", "clear"],
         timeout: 4
       )
     ])

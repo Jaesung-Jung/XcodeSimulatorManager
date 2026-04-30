@@ -1016,6 +1016,12 @@ struct MainWindowFeature {
       case .workspace(.deviceDetail(.developerTools(.clearLocationButtonTapped))):
         return runClearLocationCommand(&state)
 
+      case .workspace(.deviceDetail(.developerTools(.setStatusBarOverrideButtonTapped))):
+        return runSetStatusBarOverrideCommand(&state)
+
+      case .workspace(.deviceDetail(.developerTools(.clearStatusBarOverrideButtonTapped))):
+        return runClearStatusBarOverrideCommand(&state)
+
       case .sidebar, .workspace:
         return .none
       }
@@ -1104,7 +1110,9 @@ struct MainWindowFeature {
            .pushNotification,
            .privacyPermission,
            .setLocation,
-           .clearLocation:
+           .clearLocation,
+           .statusBarOverride,
+           .clearStatusBarOverride:
         return
       }
 
@@ -1775,6 +1783,36 @@ struct MainWindowFeature {
     }
   }
 
+  private func runSetStatusBarOverrideCommand(_ state: inout State) -> Effect<Action> {
+    let tools = state.workspace.deviceDetail.developerTools
+    guard tools.setStatusBarOverrideDisabledReason == nil else {
+      return .none
+    }
+
+    let arguments = tools.statusBarOverrideArguments
+
+    return runBootedDeveloperToolCommand(
+      &state,
+      command: .statusBarOverride
+    ) { coreSimulatorService, deviceID in
+      await coreSimulatorService.setStatusBarOverride(deviceID, arguments)
+    }
+  }
+
+  private func runClearStatusBarOverrideCommand(_ state: inout State) -> Effect<Action> {
+    let tools = state.workspace.deviceDetail.developerTools
+    guard tools.clearStatusBarOverrideDisabledReason == nil else {
+      return .none
+    }
+
+    return runBootedDeveloperToolCommand(
+      &state,
+      command: .clearStatusBarOverride
+    ) { coreSimulatorService, deviceID in
+      await coreSimulatorService.clearStatusBarOverride(deviceID)
+    }
+  }
+
   private func runDeveloperToolCommand(
     _ state: inout State,
     command: DeviceCommand,
@@ -1839,6 +1877,35 @@ struct MainWindowFeature {
           )
         )
       }
+    }
+  }
+
+  private func runBootedDeveloperToolCommand(
+    _ state: inout State,
+    command: DeviceCommand,
+    run: @escaping @Sendable (CoreSimulatorServiceClient, String) async -> CommandResult
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
+          let device = state.workspace.selectedDevice,
+          device.isAvailable,
+          device.state == .booted
+    else {
+      return .none
+    }
+
+    let deviceCommandState = DeviceCommandState(command: command, deviceID: device.id)
+    state.workspace.setDeviceCommandState(deviceCommandState)
+
+    return .run { [coreSimulatorService] send in
+      let commandResult = await run(coreSimulatorService, device.id)
+      await send(
+        .developerToolCommandResults(
+          deviceCommandState,
+          [commandResult],
+          refreshAfterward: false
+        )
+      )
     }
   }
 
@@ -2176,7 +2243,9 @@ struct MainWindowFeature {
          .pushNotification,
          .privacyPermission,
          .setLocation,
-         .clearLocation:
+         .clearLocation,
+         .statusBarOverride,
+         .clearStatusBarOverride:
       return false
     }
   }

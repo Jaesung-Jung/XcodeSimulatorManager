@@ -2834,6 +2834,179 @@ struct MainWindowFeatureTests {
   }
 
   @Test
+  func statusBarOverrideOnBootedDeviceRecordsCommandResultWithoutRefreshing() async {
+    let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
+    let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
+    let commandResult = MainWindowTestFixtures.makeCommandResult(
+      id: "status-bar",
+      arguments: [
+        "simctl",
+        "status_bar",
+        device.id,
+        "override",
+        "--time",
+        "09:41",
+        "--batteryLevel",
+        "100"
+      ]
+    )
+    let recorder = MainWindowDeveloperToolCommandRecorder(
+      openURLResult: commandResult,
+      pushResult: commandResult,
+      privacyResult: commandResult,
+      setLocationResult: commandResult,
+      clearLocationResult: commandResult,
+      statusBarResult: commandResult
+    )
+    let refreshRecorder = MainWindowRefreshRecorder(
+      result: MainWindowTestFixtures.makeRefreshResult(snapshot: snapshot)
+    )
+    let commandState = DeviceCommandState(command: .statusBarOverride, deviceID: device.id)
+    var initialState = MainWindowFeature.State(
+      snapshot: snapshot,
+      selectedDeviceID: device.id
+    )
+    initialState.workspace.deviceDetail.developerTools.statusBarTime = "09:41"
+    initialState.workspace.deviceDetail.developerTools.statusBarBatteryLevel = "100"
+
+    let store = TestStore(initialState: initialState) {
+      MainWindowFeature()
+    } withDependencies: {
+      $0.coreSimulatorService.setStatusBarOverride = { deviceID, arguments in
+        await recorder.setStatusBarOverride(deviceID: deviceID, arguments: arguments)
+      }
+      $0.simulatorRepository.refresh = {
+        await refreshRecorder.refresh()
+      }
+    }
+
+    await store.send(.workspace(.deviceDetail(.developerTools(.setStatusBarOverrideButtonTapped)))) {
+      $0.workspace.setDeviceCommandState(commandState)
+    }
+
+    await store.receive(
+      .developerToolCommandResults(
+        commandState,
+        [commandResult],
+        refreshAfterward: false
+      )
+    ) {
+      $0.workspace.appendCommandResult(commandResult)
+      $0.workspace.setDeviceCommandState(nil)
+    }
+
+    #expect(await recorder.statusBarCalls() == [
+      MainWindowStatusBarOverrideCall(
+        deviceID: device.id,
+        arguments: ["--time", "09:41", "--batteryLevel", "100"]
+      )
+    ])
+    #expect(await refreshRecorder.refreshCallCount() == 0)
+  }
+
+  @Test
+  func clearStatusBarOverrideOnBootedDeviceRecordsCommandResultWithoutRefreshing() async {
+    let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
+    let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
+    let commandResult = MainWindowTestFixtures.makeCommandResult(
+      id: "clear-status-bar",
+      arguments: ["simctl", "status_bar", device.id, "clear"]
+    )
+    let recorder = MainWindowDeveloperToolCommandRecorder(
+      openURLResult: commandResult,
+      pushResult: commandResult,
+      privacyResult: commandResult,
+      setLocationResult: commandResult,
+      clearLocationResult: commandResult,
+      clearStatusBarResult: commandResult
+    )
+    let refreshRecorder = MainWindowRefreshRecorder(
+      result: MainWindowTestFixtures.makeRefreshResult(snapshot: snapshot)
+    )
+    let commandState = DeviceCommandState(command: .clearStatusBarOverride, deviceID: device.id)
+
+    let store = TestStore(
+      initialState: MainWindowFeature.State(
+        snapshot: snapshot,
+        selectedDeviceID: device.id
+      )
+    ) {
+      MainWindowFeature()
+    } withDependencies: {
+      $0.coreSimulatorService.clearStatusBarOverride = { deviceID in
+        await recorder.clearStatusBarOverride(deviceID: deviceID)
+      }
+      $0.simulatorRepository.refresh = {
+        await refreshRecorder.refresh()
+      }
+    }
+
+    await store.send(.workspace(.deviceDetail(.developerTools(.clearStatusBarOverrideButtonTapped)))) {
+      $0.workspace.setDeviceCommandState(commandState)
+    }
+
+    await store.receive(
+      .developerToolCommandResults(
+        commandState,
+        [commandResult],
+        refreshAfterward: false
+      )
+    ) {
+      $0.workspace.appendCommandResult(commandResult)
+      $0.workspace.setDeviceCommandState(nil)
+    }
+
+    #expect(await recorder.clearStatusBarCalls() == [device.id])
+    #expect(await refreshRecorder.refreshCallCount() == 0)
+  }
+
+  @Test
+  func statusBarOverrideOnShutdownDeviceDoesNotBootOrRunCommand() async {
+    let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .shutdown)
+    let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
+    let commandResult = MainWindowTestFixtures.makeCommandResult(
+      id: "unexpected-status-bar",
+      arguments: ["simctl", "status_bar", device.id, "override"]
+    )
+    let bootRecorder = MainWindowAppCommandRecorder()
+    let recorder = MainWindowDeveloperToolCommandRecorder(
+      openURLResult: commandResult,
+      pushResult: commandResult,
+      privacyResult: commandResult,
+      setLocationResult: commandResult,
+      clearLocationResult: commandResult,
+      statusBarResult: commandResult,
+      clearStatusBarResult: commandResult
+    )
+    var initialState = MainWindowFeature.State(
+      snapshot: snapshot,
+      selectedDeviceID: device.id
+    )
+    initialState.workspace.deviceDetail.developerTools.statusBarTime = "09:41"
+
+    let store = TestStore(initialState: initialState) {
+      MainWindowFeature()
+    } withDependencies: {
+      $0.coreSimulatorService.bootDeviceIfNeeded = { id in
+        await bootRecorder.bootDeviceIfNeeded(id: id)
+      }
+      $0.coreSimulatorService.setStatusBarOverride = { deviceID, arguments in
+        await recorder.setStatusBarOverride(deviceID: deviceID, arguments: arguments)
+      }
+      $0.coreSimulatorService.clearStatusBarOverride = { deviceID in
+        await recorder.clearStatusBarOverride(deviceID: deviceID)
+      }
+    }
+
+    await store.send(.workspace(.deviceDetail(.developerTools(.setStatusBarOverrideButtonTapped))))
+    await store.send(.workspace(.deviceDetail(.developerTools(.clearStatusBarOverrideButtonTapped))))
+
+    #expect(await bootRecorder.bootCalls() == [])
+    #expect(await recorder.statusBarCalls() == [])
+    #expect(await recorder.clearStatusBarCalls() == [])
+  }
+
+  @Test
   func invalidPushPayloadDoesNotRunCommand() async {
     let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
     let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
@@ -2948,30 +3121,49 @@ private struct MainWindowSetLocationCall: Equatable {
   let coordinate: String
 }
 
+private struct MainWindowStatusBarOverrideCall: Equatable {
+  let deviceID: String
+  let arguments: [String]
+}
+
 private actor MainWindowDeveloperToolCommandRecorder {
   private let openURLResult: CommandResult
   private let pushResult: CommandResult
   private let privacyResult: CommandResult
   private let setLocationResult: CommandResult
   private let clearLocationResult: CommandResult
+  private let statusBarResult: CommandResult
+  private let clearStatusBarResult: CommandResult
   private var recordedOpenURLCalls: [MainWindowOpenURLCall] = []
   private var recordedPushCalls: [MainWindowPushCall] = []
   private var recordedPrivacyCalls: [MainWindowPrivacyCall] = []
   private var recordedSetLocationCalls: [MainWindowSetLocationCall] = []
   private var recordedClearLocationCalls: [String] = []
+  private var recordedStatusBarCalls: [MainWindowStatusBarOverrideCall] = []
+  private var recordedClearStatusBarCalls: [String] = []
 
   init(
     openURLResult: CommandResult,
     pushResult: CommandResult,
     privacyResult: CommandResult,
     setLocationResult: CommandResult,
-    clearLocationResult: CommandResult
+    clearLocationResult: CommandResult,
+    statusBarResult: CommandResult = MainWindowTestFixtures.makeCommandResult(
+      id: "status-bar",
+      arguments: ["simctl", "status_bar", "DEVICE", "override"]
+    ),
+    clearStatusBarResult: CommandResult = MainWindowTestFixtures.makeCommandResult(
+      id: "clear-status-bar",
+      arguments: ["simctl", "status_bar", "DEVICE", "clear"]
+    )
   ) {
     self.openURLResult = openURLResult
     self.pushResult = pushResult
     self.privacyResult = privacyResult
     self.setLocationResult = setLocationResult
     self.clearLocationResult = clearLocationResult
+    self.statusBarResult = statusBarResult
+    self.clearStatusBarResult = clearStatusBarResult
   }
 
   func openURL(deviceID: String, urlString: String) -> CommandResult {
@@ -3025,6 +3217,18 @@ private actor MainWindowDeveloperToolCommandRecorder {
     return clearLocationResult
   }
 
+  func setStatusBarOverride(deviceID: String, arguments: [String]) -> CommandResult {
+    recordedStatusBarCalls.append(
+      MainWindowStatusBarOverrideCall(deviceID: deviceID, arguments: arguments)
+    )
+    return statusBarResult
+  }
+
+  func clearStatusBarOverride(deviceID: String) -> CommandResult {
+    recordedClearStatusBarCalls.append(deviceID)
+    return clearStatusBarResult
+  }
+
   func openURLCalls() -> [MainWindowOpenURLCall] {
     recordedOpenURLCalls
   }
@@ -3043,6 +3247,14 @@ private actor MainWindowDeveloperToolCommandRecorder {
 
   func clearLocationCalls() -> [String] {
     recordedClearLocationCalls
+  }
+
+  func statusBarCalls() -> [MainWindowStatusBarOverrideCall] {
+    recordedStatusBarCalls
+  }
+
+  func clearStatusBarCalls() -> [String] {
+    recordedClearStatusBarCalls
   }
 }
 

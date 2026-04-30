@@ -13,4 +13,6 @@ enum DeviceCommand {
   case privacyPermission
   case setLocation
   case clearLocation
+  case statusBarOverride
+  case clearStatusBarOverride
 }
