@@ -26,12 +26,6 @@ struct MenuBarDeviceSection: View {
     devices.filter { filters.pinnedDeviceIDs.contains($0.id) }
   }
 
-  private var recentDevices: [SimulatorDevice] {
-    filters.recentDeviceIDs.compactMap { id in
-      devices.first { $0.id == id }
-    }
-  }
-
   private var installedAppsByID: [String: InstalledApp] {
     Dictionary(
       uniqueKeysWithValues: (snapshot?.installedAppsByDeviceID.values.flatMap { $0 } ?? []).map {
@@ -71,20 +65,6 @@ struct MenuBarDeviceSection: View {
           AppButton(app: app) {
             selectApp(app)
           }
-        }
-      }
-    }
-
-    if !recentDevices.isEmpty {
-      Section("Recent Devices") {
-        ForEach(recentDevices) { device in
-          DeviceButton(
-            device: device,
-            title: deviceTitle(for: device),
-            onSelect: {
-              selectDevice(device)
-            }
-          )
         }
       }
     }

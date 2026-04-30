@@ -97,8 +97,6 @@ struct WorkspaceFeature {
         guard devices.contains(where: { $0.id == id }) else {
           return
         }
-
-        filters.recordRecentDeviceID(id)
       }
 
       deviceList.selectedDeviceID = id
@@ -474,8 +472,6 @@ struct WorkspaceFeature {
         true
       case .pinned:
         filters.pinnedDeviceIDs.contains(device.id)
-      case .recent:
-        filters.recentDeviceIDs.contains(device.id)
       case .warnings:
         snapshot?.warnings.contains { $0.relatedID == device.id } == true
       case .platform(let platform):

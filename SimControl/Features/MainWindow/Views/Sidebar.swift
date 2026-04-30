@@ -117,13 +117,6 @@ struct Sidebar: View {
         .tag(SimulatorFilters.SidebarScope.pinned)
 
         BarItem(
-          title: "Recent",
-          systemImage: "clock",
-          value: "\(visibleRecentDeviceCount)"
-        )
-        .tag(SimulatorFilters.SidebarScope.recent)
-
-        BarItem(
           title: "Warnings",
           systemImage: "exclamationmark.triangle",
           value: "\(warnedDeviceCount)"
@@ -186,10 +179,6 @@ struct Sidebar: View {
 
   private var visiblePinnedDeviceCount: Int {
     store.snapshot?.devices.filter { filters.pinnedDeviceIDs.contains($0.id) }.count ?? 0
-  }
-
-  private var visibleRecentDeviceCount: Int {
-    store.snapshot?.devices.filter { filters.recentDeviceIDs.contains($0.id) }.count ?? 0
   }
 
   private func platform(for title: String) -> SimulatorPlatform {

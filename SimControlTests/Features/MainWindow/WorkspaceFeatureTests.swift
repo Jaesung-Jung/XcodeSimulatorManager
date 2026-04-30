@@ -30,7 +30,6 @@ struct WorkspaceFeatureTests {
     }
 
     await store.send(.deviceList(.selectionChanged(MainWindowTestFixtures.secondDevice.id))) {
-      $0.filters.recordRecentDeviceID(MainWindowTestFixtures.secondDevice.id)
       $0.deviceList = DeviceListFeature.State(
         devices: [
           MainWindowTestFixtures.device,
@@ -292,7 +291,7 @@ struct WorkspaceFeatureTests {
   }
 
   @Test
-  func pinnedAndRecentSidebarScopesProjectVisibleDevices() {
+  func pinnedSidebarScopeProjectsVisibleDevices() {
     var state = WorkspaceFeature.State(
       snapshot: MainWindowTestFixtures.makeSnapshot(
         devices: [
@@ -308,13 +307,6 @@ struct WorkspaceFeatureTests {
 
     #expect(state.deviceList.devices.map(\.id) == [MainWindowTestFixtures.secondDevice.id])
     #expect(state.deviceList.selectedDeviceID == MainWindowTestFixtures.secondDevice.id)
-
-    state.setSidebarScope(.all)
-    state.selectDevice(id: MainWindowTestFixtures.device.id)
-    state.setSidebarScope(.recent)
-
-    #expect(state.filters.recentDeviceIDs == [MainWindowTestFixtures.device.id])
-    #expect(state.deviceList.devices.map(\.id) == [MainWindowTestFixtures.device.id])
   }
 
   @Test

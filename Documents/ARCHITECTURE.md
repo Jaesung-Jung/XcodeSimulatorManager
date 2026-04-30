@@ -324,7 +324,7 @@ The first screen is the simulator management interface. The current SwiftUI comp
 
 ## Menu Bar
 
-The menu bar renders from the shared snapshot. It provides quick access to pinned devices, recent devices, all devices, common device actions, installed app actions, settings, and quit.
+The menu bar renders from the shared snapshot. It provides quick access to pinned devices, all devices, common device actions, installed app actions, settings, and quit.
 
 Menu actions call the same store intents as the main window. Complex actions can open a small dialog or bring the main window forward.
 

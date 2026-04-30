@@ -121,8 +121,6 @@ extension SimulatorFilters.SidebarScope {
       "All Devices"
     case .pinned:
       "Pinned"
-    case .recent:
-      "Recent"
     case .warnings:
       "Warnings"
     case .platform(let platform):

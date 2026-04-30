@@ -47,7 +47,7 @@ Pinned records persist across app restarts. If a pinned target no longer exists,
 
 ## Recent Targets
 
-SimControl tracks useful recent targets such as devices, apps, URLs, push payloads, locations, and output folders. Recent data can be cleared from Settings.
+SimControl tracks useful recent targets such as apps, URLs, push payloads, locations, and output folders. Recent data can be cleared from Settings.
 
 Sensitive recent data is stored only when appropriate for the feature and the user's settings.
 
@@ -65,7 +65,7 @@ If a selected target disappears, the app clears selection or moves to a nearby v
 
 ## Menu Bar Navigation
 
-The menu bar remains usable even with large simulator inventories. It groups items by pinned devices, recent devices, platform, and runtime. Settings control how many devices or apps are shown directly.
+The menu bar remains usable even with large simulator inventories. It groups items by pinned devices, platform, and runtime. Settings control how many devices or apps are shown directly.
 
 Complex browsing can continue in the main window through an `Open in Main Window` action.
 

@@ -379,7 +379,6 @@ Menu bar content:
 - Open SimControl
 - Open Simulator.app
 - Pinned devices
-- Recent devices
 - Device actions
 - Installed app actions
 - Settings

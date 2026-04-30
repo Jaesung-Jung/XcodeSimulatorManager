@@ -4,7 +4,6 @@ struct SimulatorFilters: Equatable {
   enum SidebarScope: Equatable, Hashable {
     case all
     case pinned
-    case recent
     case warnings
     case platform(SimulatorPlatform)
     case runtime(String)
@@ -71,7 +70,6 @@ struct SimulatorFilters: Equatable {
   var appSortDirection: SortDirection
   var pinnedDeviceIDs: Set<String>
   var pinnedAppIDs: Set<String>
-  var recentDeviceIDs: [String]
   var recentAppIDs: [String]
 
   init(
@@ -88,7 +86,6 @@ struct SimulatorFilters: Equatable {
     appSortDirection: SortDirection = .ascending,
     pinnedDeviceIDs: Set<String> = [],
     pinnedAppIDs: Set<String> = [],
-    recentDeviceIDs: [String] = [],
     recentAppIDs: [String] = []
   ) {
     self.searchQuery = searchQuery
@@ -104,7 +101,6 @@ struct SimulatorFilters: Equatable {
     self.appSortDirection = appSortDirection
     self.pinnedDeviceIDs = pinnedDeviceIDs
     self.pinnedAppIDs = pinnedAppIDs
-    self.recentDeviceIDs = Self.deduplicatedRecentIDs(recentDeviceIDs)
     self.recentAppIDs = Self.deduplicatedRecentIDs(recentAppIDs)
   }
 
@@ -126,10 +122,6 @@ struct SimulatorFilters: Equatable {
     appSystemFilter != .user
       || appGroupFilter != .all
       || appDatabaseFilter != .all
-  }
-
-  mutating func recordRecentDeviceID(_ id: String) {
-    recentDeviceIDs = Self.recentIDs(afterRecording: id, in: recentDeviceIDs)
   }
 
   mutating func recordRecentAppID(_ id: String) {
