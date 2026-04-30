@@ -4,7 +4,7 @@ SimControl uses Xcode command line tools and CoreSimulator data to build a curre
 
 ## Xcode and simctl Environment
 
-SimControl detects the active Xcode developer directory with `xcrun xcode-select -p` and shows the result in Settings. It validates that `xcrun simctl` can run before attempting simulator inventory or control actions.
+SimControl detects the active Xcode developer directory with `xcode-select -p` and shows the result in Settings. It validates that `xcrun simctl` can run before attempting simulator inventory or control actions.
 
 When the active Xcode path changes, SimControl refreshes its simulator snapshot. If Xcode or `simctl` is unavailable, the app shows an environment problem with the command output needed to diagnose it.
 

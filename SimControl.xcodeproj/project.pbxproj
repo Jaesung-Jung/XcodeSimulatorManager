@@ -6,8 +6,23 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4B2825E42FA18B7D0006787D /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2825E32FA18B7D0006787D /* ComposableArchitecture */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4B2820FF2FA0F3600006787D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4B28205A2FA0BF520006787D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4B2820612FA0BF520006787D;
+			remoteInfo = SimControl;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		4B2820622FA0BF520006787D /* SimControl.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimControl.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B2820FB2FA0F3600006787D /* SimControlTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SimControlTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -16,10 +31,23 @@
 			path = SimControl;
 			sourceTree = "<group>";
 		};
+		4B2820FC2FA0F3600006787D /* SimControlTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = SimControlTests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		4B28205F2FA0BF520006787D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4B2825E42FA18B7D0006787D /* ComposableArchitecture in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4B2820F82FA0F3600006787D /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -33,6 +61,7 @@
 			isa = PBXGroup;
 			children = (
 				4B2820642FA0BF520006787D /* SimControl */,
+				4B2820FC2FA0F3600006787D /* SimControlTests */,
 				4B2820632FA0BF520006787D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,6 +70,7 @@
 			isa = PBXGroup;
 			children = (
 				4B2820622FA0BF520006787D /* SimControl.app */,
+				4B2820FB2FA0F3600006787D /* SimControlTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -65,10 +95,34 @@
 			);
 			name = SimControl;
 			packageProductDependencies = (
+				4B2825E32FA18B7D0006787D /* ComposableArchitecture */,
 			);
 			productName = SimControl;
 			productReference = 4B2820622FA0BF520006787D /* SimControl.app */;
 			productType = "com.apple.product-type.application";
+		};
+		4B2820FA2FA0F3600006787D /* SimControlTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4B2821012FA0F3600006787D /* Build configuration list for PBXNativeTarget "SimControlTests" */;
+			buildPhases = (
+				4B2820F72FA0F3600006787D /* Sources */,
+				4B2820F82FA0F3600006787D /* Frameworks */,
+				4B2820F92FA0F3600006787D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4B2821002FA0F3600006787D /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				4B2820FC2FA0F3600006787D /* SimControlTests */,
+			);
+			name = SimControlTests;
+			packageProductDependencies = (
+			);
+			productName = SimControlTests;
+			productReference = 4B2820FB2FA0F3600006787D /* SimControlTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -83,6 +137,10 @@
 					4B2820612FA0BF520006787D = {
 						CreatedOnToolsVersion = 26.4;
 					};
+					4B2820FA2FA0F3600006787D = {
+						CreatedOnToolsVersion = 26.4;
+						TestTargetID = 4B2820612FA0BF520006787D;
+					};
 				};
 			};
 			buildConfigurationList = 4B28205D2FA0BF520006787D /* Build configuration list for PBXProject "SimControl" */;
@@ -94,18 +152,29 @@
 			);
 			mainGroup = 4B2820592FA0BF520006787D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4B2825E22FA18B7D0006787D /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4B2820632FA0BF520006787D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				4B2820612FA0BF520006787D /* SimControl */,
+				4B2820FA2FA0F3600006787D /* SimControlTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		4B2820602FA0BF520006787D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4B2820F92FA0F3600006787D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +191,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4B2820F72FA0F3600006787D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4B2821002FA0F3600006787D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4B2820612FA0BF520006787D /* SimControl */;
+			targetProxy = 4B2820FF2FA0F3600006787D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		4B28206B2FA0BF530006787D /* Debug */ = {
@@ -251,7 +335,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -266,7 +350,7 @@
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -281,7 +365,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				ENABLE_APP_SANDBOX = YES;
+				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -296,10 +380,48 @@
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		4B2821022FA0F3600006787D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.js.simctl.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SimControl.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SimControl";
+			};
+			name = Debug;
+		};
+		4B2821032FA0F3600006787D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.js.simctl.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SimControl.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/SimControl";
 			};
 			name = Release;
 		};
@@ -324,7 +446,35 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		4B2821012FA0F3600006787D /* Build configuration list for PBXNativeTarget "SimControlTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4B2821022FA0F3600006787D /* Debug */,
+				4B2821032FA0F3600006787D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4B2825E22FA18B7D0006787D /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.25.5;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4B2825E32FA18B7D0006787D /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B2825E22FA18B7D0006787D /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4B28205A2FA0BF520006787D /* Project object */;
 }

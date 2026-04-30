@@ -28,7 +28,6 @@ Environment problems appear here with enough context for users to understand wha
 Menu bar settings control:
 
 - Pinned devices first
-- Recent devices
 - Maximum devices shown directly
 - Maximum apps shown directly per device
 - Empty device visibility

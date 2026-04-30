@@ -1,6 +1,6 @@
 # SimControl Architecture
 
-SimControl is a macOS app for managing Xcode Simulator devices and installed applications. It combines a full SwiftUI management window with a persistent menu bar interface. Both surfaces use the same state store, command execution layer, and simulator services.
+SimControl is a macOS app for managing Xcode Simulator devices and installed applications. It combines a full SwiftUI management window with a persistent menu bar interface. The main window owns its UI state through TCA features and shares the command execution layer and simulator services through the app container.
 
 The app remains running after the main window is closed. The menu bar controller stays active until the user explicitly quits SimControl.
 
@@ -13,17 +13,14 @@ flowchart TB
     App["SimControlApp"]
     Delegate["AppDelegate"]
     Container["AppContainer"]
-    Store["SimulatorStore"]
+    Store["MainWindowFeature Store"]
     Repository["SimulatorRepository"]
     Command["CommandExecutor"]
     Service["CoreSimulatorService"]
-    Scanner["AppContainerScanner"]
-    Monitor["SimulatorFileMonitor"]
-    Links["LinkFolderManager"]
-    Permissions["PermissionCoordinator"]
     Window["Main Window"]
     Menu["Menu Bar"]
     Settings["Settings"]
+    Future["Future service placeholders"]
 
     App --> Delegate
     App --> Container
@@ -31,19 +28,17 @@ flowchart TB
     App --> Menu
     App --> Settings
     Container --> Store
+    Container --> Repository
     Store --> Repository
     Repository --> Service
-    Repository --> Scanner
-    Repository --> Monitor
-    Repository --> Links
-    Repository --> Permissions
     Service --> Command
     Window --> Store
-    Menu --> Store
-    Settings --> Store
+    Menu --> Container
+    Settings --> Container
+    Container -. later phases .-> Future
 ```
 
-The UI sends user intent to `SimulatorStore`. The store coordinates long-running work through `SimulatorRepository`, then publishes updated state back to the UI. Process execution, file scanning, monitoring, link management, and permission handling stay outside the UI layer.
+The main-window UI sends user intent to scoped TCA stores. `MainWindowFeature` is the root effect boundary: it coordinates refresh work through `SimulatorRepository`, then publishes updated state through child features. Process execution stays outside the UI layer. File scanning, monitoring, link management, and permission handling have placeholder services and are wired in later phases.
 
 ## Application Lifecycle
 
@@ -73,17 +68,14 @@ SimControl starts as a regular macOS app with Dock and Cmd-Tab presence. A later
 ```text
 AppContainer
   SettingsStore
+  ActionLogStore
   CommandExecutor
   CoreSimulatorService
-  AppContainerScanner
-  SimulatorFileMonitor
-  LinkFolderManager
-  PermissionCoordinator
   SimulatorRepository
-  SimulatorStore
+  MainWindowFeature Store
 ```
 
-Concrete service construction is kept here so views do not need to know how simulator services are built. Views interact with `SimulatorStore` and render state derived from it.
+Concrete service construction is kept here so views do not need to know how simulator services are built. Main-window views interact with scoped TCA stores and render state derived from those feature states.
 
 ## State Model
 
@@ -161,38 +153,56 @@ Modern `simctl list -j` fields such as `isAvailable`, `platform`, `supportedDevi
 
 ## Store
 
-`SimulatorStore` is the UI-facing state owner. It runs on the main actor and exposes:
+The main-window UI state is owned by TCA features. `MainWindowFeature` is the root effect boundary and exposes:
+
+```text
+sidebar
+workspace
+task
+refreshButtonTapped
+refreshResponse
+```
+
+Refresh effects, duplicate refresh guards, and command-result normalization live at the root. The root scopes state and actions into child features instead of passing selection values and closures through view initializers.
+
+`WorkspaceFeature` owns snapshot-derived browsing state:
 
 ```text
 snapshot
 refreshState
-selectedDeviceID
-selectedAppID
-filters
-searchQuery
-actionStates
-lastCommandResults
-permissionState
-settings
+deviceList.selectedDeviceID
+deviceDetail.installedApps.selectedAppID
+commandResults
+inspector
 ```
 
-The store accepts user intent such as refresh, select device, boot, shutdown, launch app, open container, create device, erase device, open settings, and quit. It starts asynchronous repository work, guards against duplicate actions, records command results, and publishes new UI state.
+MainWindow feature-local shared state is split into:
+
+```text
+InventoryRefreshState
+InstalledAppsAvailability
+```
+
+State-owning screens are split into child features: `SidebarFeature`, `DeviceListFeature`, `DeviceDetailFeature`, `InstalledAppsFeature`, and `InspectorFeature`. `SidebarFeature` is currently read-only summary state with an `EmptyReducer`; sidebar filtering and navigation are deferred to the search/filter phase. Pure rendering views such as rows, headers, section labels, and command result cells remain initializer-based.
+
+The TCA store accepts user intent such as refresh, select device, and select installed app. It starts asynchronous repository work, guards against duplicate refreshes, records command results, and publishes new UI state.
 
 The store does not execute shell commands, scan files, create links, or parse `simctl` JSON directly.
 
 ## Repository
 
-`SimulatorRepository` coordinates simulator reads and writes. It serializes refresh work, calls simulator services, asks the scanner for installed apps, updates link-folder state, and returns immutable snapshots.
+`SimulatorRepository` currently coordinates simulator inventory reads. It serializes refresh work, calls simulator services, maps service-layer `simctl list -j` values into domain values, and returns immutable snapshots.
 
-A refresh follows this shape:
+The current refresh follows this shape:
 
 1. Read the active Xcode developer path.
 2. Run `simctl list -j`.
 3. Decode runtimes, device types, devices, and pairs.
 4. Connect devices to runtimes and pairs.
-5. Scan app containers for each device.
-6. Collect warnings and permission issues.
-7. Return a new `SimulatorSnapshot`.
+5. Collect mapping warnings.
+6. Return a new `SimulatorSnapshot`.
+
+Installed app scanning, link-folder updates, and file monitoring are later-phase repository responsibilities. Until the scanner is wired, `installedAppsByDeviceID` is not authoritative real app inventory.
 
 Command actions follow this shape:
 
@@ -220,40 +230,25 @@ Commands run asynchronously. Failures preserve stderr and exit code so users can
 
 ## CoreSimulator Service
 
-`CoreSimulatorService` wraps `xcrun simctl` with typed methods:
+`CoreSimulatorService` wraps Xcode and Simulator command boundaries with typed methods:
 
 ```text
 selectedXcodePath()
 list()
-boot(deviceID)
-shutdown(deviceID)
 openSimulatorApp()
-launchApp(deviceID, bundleID)
-terminateApp(deviceID, bundleID)
-uninstallApp(deviceID, bundleID)
-installApp(deviceID, appBundlePath)
-createDevice(name, deviceTypeID, runtimeID)
-cloneDevice(sourceID, name)
-renameDevice(deviceID, name)
-eraseDevice(deviceID)
-deleteDevice(deviceID)
-pair(phoneID, watchID)
-unpair(pairID)
-getAppContainer(deviceID, bundleID, kind)
-listApps(deviceID)
-openURL(deviceID, url)
-push(deviceID, payloadPath, bundleID)
-setPrivacy(deviceID, service, bundleID, value)
-setLocation(deviceID, location)
-captureScreenshot(deviceID, outputPath)
-recordVideo(deviceID, outputPath)
 ```
+
+`selectedXcodePath()` runs `xcode-select -p`. `list()` runs `xcrun simctl list -j`. `openSimulatorApp()` runs `open -a Simulator`. `CommandExecutor` resolves bare command names against the inherited process `PATH` first, then macOS default executable directories, so service code does not hard-code system executable paths.
+
+Future typed service methods will cover boot, shutdown, app launch, install/uninstall, device creation, erase/delete, pairing, app container lookup, URL opening, push notification, privacy, location, screenshots, and video recording.
 
 Service methods do not update UI state. They execute commands and return typed results to the repository.
 
 ## App Container Scanner
 
-`AppContainerScanner` reads CoreSimulator folders to discover installed apps, including apps on shutdown simulators.
+`AppContainerScanner` is currently a placeholder. Phase 15 wires it into `SimulatorRepository`.
+
+When implemented, `AppContainerScanner` will read CoreSimulator folders to discover installed apps, including apps on shutdown simulators.
 
 It scans:
 
@@ -265,7 +260,7 @@ It scans:
 
 The scanner matches bundle and data containers using `.com.apple.mobile_container_manager.metadata.plist`, then reads app metadata from `.app/Info.plist`. It also discovers App Groups, app icons, common database files, and container paths.
 
-CoreSimulator internal layout can change between Xcode versions, so scanner failures are reported as warnings instead of app crashes.
+CoreSimulator internal layout can change between Xcode versions, so scanner failures should be reported as warnings instead of app crashes.
 
 ## File Monitoring
 
@@ -302,7 +297,7 @@ The feature is user-controlled. It only runs after a root folder is selected. Re
 
 `PermissionCoordinator` distinguishes missing data from permission failures. It reports read failures for CoreSimulator folders and write failures for link folders or output folders.
 
-The app is designed as a developer utility. If a sandboxed distribution is supported, folder access will use user-selected locations and security-scoped bookmarks.
+The app is designed as a developer utility and the macOS app target currently has App Sandbox disabled. This is required for running `xcrun simctl` and inspecting CoreSimulator paths directly. If a sandboxed distribution is supported later, folder access will use user-selected locations and security-scoped bookmarks.
 
 ## Main Window
 
@@ -313,27 +308,23 @@ Toolbar
   Refresh | Open Simulator | Create | Search | Settings
 
 Sidebar
-  Platforms
-  Runtimes
-  Device States
-  Pinned Devices
+  Read-only inventory summary in the current phase
+  Future platforms, runtimes, device states, and pinned devices
 
 Content
-  Device list or table
+  Device list
 
 Inspector
   Device summary
-  Quick actions
   Installed apps
-  App Groups
-  Recent command results
+  App Groups and environment details
 ```
 
-The first screen is the simulator management interface.
+The first screen is the simulator management interface. The current SwiftUI composition is a three-column `NavigationSplitView`: `Sidebar` in the sidebar column, `DeviceListView` in the content column, and `WorkspaceView` in the detail column. `WorkspaceView` owns selected-device detail/empty/error content and the inspector panel.
 
 ## Menu Bar
 
-The menu bar renders from the shared snapshot. It provides quick access to pinned devices, recent devices, all devices, common device actions, installed app actions, settings, and quit.
+The menu bar renders from the shared snapshot. It provides quick access to pinned devices, all devices, common device actions, installed app actions, settings, and quit.
 
 Menu actions call the same store intents as the main window. Complex actions can open a small dialog or bring the main window forward.
 
@@ -394,31 +385,65 @@ SimControl/
     AppDelegate.swift
     AppContainer.swift
   Domain/
+    XcodeSelection.swift
     SimulatorSnapshot.swift
     SimulatorRuntime.swift
     SimulatorDevice.swift
     SimulatorDeviceType.swift
     InstalledApp.swift
+    AppGroupContainer.swift
     DevicePair.swift
+    CommandResult.swift
     ActionResult.swift
+    SimulatorWarning.swift
   Services/
     CommandExecutor.swift
     CoreSimulatorService.swift
-    SimctlModels.swift
+    Models/
+      SimctlListPayload.swift
+      SimctlRuntime.swift
+      SimctlDeviceType.swift
+      SimctlDevice.swift
+      SimctlPair.swift
     AppContainerScanner.swift
     LinkFolderManager.swift
     SimulatorFileMonitor.swift
     PermissionCoordinator.swift
   State/
-    SimulatorStore.swift
     SettingsStore.swift
     ActionLogStore.swift
   Features/
     MainWindow/
+      Features/
+        MainWindowFeature.swift
+        WorkspaceFeature.swift
+        DeviceListFeature.swift
+        DeviceDetailFeature.swift
+        InstalledAppsFeature.swift
+        SidebarFeature.swift
+        InspectorFeature.swift
+        State/
+          InventoryRefreshState.swift
+          InstalledAppsAvailability.swift
+      Views/
+        MainWindowView.swift
+        WorkspaceView.swift
+        DeviceListView.swift
+        DeviceDetailView.swift
+        InstalledAppsView.swift
+        Sidebar.swift
+        InspectorView.swift
+        Support/
+          MainWindowDisplayValues.swift
+        Previews/
+          MainWindowPreviewFixtures.swift
     MenuBar/
     Settings/
     CreateDevice/
   SharedUI/
+    EmptyStateView.swift
+    SectionHeader.swift
+    StatusBadge.swift
 ```
 
-The structure keeps platform commands, simulator parsing, file-system work, and SwiftUI presentation separate so each piece can be tested independently.
+The structure keeps platform commands, simulator parsing, file-system work, and SwiftUI presentation separate so each piece can be tested independently. `SharedUI` is limited to app-wide primitives; MainWindow-specific rendering stays under `Features/MainWindow` even when it does not own a reducer.
