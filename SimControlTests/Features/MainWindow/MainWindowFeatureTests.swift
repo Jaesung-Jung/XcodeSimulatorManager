@@ -2666,6 +2666,216 @@ struct MainWindowFeatureTests {
       $0.workspace.setOpeningSimulatorApp(false)
     }
   }
+
+  @Test
+  func openDeepLinkRecordsCommandResultWithoutRefreshing() async {
+    let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
+    let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
+    let openResult = MainWindowTestFixtures.makeCommandResult(
+      id: "open-url",
+      arguments: ["simctl", "openurl", device.id, "myapp://home"]
+    )
+    let recorder = MainWindowDeveloperToolCommandRecorder(
+      openURLResult: openResult,
+      pushResult: openResult,
+      privacyResult: openResult,
+      setLocationResult: openResult,
+      clearLocationResult: openResult
+    )
+    let refreshRecorder = MainWindowRefreshRecorder(
+      result: MainWindowTestFixtures.makeRefreshResult(snapshot: snapshot)
+    )
+    let commandState = DeviceCommandState(command: .openURL, deviceID: device.id)
+
+    let store = TestStore(
+      initialState: MainWindowFeature.State(
+        snapshot: snapshot,
+        selectedDeviceID: device.id
+      )
+    ) {
+      MainWindowFeature()
+    } withDependencies: {
+      $0.coreSimulatorService.openURL = { deviceID, urlString in
+        await recorder.openURL(deviceID: deviceID, urlString: urlString)
+      }
+      $0.simulatorRepository.refresh = {
+        await refreshRecorder.refresh()
+      }
+    }
+
+    await store.send(
+      .workspace(.deviceDetail(.developerTools(.deepLinkURLChanged("myapp://home"))))
+    ) {
+      $0.workspace.deviceDetail.developerTools.deepLinkURLString = "myapp://home"
+    }
+
+    await store.send(.workspace(.deviceDetail(.developerTools(.openDeepLinkButtonTapped)))) {
+      $0.workspace.deviceDetail.developerTools.recentDeepLinkURLs = ["myapp://home"]
+      $0.workspace.setDeviceCommandState(commandState)
+    }
+
+    await store.receive(
+      .developerToolCommandResults(
+        commandState,
+        [openResult],
+        refreshAfterward: false
+      )
+    ) {
+      $0.workspace.appendCommandResult(openResult)
+      $0.workspace.setDeviceCommandState(nil)
+    }
+
+    #expect(await recorder.openURLCalls() == [
+      MainWindowOpenURLCall(deviceID: device.id, urlString: "myapp://home")
+    ])
+    #expect(await refreshRecorder.refreshCallCount() == 0)
+  }
+
+  @Test
+  func developerToolOnShutdownDeviceBootsThenRefreshesSnapshot() async {
+    let shutdownDevice = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .shutdown)
+    let bootedDevice = MainWindowTestFixtures.makeDevice(id: shutdownDevice.id, state: .booted)
+    let initialSnapshot = MainWindowTestFixtures.makeSnapshot(devices: [shutdownDevice])
+    let refreshedSnapshot = MainWindowTestFixtures.makeSnapshot(devices: [bootedDevice])
+    let bootResult = MainWindowTestFixtures.makeCommandResult(
+      id: "bootstatus",
+      arguments: ["simctl", "bootstatus", shutdownDevice.id, "-b"]
+    )
+    let setLocationResult = MainWindowTestFixtures.makeCommandResult(
+      id: "set-location",
+      arguments: [
+        "simctl",
+        "location",
+        shutdownDevice.id,
+        "set",
+        "37.334900,-122.009020"
+      ]
+    )
+    let refreshResult = MainWindowTestFixtures.makeRefreshResult(snapshot: refreshedSnapshot)
+    let recorder = MainWindowDeveloperToolCommandRecorder(
+      openURLResult: setLocationResult,
+      pushResult: setLocationResult,
+      privacyResult: setLocationResult,
+      setLocationResult: setLocationResult,
+      clearLocationResult: setLocationResult
+    )
+    let commandState = DeviceCommandState(command: .setLocation, deviceID: shutdownDevice.id)
+    let recentLocation = DeveloperToolsFeature.LocationCoordinateInput(
+      name: "Apple Park",
+      latitude: "37.334900",
+      longitude: "-122.009020"
+    )
+
+    let store = TestStore(
+      initialState: MainWindowFeature.State(
+        snapshot: initialSnapshot,
+        selectedDeviceID: shutdownDevice.id
+      )
+    ) {
+      MainWindowFeature()
+    } withDependencies: {
+      $0.coreSimulatorService.bootDeviceIfNeeded = { _ in
+        bootResult
+      }
+      $0.coreSimulatorService.setLocation = { deviceID, coordinate in
+        await recorder.setLocation(deviceID: deviceID, coordinate: coordinate)
+      }
+      $0.simulatorRepository.refresh = {
+        refreshResult
+      }
+    }
+
+    await store.send(.workspace(.deviceDetail(.developerTools(.setLocationButtonTapped)))) {
+      $0.workspace.deviceDetail.developerTools.recentLocations = [recentLocation]
+      $0.workspace.setDeviceCommandState(commandState)
+    }
+
+    await store.receive(
+      .developerToolCommandResults(
+        commandState,
+        [bootResult, setLocationResult],
+        refreshAfterward: true
+      )
+    ) {
+      $0.workspace.appendCommandResult(bootResult)
+      $0.workspace.appendCommandResult(setLocationResult)
+      $0.sidebar.refreshState = .refreshing
+      $0.workspace.refreshState = .refreshing
+    }
+
+    await store.receive(
+      .developerToolCommandRefreshResponse(
+        commandState,
+        refreshResult,
+        preferredSelectedDeviceID: shutdownDevice.id
+      )
+    ) {
+      $0.sidebar = SidebarFeature.State(snapshot: refreshedSnapshot, refreshState: .idle)
+      $0.workspace.applySnapshot(
+        refreshedSnapshot,
+        refreshState: .idle,
+        commandResults: [
+          bootResult,
+          setLocationResult,
+          MainWindowTestFixtures.xcodeCommandResult,
+          MainWindowTestFixtures.listCommandResult
+        ],
+        preferredSelectedDeviceID: shutdownDevice.id
+      )
+      $0.workspace.setDeviceCommandState(nil)
+    }
+
+    #expect(await recorder.setLocationCalls() == [
+      MainWindowSetLocationCall(
+        deviceID: shutdownDevice.id,
+        coordinate: "37.334900,-122.009020"
+      )
+    ])
+  }
+
+  @Test
+  func invalidPushPayloadDoesNotRunCommand() async {
+    let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
+    let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
+    let commandResult = MainWindowTestFixtures.makeCommandResult(
+      id: "unexpected-push",
+      arguments: ["simctl", "push", device.id]
+    )
+    let recorder = MainWindowDeveloperToolCommandRecorder(
+      openURLResult: commandResult,
+      pushResult: commandResult,
+      privacyResult: commandResult,
+      setLocationResult: commandResult,
+      clearLocationResult: commandResult
+    )
+
+    let store = TestStore(
+      initialState: MainWindowFeature.State(
+        snapshot: snapshot,
+        selectedDeviceID: device.id
+      )
+    ) {
+      MainWindowFeature()
+    } withDependencies: {
+      $0.coreSimulatorService.pushNotification = { deviceID, bundleID, payloadJSON in
+        await recorder.pushNotification(
+          deviceID: deviceID,
+          bundleID: bundleID,
+          payloadJSON: payloadJSON
+        )
+      }
+    }
+
+    await store.send(
+      .workspace(.deviceDetail(.developerTools(.pushPayloadJSONChanged(#"{"alert":"Hello"}"#))))
+    ) {
+      $0.workspace.deviceDetail.developerTools.pushPayloadJSON = #"{"alert":"Hello"}"#
+    }
+
+    await store.send(.workspace(.deviceDetail(.developerTools(.sendPushButtonTapped))))
+
+    #expect(await recorder.pushCalls() == [])
+  }
 }
 
 private struct MainWindowCreateDeviceCall: Equatable {
@@ -2713,6 +2923,127 @@ private struct MainWindowCopyPathCall: Equatable {
 private struct MainWindowCopyValueCall: Equatable {
   let value: String?
   let label: String
+}
+
+private struct MainWindowOpenURLCall: Equatable {
+  let deviceID: String
+  let urlString: String
+}
+
+private struct MainWindowPushCall: Equatable {
+  let deviceID: String
+  let bundleID: String?
+  let payloadJSON: String
+}
+
+private struct MainWindowPrivacyCall: Equatable {
+  let deviceID: String
+  let action: String
+  let service: String
+  let bundleID: String?
+}
+
+private struct MainWindowSetLocationCall: Equatable {
+  let deviceID: String
+  let coordinate: String
+}
+
+private actor MainWindowDeveloperToolCommandRecorder {
+  private let openURLResult: CommandResult
+  private let pushResult: CommandResult
+  private let privacyResult: CommandResult
+  private let setLocationResult: CommandResult
+  private let clearLocationResult: CommandResult
+  private var recordedOpenURLCalls: [MainWindowOpenURLCall] = []
+  private var recordedPushCalls: [MainWindowPushCall] = []
+  private var recordedPrivacyCalls: [MainWindowPrivacyCall] = []
+  private var recordedSetLocationCalls: [MainWindowSetLocationCall] = []
+  private var recordedClearLocationCalls: [String] = []
+
+  init(
+    openURLResult: CommandResult,
+    pushResult: CommandResult,
+    privacyResult: CommandResult,
+    setLocationResult: CommandResult,
+    clearLocationResult: CommandResult
+  ) {
+    self.openURLResult = openURLResult
+    self.pushResult = pushResult
+    self.privacyResult = privacyResult
+    self.setLocationResult = setLocationResult
+    self.clearLocationResult = clearLocationResult
+  }
+
+  func openURL(deviceID: String, urlString: String) -> CommandResult {
+    recordedOpenURLCalls.append(
+      MainWindowOpenURLCall(deviceID: deviceID, urlString: urlString)
+    )
+    return openURLResult
+  }
+
+  func pushNotification(
+    deviceID: String,
+    bundleID: String?,
+    payloadJSON: String
+  ) -> CommandResult {
+    recordedPushCalls.append(
+      MainWindowPushCall(
+        deviceID: deviceID,
+        bundleID: bundleID,
+        payloadJSON: payloadJSON
+      )
+    )
+    return pushResult
+  }
+
+  func setPrivacyPermission(
+    deviceID: String,
+    action: String,
+    service: String,
+    bundleID: String?
+  ) -> CommandResult {
+    recordedPrivacyCalls.append(
+      MainWindowPrivacyCall(
+        deviceID: deviceID,
+        action: action,
+        service: service,
+        bundleID: bundleID
+      )
+    )
+    return privacyResult
+  }
+
+  func setLocation(deviceID: String, coordinate: String) -> CommandResult {
+    recordedSetLocationCalls.append(
+      MainWindowSetLocationCall(deviceID: deviceID, coordinate: coordinate)
+    )
+    return setLocationResult
+  }
+
+  func clearLocation(deviceID: String) -> CommandResult {
+    recordedClearLocationCalls.append(deviceID)
+    return clearLocationResult
+  }
+
+  func openURLCalls() -> [MainWindowOpenURLCall] {
+    recordedOpenURLCalls
+  }
+
+  func pushCalls() -> [MainWindowPushCall] {
+    recordedPushCalls
+  }
+
+  func privacyCalls() -> [MainWindowPrivacyCall] {
+    recordedPrivacyCalls
+  }
+
+  func setLocationCalls() -> [MainWindowSetLocationCall] {
+    recordedSetLocationCalls
+  }
+
+  func clearLocationCalls() -> [String] {
+    recordedClearLocationCalls
+  }
 }
 
 private actor MainWindowPathActionRecorder {

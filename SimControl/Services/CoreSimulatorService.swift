@@ -61,6 +61,11 @@ struct CoreSimulatorService {
   private static let defaultDeviceCommandTimeout: TimeInterval = 60
 
   private let runCommand: CommandRunner
+  private let makePushPayloadURL: () -> URL
+  private let writePushPayload: (String, URL) throws -> Void
+  private let removePushPayload: (URL) -> Void
+  private let now: () -> Date
+  private let makeID: () -> String
   private let selectedXcodePathTimeout: TimeInterval?
   private let listTimeout: TimeInterval?
   private let openSimulatorAppTimeout: TimeInterval?
@@ -71,12 +76,22 @@ struct CoreSimulatorService {
     selectedXcodePathTimeout: TimeInterval? = Self.defaultSelectedXcodePathTimeout,
     listTimeout: TimeInterval? = Self.defaultListTimeout,
     openSimulatorAppTimeout: TimeInterval? = Self.defaultOpenSimulatorAppTimeout,
-    deviceCommandTimeout: TimeInterval? = Self.defaultDeviceCommandTimeout
+    deviceCommandTimeout: TimeInterval? = Self.defaultDeviceCommandTimeout,
+    makePushPayloadURL: @escaping () -> URL = Self.defaultPushPayloadURL,
+    writePushPayload: @escaping (String, URL) throws -> Void = Self.defaultWritePushPayload,
+    removePushPayload: @escaping (URL) -> Void = Self.defaultRemovePushPayload,
+    now: @escaping () -> Date = Date.init,
+    makeID: @escaping () -> String = { UUID().uuidString }
   ) {
     self.selectedXcodePathTimeout = selectedXcodePathTimeout
     self.listTimeout = listTimeout
     self.openSimulatorAppTimeout = openSimulatorAppTimeout
     self.deviceCommandTimeout = deviceCommandTimeout
+    self.makePushPayloadURL = makePushPayloadURL
+    self.writePushPayload = writePushPayload
+    self.removePushPayload = removePushPayload
+    self.now = now
+    self.makeID = makeID
     self.runCommand = { executable, arguments, timeout in
       await commandExecutor.execute(
         executable: executable,
@@ -91,12 +106,22 @@ struct CoreSimulatorService {
     listTimeout: TimeInterval? = Self.defaultListTimeout,
     openSimulatorAppTimeout: TimeInterval? = Self.defaultOpenSimulatorAppTimeout,
     deviceCommandTimeout: TimeInterval? = Self.defaultDeviceCommandTimeout,
+    makePushPayloadURL: @escaping () -> URL = Self.defaultPushPayloadURL,
+    writePushPayload: @escaping (String, URL) throws -> Void = Self.defaultWritePushPayload,
+    removePushPayload: @escaping (URL) -> Void = Self.defaultRemovePushPayload,
+    now: @escaping () -> Date = Date.init,
+    makeID: @escaping () -> String = { UUID().uuidString },
     runCommand: @escaping CommandRunner
   ) {
     self.selectedXcodePathTimeout = selectedXcodePathTimeout
     self.listTimeout = listTimeout
     self.openSimulatorAppTimeout = openSimulatorAppTimeout
     self.deviceCommandTimeout = deviceCommandTimeout
+    self.makePushPayloadURL = makePushPayloadURL
+    self.writePushPayload = writePushPayload
+    self.removePushPayload = removePushPayload
+    self.now = now
+    self.makeID = makeID
     self.runCommand = runCommand
   }
 
@@ -326,6 +351,92 @@ struct CoreSimulatorService {
     )
   }
 
+  /// Opens a URL on a simulator device.
+  func openURL(deviceID: String, urlString: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "openurl", deviceID, urlString],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Sends a simulated push notification payload to a simulator app.
+  func pushNotification(
+    deviceID: String,
+    bundleID: String?,
+    payloadJSON: String
+  ) async -> CommandResult {
+    let payloadURL = makePushPayloadURL()
+    let startedAt = now()
+    var arguments = ["simctl", "push", deviceID]
+
+    if let bundleID, !bundleID.isEmpty {
+      arguments.append(bundleID)
+    }
+
+    arguments.append(payloadURL.path)
+
+    do {
+      try writePushPayload(payloadJSON, payloadURL)
+    } catch {
+      return commandResult(
+        arguments: arguments,
+        stdout: "",
+        stderr: "Push payload could not be written: \(error.localizedDescription)",
+        exitCode: 1,
+        startedAt: startedAt
+      )
+    }
+
+    defer {
+      removePushPayload(payloadURL)
+    }
+
+    return await runCommand(
+      "xcrun",
+      arguments,
+      deviceCommandTimeout
+    )
+  }
+
+  /// Grants, revokes, or resets a simulator privacy permission.
+  func setPrivacyPermission(
+    deviceID: String,
+    action: String,
+    service: String,
+    bundleID: String?
+  ) async -> CommandResult {
+    var arguments = ["simctl", "privacy", deviceID, action, service]
+
+    if let bundleID, !bundleID.isEmpty {
+      arguments.append(bundleID)
+    }
+
+    return await runCommand(
+      "xcrun",
+      arguments,
+      deviceCommandTimeout
+    )
+  }
+
+  /// Sets a fixed simulator location.
+  func setLocation(deviceID: String, coordinate: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "location", deviceID, "set", coordinate],
+      deviceCommandTimeout
+    )
+  }
+
+  /// Clears any simulated location from a simulator device.
+  func clearLocation(deviceID: String) async -> CommandResult {
+    await runCommand(
+      "xcrun",
+      ["simctl", "location", deviceID, "clear"],
+      deviceCommandTimeout
+    )
+  }
+
   private func commandFailureDiagnostic(command: String, result: CommandResult) -> String {
     let summary = "\(command) failed with exit code \(result.exitCode)."
     let stderr = result.stderr.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -335,5 +446,37 @@ struct CoreSimulatorService {
     }
 
     return "\(summary)\n\(stderr)"
+  }
+
+  private func commandResult(
+    arguments: [String],
+    stdout: String,
+    stderr: String,
+    exitCode: Int32,
+    startedAt: Date
+  ) -> CommandResult {
+    CommandResult(
+      id: "core-simulator-service-\(makeID())",
+      executable: "xcrun",
+      arguments: arguments,
+      stdout: stdout,
+      stderr: stderr,
+      exitCode: exitCode,
+      duration: max(0, now().timeIntervalSince(startedAt)),
+      startedAt: startedAt
+    )
+  }
+
+  private static func defaultPushPayloadURL() -> URL {
+    FileManager.default.temporaryDirectory
+      .appendingPathComponent("SimControl-PushPayload-\(UUID().uuidString).json")
+  }
+
+  private static func defaultWritePushPayload(_ payloadJSON: String, to url: URL) throws {
+    try payloadJSON.write(to: url, atomically: true, encoding: .utf8)
+  }
+
+  private static func defaultRemovePushPayload(_ url: URL) {
+    try? FileManager.default.removeItem(at: url)
   }
 }

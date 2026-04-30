@@ -8,4 +8,9 @@ enum DeviceCommand {
   case delete
   case pair
   case unpair
+  case openURL
+  case pushNotification
+  case privacyPermission
+  case setLocation
+  case clearLocation
 }

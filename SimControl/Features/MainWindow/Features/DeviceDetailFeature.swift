@@ -24,6 +24,7 @@ struct DeviceDetailFeature {
     var deviceCommandState: DeviceCommandState?
     var appCommandState: AppCommandState?
     var isOpeningSimulatorApp: Bool
+    var developerTools: DeveloperToolsFeature.State
 
     init(
       device: SimulatorDevice? = nil,
@@ -34,11 +35,20 @@ struct DeviceDetailFeature {
       commandResults: [CommandResult] = [],
       deviceCommandState: DeviceCommandState? = nil,
       appCommandState: AppCommandState? = nil,
-      isOpeningSimulatorApp: Bool = false
+      isOpeningSimulatorApp: Bool = false,
+      developerTools: DeveloperToolsFeature.State = DeveloperToolsFeature.State()
     ) {
       var installedApps = installedApps
       installedApps.appCommandState = appCommandState
       installedApps.isDeviceCommandRunning = deviceCommandState != nil
+      var developerTools = developerTools
+      developerTools.updateContext(
+        device: device,
+        installedApps: installedApps.apps,
+        selectedAppID: installedApps.selectedAppID,
+        deviceCommandState: deviceCommandState,
+        appCommandState: appCommandState
+      )
 
       self.device = device
       self.runtime = runtime
@@ -49,6 +59,7 @@ struct DeviceDetailFeature {
       self.deviceCommandState = deviceCommandState
       self.appCommandState = appCommandState
       self.isOpeningSimulatorApp = isOpeningSimulatorApp
+      self.developerTools = developerTools
     }
 
     var selectedApp: InstalledApp? {
@@ -76,6 +87,7 @@ struct DeviceDetailFeature {
     case copyRuntimeIdentifierButtonTapped(String)
     case copyDeviceTypeIdentifierButtonTapped(String)
     case installedApps(InstalledAppsFeature.Action)
+    case developerTools(DeveloperToolsFeature.Action)
   }
 
   var body: some ReducerOf<Self> {
@@ -99,11 +111,17 @@ struct DeviceDetailFeature {
 
       case .installedApps:
         return .none
+
+      case .developerTools:
+        return .none
       }
     }
 
     Scope(state: \.installedApps, action: \.installedApps) {
       InstalledAppsFeature()
+    }
+    Scope(state: \.developerTools, action: \.developerTools) {
+      DeveloperToolsFeature()
     }
   }
 }

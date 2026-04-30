@@ -96,6 +96,30 @@ final class AppContainer {
           container: container
         )
       }
+      $0.coreSimulatorService.openURL = { deviceID, urlString in
+        await coreSimulatorService.openURL(deviceID: deviceID, urlString: urlString)
+      }
+      $0.coreSimulatorService.pushNotification = { deviceID, bundleID, payloadJSON in
+        await coreSimulatorService.pushNotification(
+          deviceID: deviceID,
+          bundleID: bundleID,
+          payloadJSON: payloadJSON
+        )
+      }
+      $0.coreSimulatorService.setPrivacyPermission = { deviceID, action, serviceName, bundleID in
+        await coreSimulatorService.setPrivacyPermission(
+          deviceID: deviceID,
+          action: action,
+          service: serviceName,
+          bundleID: bundleID
+        )
+      }
+      $0.coreSimulatorService.setLocation = { deviceID, coordinate in
+        await coreSimulatorService.setLocation(deviceID: deviceID, coordinate: coordinate)
+      }
+      $0.coreSimulatorService.clearLocation = { deviceID in
+        await coreSimulatorService.clearLocation(deviceID: deviceID)
+      }
       $0.appSandboxReset.resetSandbox = { dataContainer in
         await appSandboxResetService.resetSandbox(at: dataContainer)
       }

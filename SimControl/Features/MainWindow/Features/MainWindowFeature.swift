@@ -456,6 +456,16 @@ struct MainWindowFeature {
       preferredSelectedDeviceID: String?,
       preferredSelectedAppID: String?
     )
+    case developerToolCommandResults(
+      DeviceCommandState,
+      [CommandResult],
+      refreshAfterward: Bool
+    )
+    case developerToolCommandRefreshResponse(
+      DeviceCommandState,
+      SimulatorRepository.RefreshResult,
+      preferredSelectedDeviceID: String?
+    )
     case sidebar(SidebarFeature.Action)
     case workspace(WorkspaceFeature.Action)
   }
@@ -595,6 +605,58 @@ struct MainWindowFeature {
         for result in results {
           state.workspace.appendCommandResult(result)
         }
+        return .none
+
+      case .developerToolCommandResults(let deviceCommandState, let results, let refreshAfterward):
+        guard state.workspace.deviceCommandState == deviceCommandState else {
+          return .none
+        }
+
+        for result in results {
+          state.workspace.appendCommandResult(result)
+        }
+
+        if refreshAfterward {
+          state.sidebar.refreshState = .refreshing
+          state.workspace.setRefreshState(.refreshing)
+        } else {
+          state.workspace.setDeviceCommandState(nil)
+        }
+
+        return .none
+
+      case .developerToolCommandRefreshResponse(
+        let deviceCommandState,
+        let result,
+        let preferredSelectedDeviceID
+      ):
+        guard state.workspace.deviceCommandState == deviceCommandState else {
+          return .none
+        }
+
+        let commandResults = state.workspace.commandResults + commandResults(from: result)
+
+        if let snapshot = result.snapshot, result.diagnostic == nil {
+          state.sidebar.snapshot = snapshot
+          state.sidebar.refreshState = .idle
+          state.workspace.applySnapshot(
+            snapshot,
+            refreshState: .idle,
+            commandResults: commandResults,
+            preferredSelectedDeviceID: preferredSelectedDeviceID
+          )
+        } else {
+          let refreshState = InventoryRefreshState.failed(
+            diagnostic: result.diagnostic ?? "Unable to refresh simulator inventory."
+          )
+          state.sidebar.refreshState = refreshState
+          state.workspace.applyRefreshFailure(
+            refreshState,
+            commandResults: commandResults
+          )
+        }
+
+        state.workspace.setDeviceCommandState(nil)
         return .none
 
       case .deviceCommandResponse(let deviceCommandState, let result):
@@ -939,6 +1001,21 @@ struct MainWindowFeature {
           operation: .copy
         )
 
+      case .workspace(.deviceDetail(.developerTools(.openDeepLinkButtonTapped))):
+        return runOpenDeepLinkCommand(&state)
+
+      case .workspace(.deviceDetail(.developerTools(.sendPushButtonTapped))):
+        return runPushNotificationCommand(&state)
+
+      case .workspace(.deviceDetail(.developerTools(.applyPrivacyButtonTapped))):
+        return runPrivacyPermissionCommand(&state)
+
+      case .workspace(.deviceDetail(.developerTools(.setLocationButtonTapped))):
+        return runSetLocationCommand(&state)
+
+      case .workspace(.deviceDetail(.developerTools(.clearLocationButtonTapped))):
+        return runClearLocationCommand(&state)
+
       case .sidebar, .workspace:
         return .none
       }
@@ -1016,7 +1093,18 @@ struct MainWindowFeature {
         commandResult = await coreSimulatorService.bootDevice(deviceID)
       case .shutdown:
         commandResult = await coreSimulatorService.shutdownDevice(deviceID)
-      case .create, .clone, .rename, .erase, .delete, .pair, .unpair:
+      case .create,
+           .clone,
+           .rename,
+           .erase,
+           .delete,
+           .pair,
+           .unpair,
+           .openURL,
+           .pushNotification,
+           .privacyPermission,
+           .setLocation,
+           .clearLocation:
         return
       }
 
@@ -1592,6 +1680,168 @@ struct MainWindowFeature {
     }
   }
 
+  private func runOpenDeepLinkCommand(_ state: inout State) -> Effect<Action> {
+    let tools = state.workspace.deviceDetail.developerTools
+    guard tools.openDeepLinkDisabledReason == nil else {
+      return .none
+    }
+
+    let urlString = DeveloperToolsFeature.State.trimmed(tools.deepLinkURLString)
+    state.workspace.deviceDetail.developerTools.recordDeepLinkURL(urlString)
+
+    return runDeveloperToolCommand(
+      &state,
+      command: .openURL
+    ) { coreSimulatorService, deviceID in
+      await coreSimulatorService.openURL(deviceID, urlString)
+    }
+  }
+
+  private func runPushNotificationCommand(_ state: inout State) -> Effect<Action> {
+    let tools = state.workspace.deviceDetail.developerTools
+    guard tools.sendPushDisabledReason == nil else {
+      return .none
+    }
+
+    let bundleID = nonEmpty(tools.pushBundleID)
+    let payloadJSON = tools.pushPayloadJSON
+
+    return runDeveloperToolCommand(
+      &state,
+      command: .pushNotification
+    ) { coreSimulatorService, deviceID in
+      await coreSimulatorService.pushNotification(
+        deviceID,
+        bundleID,
+        payloadJSON
+      )
+    }
+  }
+
+  private func runPrivacyPermissionCommand(_ state: inout State) -> Effect<Action> {
+    let tools = state.workspace.deviceDetail.developerTools
+    guard tools.applyPrivacyDisabledReason == nil else {
+      return .none
+    }
+
+    let action = tools.privacyAction.rawValue
+    let service = tools.privacyService.simctlArgument
+    let bundleID = nonEmpty(tools.privacyBundleID)
+
+    return runDeveloperToolCommand(
+      &state,
+      command: .privacyPermission
+    ) { coreSimulatorService, deviceID in
+      await coreSimulatorService.setPrivacyPermission(
+        deviceID,
+        action,
+        service,
+        bundleID
+      )
+    }
+  }
+
+  private func runSetLocationCommand(_ state: inout State) -> Effect<Action> {
+    let tools = state.workspace.deviceDetail.developerTools
+    guard tools.setLocationDisabledReason == nil,
+          let coordinate = tools.selectedLocationCoordinate,
+          let normalizedCoordinate = normalizedCoordinate(coordinate)
+    else {
+      return .none
+    }
+
+    state.workspace.deviceDetail.developerTools.recordLocation(normalizedCoordinate)
+    let coordinatePair = "\(normalizedCoordinate.latitude),\(normalizedCoordinate.longitude)"
+
+    return runDeveloperToolCommand(
+      &state,
+      command: .setLocation
+    ) { coreSimulatorService, deviceID in
+      await coreSimulatorService.setLocation(deviceID, coordinatePair)
+    }
+  }
+
+  private func runClearLocationCommand(_ state: inout State) -> Effect<Action> {
+    let tools = state.workspace.deviceDetail.developerTools
+    guard tools.clearLocationDisabledReason == nil else {
+      return .none
+    }
+
+    return runDeveloperToolCommand(
+      &state,
+      command: .clearLocation
+    ) { coreSimulatorService, deviceID in
+      await coreSimulatorService.clearLocation(deviceID)
+    }
+  }
+
+  private func runDeveloperToolCommand(
+    _ state: inout State,
+    command: DeviceCommand,
+    run: @escaping @Sendable (CoreSimulatorServiceClient, String) async -> CommandResult
+  ) -> Effect<Action> {
+    guard state.workspace.deviceCommandState == nil,
+          state.workspace.appCommandState == nil,
+          let device = state.workspace.selectedDevice,
+          device.isAvailable,
+          device.state == .booted || device.state == .shutdown
+    else {
+      return .none
+    }
+
+    let deviceCommandState = DeviceCommandState(command: command, deviceID: device.id)
+    let shouldBoot = device.state == .shutdown
+    state.workspace.setDeviceCommandState(deviceCommandState)
+
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      var commandResults: [CommandResult] = []
+
+      if shouldBoot {
+        let bootResult = await coreSimulatorService.bootDeviceIfNeeded(device.id)
+        commandResults.append(bootResult)
+
+        guard bootResult.succeeded else {
+          await send(
+            .developerToolCommandResults(
+              deviceCommandState,
+              commandResults,
+              refreshAfterward: true
+            )
+          )
+          let refreshResult = await simulatorRepository.refresh()
+          await send(
+            .developerToolCommandRefreshResponse(
+              deviceCommandState,
+              refreshResult,
+              preferredSelectedDeviceID: device.id
+            )
+          )
+          return
+        }
+      }
+
+      commandResults.append(await run(coreSimulatorService, device.id))
+      await send(
+        .developerToolCommandResults(
+          deviceCommandState,
+          commandResults,
+          refreshAfterward: shouldBoot
+        )
+      )
+
+      if shouldBoot {
+        let refreshResult = await simulatorRepository.refresh()
+        await send(
+          .developerToolCommandRefreshResponse(
+            deviceCommandState,
+            refreshResult,
+            preferredSelectedDeviceID: device.id
+          )
+        )
+      }
+    }
+  }
+
   private func runDevicePathAction(
     _ state: inout State,
     deviceID: String,
@@ -1915,7 +2165,18 @@ struct MainWindowFeature {
       return device.state == .shutdown
     case .shutdown:
       return device.state == .booted
-    case .create, .clone, .rename, .erase, .delete, .pair, .unpair:
+    case .create,
+         .clone,
+         .rename,
+         .erase,
+         .delete,
+         .pair,
+         .unpair,
+         .openURL,
+         .pushNotification,
+         .privacyPermission,
+         .setLocation,
+         .clearLocation:
       return false
     }
   }
@@ -1935,6 +2196,34 @@ struct MainWindowFeature {
   private func nonEmpty(_ value: String) -> String? {
     let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
     return trimmedValue.isEmpty ? nil : trimmedValue
+  }
+
+  private func normalizedCoordinate(
+    _ coordinate: DeveloperToolsFeature.LocationCoordinateInput
+  ) -> DeveloperToolsFeature.LocationCoordinateInput? {
+    guard let latitude = Double(
+      DeveloperToolsFeature.State.trimmed(coordinate.latitude)
+    ),
+          let longitude = Double(
+            DeveloperToolsFeature.State.trimmed(coordinate.longitude)
+          )
+    else {
+      return nil
+    }
+
+    return DeveloperToolsFeature.LocationCoordinateInput(
+      name: coordinate.name,
+      latitude: Self.normalizedCoordinateValue(latitude),
+      longitude: Self.normalizedCoordinateValue(longitude)
+    )
+  }
+
+  private static func normalizedCoordinateValue(_ value: Double) -> String {
+    String(
+      format: "%.6f",
+      locale: Locale(identifier: "en_US_POSIX"),
+      value
+    )
   }
 
   private static func preferredDeviceID(from result: CommandResult) -> String? {

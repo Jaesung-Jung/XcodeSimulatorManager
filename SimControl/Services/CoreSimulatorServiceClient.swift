@@ -18,6 +18,11 @@ struct CoreSimulatorServiceClient: Sendable {
   var uninstallApp: @Sendable (_ deviceID: String, _ bundleID: String) async -> CommandResult
   var installApp: @Sendable (_ deviceID: String, _ appBundlePath: URL) async -> CommandResult
   var getAppContainer: @Sendable (_ deviceID: String, _ bundleID: String, _ container: CoreSimulatorService.AppContainerKind) async -> CommandResult
+  var openURL: @Sendable (_ deviceID: String, _ urlString: String) async -> CommandResult
+  var pushNotification: @Sendable (_ deviceID: String, _ bundleID: String?, _ payloadJSON: String) async -> CommandResult
+  var setPrivacyPermission: @Sendable (_ deviceID: String, _ action: String, _ service: String, _ bundleID: String?) async -> CommandResult
+  var setLocation: @Sendable (_ deviceID: String, _ coordinate: String) async -> CommandResult
+  var clearLocation: @Sendable (_ deviceID: String) async -> CommandResult
 }
 
 extension CoreSimulatorServiceClient: DependencyKey {
@@ -83,6 +88,30 @@ extension CoreSimulatorServiceClient: DependencyKey {
           bundleID: bundleID,
           container: container
         )
+      },
+      openURL: { deviceID, urlString in
+        await service.openURL(deviceID: deviceID, urlString: urlString)
+      },
+      pushNotification: { deviceID, bundleID, payloadJSON in
+        await service.pushNotification(
+          deviceID: deviceID,
+          bundleID: bundleID,
+          payloadJSON: payloadJSON
+        )
+      },
+      setPrivacyPermission: { deviceID, action, serviceName, bundleID in
+        await service.setPrivacyPermission(
+          deviceID: deviceID,
+          action: action,
+          service: serviceName,
+          bundleID: bundleID
+        )
+      },
+      setLocation: { deviceID, coordinate in
+        await service.setLocation(deviceID: deviceID, coordinate: coordinate)
+      },
+      clearLocation: { deviceID in
+        await service.clearLocation(deviceID: deviceID)
       }
     )
   }

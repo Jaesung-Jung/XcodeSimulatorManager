@@ -79,7 +79,9 @@ struct DeviceDetailView: View {
             store: store.scope(state: \.installedApps, action: \.installedApps)
           )
 
-          DeveloperToolsSection()
+          DeveloperToolsView(
+            store: store.scope(state: \.developerTools, action: \.developerTools)
+          )
 
           CommandResultsSection(results: store.commandResults)
         }
@@ -464,34 +466,6 @@ extension DeviceDetailView {
       .padding(10)
       .background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 8))
       .accessibilityElement(children: .combine)
-    }
-  }
-}
-
-extension DeviceDetailView {
-  private struct DeveloperToolsSection: View {
-    private let tools: [(id: String, title: LocalizedStringKey, systemImage: String)] = [
-      ("deep-link", "Deep Link", "link"),
-      ("notification", "Notification", "bell.badge"),
-      ("logs", "Logs", "doc.text.magnifyingglass"),
-      ("diagnostics", "Diagnostics", "stethoscope")
-    ]
-
-    var body: some View {
-      VStack(alignment: .leading, spacing: 10) {
-        SectionHeader(title: "Developer Tools", systemImage: "wrench.and.screwdriver")
-
-        HStack(spacing: 8) {
-          ForEach(tools, id: \.id) { tool in
-            Button {
-            } label: {
-              Label(tool.title, systemImage: tool.systemImage)
-                .frame(maxWidth: .infinity)
-            }
-            .disabled(true)
-          }
-        }
-      }
     }
   }
 }

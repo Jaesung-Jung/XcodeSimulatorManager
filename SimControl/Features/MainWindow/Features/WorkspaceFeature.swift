@@ -220,12 +220,14 @@ struct WorkspaceFeature {
       self.deviceCommandState = deviceCommandState
       deviceDetail.deviceCommandState = deviceCommandState
       deviceDetail.installedApps.isDeviceCommandRunning = deviceCommandState != nil
+      deviceDetail.developerTools.deviceCommandState = deviceCommandState
     }
 
     mutating func setAppCommandState(_ appCommandState: AppCommandState?) {
       self.appCommandState = appCommandState
       deviceDetail.appCommandState = appCommandState
       deviceDetail.installedApps.appCommandState = appCommandState
+      deviceDetail.developerTools.appCommandState = appCommandState
     }
 
     mutating func setOpeningSimulatorApp(_ isOpeningSimulatorApp: Bool) {
@@ -251,6 +253,14 @@ struct WorkspaceFeature {
         snapshot?.installedAppsByDeviceID[device.id] ?? []
       } ?? []
       let installedApps = selectedDevice.map(visibleApps) ?? []
+      var developerTools = deviceDetail.developerTools
+      developerTools.updateContext(
+        device: selectedDevice,
+        installedApps: allInstalledApps,
+        selectedAppID: selectedAppID,
+        deviceCommandState: deviceCommandState,
+        appCommandState: appCommandState
+      )
 
       deviceDetail = DeviceDetailFeature.State(
         device: selectedDevice,
@@ -271,7 +281,8 @@ struct WorkspaceFeature {
         commandResults: commandResults,
         deviceCommandState: deviceCommandState,
         appCommandState: appCommandState,
-        isOpeningSimulatorApp: isOpeningSimulatorApp
+        isOpeningSimulatorApp: isOpeningSimulatorApp,
+        developerTools: developerTools
       )
       rebuildInspector()
     }

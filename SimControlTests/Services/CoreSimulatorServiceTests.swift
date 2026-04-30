@@ -498,7 +498,112 @@ struct CoreSimulatorServiceTests {
     ])
   }
 
+  @Test func developerToolCommandsRunExpectedSimctlCommandsAndReturnResults() async {
+    let payloadURL = URL(fileURLWithPath: "/tmp/SimControlTests-PushPayload.json")
+    let payloadJSON = #"{"aps":{"alert":"Hello"}}"#
+    let results = [
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "openurl", "DEVICE-1", "myapp://home"]
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: [
+          "simctl",
+          "push",
+          "DEVICE-1",
+          "com.example.app",
+          payloadURL.path
+        ]
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "privacy", "DEVICE-1", "grant", "location", "com.example.app"]
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "location", "DEVICE-1", "set", "37.334900,-122.009020"]
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "location", "DEVICE-1", "clear"]
+      )
+    ]
+    let recorder = CommandRecorder(results: results)
+    let service = CoreSimulatorService(
+      makePushPayloadURL: { payloadURL },
+      runCommand: { executable, arguments, timeout in
+        await recorder.run(executable, arguments, timeout)
+      }
+    )
+
+    let openResult = await service.openURL(
+      deviceID: "DEVICE-1",
+      urlString: "myapp://home"
+    )
+    let pushResult = await service.pushNotification(
+      deviceID: "DEVICE-1",
+      bundleID: "com.example.app",
+      payloadJSON: payloadJSON
+    )
+    let privacyResult = await service.setPrivacyPermission(
+      deviceID: "DEVICE-1",
+      action: "grant",
+      service: "location",
+      bundleID: "com.example.app"
+    )
+    let setLocationResult = await service.setLocation(
+      deviceID: "DEVICE-1",
+      coordinate: "37.334900,-122.009020"
+    )
+    let clearLocationResult = await service.clearLocation(deviceID: "DEVICE-1")
+
+    #expect(
+      [
+        openResult,
+        pushResult,
+        privacyResult,
+        setLocationResult,
+        clearLocationResult
+      ] == results
+    )
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "openurl", "DEVICE-1", "myapp://home"],
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: [
+          "simctl",
+          "push",
+          "DEVICE-1",
+          "com.example.app",
+          payloadURL.path
+        ],
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "privacy", "DEVICE-1", "grant", "location", "com.example.app"],
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "location", "DEVICE-1", "set", "37.334900,-122.009020"],
+        timeout: 60
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "location", "DEVICE-1", "clear"],
+        timeout: 60
+      )
+    ])
+  }
+
   @Test func customTimeoutsAreForwardedToCommands() async {
+    let payloadURL = URL(fileURLWithPath: "/tmp/SimControlTests-PushPayload.json")
     let recorder = CommandRecorder(results: [
       makeCommandResult(executable: "xcode-select", arguments: ["-p"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "list", "-j"]),
@@ -523,14 +628,29 @@ struct CoreSimulatorServiceTests {
       makeCommandResult(
         executable: "xcrun",
         arguments: ["simctl", "get_app_container", "DEVICE-1", "com.example.app", "data"]
-      )
+      ),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "openurl", "DEVICE-1", "myapp://home"]),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "push", "DEVICE-1", "com.example.app", payloadURL.path]
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "privacy", "DEVICE-1", "reset", "all"]
+      ),
+      makeCommandResult(
+        executable: "xcrun",
+        arguments: ["simctl", "location", "DEVICE-1", "set", "37.334900,-122.009020"]
+      ),
+      makeCommandResult(executable: "xcrun", arguments: ["simctl", "location", "DEVICE-1", "clear"])
     ])
     let service = makeService(
       recorder: recorder,
       selectedXcodePathTimeout: 1,
       listTimeout: 2,
       openSimulatorAppTimeout: 3,
-      deviceCommandTimeout: 4
+      deviceCommandTimeout: 4,
+      makePushPayloadURL: { payloadURL }
     )
 
     _ = await service.selectedXcodePath()
@@ -562,6 +682,23 @@ struct CoreSimulatorServiceTests {
       bundleID: "com.example.app",
       container: .data
     )
+    _ = await service.openURL(deviceID: "DEVICE-1", urlString: "myapp://home")
+    _ = await service.pushNotification(
+      deviceID: "DEVICE-1",
+      bundleID: "com.example.app",
+      payloadJSON: #"{"aps":{"alert":"Hello"}}"#
+    )
+    _ = await service.setPrivacyPermission(
+      deviceID: "DEVICE-1",
+      action: "reset",
+      service: "all",
+      bundleID: nil
+    )
+    _ = await service.setLocation(
+      deviceID: "DEVICE-1",
+      coordinate: "37.334900,-122.009020"
+    )
+    _ = await service.clearLocation(deviceID: "DEVICE-1")
 
     #expect(await recorder.recordedCalls() == [
       CommandCall(
@@ -653,6 +790,31 @@ struct CoreSimulatorServiceTests {
         executable: "xcrun",
         arguments: ["simctl", "get_app_container", "DEVICE-1", "com.example.app", "data"],
         timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "openurl", "DEVICE-1", "myapp://home"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "push", "DEVICE-1", "com.example.app", payloadURL.path],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "privacy", "DEVICE-1", "reset", "all"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "location", "DEVICE-1", "set", "37.334900,-122.009020"],
+        timeout: 4
+      ),
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "location", "DEVICE-1", "clear"],
+        timeout: 4
       )
     ])
   }
@@ -668,13 +830,17 @@ struct CoreSimulatorServiceTests {
     selectedXcodePathTimeout: TimeInterval?,
     listTimeout: TimeInterval?,
     openSimulatorAppTimeout: TimeInterval?,
-    deviceCommandTimeout: TimeInterval?
+    deviceCommandTimeout: TimeInterval?,
+    makePushPayloadURL: @escaping () -> URL = {
+      URL(fileURLWithPath: "/tmp/SimControlTests-PushPayload.json")
+    }
   ) -> CoreSimulatorService {
     CoreSimulatorService(
       selectedXcodePathTimeout: selectedXcodePathTimeout,
       listTimeout: listTimeout,
       openSimulatorAppTimeout: openSimulatorAppTimeout,
-      deviceCommandTimeout: deviceCommandTimeout
+      deviceCommandTimeout: deviceCommandTimeout,
+      makePushPayloadURL: makePushPayloadURL
     ) { executable, arguments, timeout in
       await recorder.run(executable, arguments, timeout)
     }
