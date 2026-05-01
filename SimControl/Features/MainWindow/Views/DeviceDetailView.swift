@@ -109,7 +109,7 @@ extension DeviceDetailView {
         MetricTile(
           title: "Platform",
           value: device.platform.displayTitle,
-          systemImage: device.platform.symbolName
+          systemImage: device.symbolName
         )
         MetricTile(
           title: "Runtime",
@@ -174,7 +174,7 @@ extension DeviceDetailView {
     var body: some View {
       VStack(alignment: .leading, spacing: 10) {
         HStack(alignment: .top, spacing: 12) {
-          Image(systemName: device.platform.symbolName)
+          Image(systemName: device.symbolName)
             .font(.system(size: 30, weight: .regular))
             .foregroundStyle(.secondary)
             .frame(width: 36)

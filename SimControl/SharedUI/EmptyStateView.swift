@@ -33,7 +33,6 @@ struct EmptyStateView: View {
           .font(.subheadline)
           .foregroundStyle(.secondary)
           .multilineTextAlignment(.center)
-          .fixedSize(horizontal: false, vertical: true)
       }
 
       if let action {

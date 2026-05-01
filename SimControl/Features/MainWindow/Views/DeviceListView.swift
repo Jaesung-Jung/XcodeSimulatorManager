@@ -4,27 +4,6 @@ import SwiftUI
 struct DeviceListView: View {
   let store: StoreOf<DeviceListFeature>
 
-  private var selectedDeviceID: Binding<String?> {
-    Binding(
-      get: { store.selectedDeviceID },
-      set: { store.send(.selectionChanged($0)) }
-    )
-  }
-
-  private var availabilityFilter: Binding<SimulatorFilters.DeviceAvailabilityFilter> {
-    Binding(
-      get: { store.filters.deviceAvailabilityFilter },
-      set: { store.send(.deviceAvailabilityFilterChanged($0)) }
-    )
-  }
-
-  private var appPresenceFilter: Binding<SimulatorFilters.DeviceAppPresenceFilter> {
-    Binding(
-      get: { store.filters.deviceAppPresenceFilter },
-      set: { store.send(.deviceAppPresenceFilterChanged($0)) }
-    )
-  }
-
   private var deviceSort: Binding<SimulatorFilters.DeviceSort> {
     Binding(
       get: { store.filters.deviceSort },
@@ -42,21 +21,10 @@ struct DeviceListView: View {
   var body: some View {
     VStack(spacing: 0) {
       HStack(spacing: 8) {
-        VStack(alignment: .leading, spacing: 2) {
-          Text("Devices")
-            .font(.headline)
-
-          Text("\(store.devices.count) of \(store.totalDeviceCount) shown")
-            .font(.caption)
-            .foregroundStyle(.secondary)
-        }
+        Text("Devices")
+          .font(.headline)
 
         Spacer()
-
-        DeviceFilterMenu(
-          availabilityFilter: availabilityFilter,
-          appPresenceFilter: appPresenceFilter
-        )
 
         DeviceSortMenu(
           sort: deviceSort,
@@ -65,17 +33,6 @@ struct DeviceListView: View {
       }
       .padding(.horizontal, 14)
       .padding(.vertical, 12)
-
-      if store.filters.hasActiveDeviceFilters {
-        ActiveDeviceFilters(
-          filters: store.filters,
-          onClear: {
-            store.send(.clearDeviceFiltersButtonTapped)
-          }
-        )
-        .padding(.horizontal, 14)
-        .padding(.bottom, 10)
-      }
 
       Divider()
 
@@ -89,30 +46,47 @@ struct DeviceListView: View {
       } else if store.devices.isEmpty {
         EmptyStateView(
           title: "No Matching Devices",
-          message: "No simulator devices match the current search and filters.",
+          message: "No simulator devices match the current search or sidebar selection.",
           systemImage: "line.3.horizontal.decrease.circle"
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
-        List(selection: selectedDeviceID) {
-          ForEach(store.devices) { device in
-            Row(
-              device: device,
-              runtime: store.runtimeByID[device.runtimeID],
-              deviceType: store.deviceTypeByID[device.deviceTypeID],
-              installedAppCount: installedAppCount(for: device),
-              isPinned: store.filters.pinnedDeviceIDs.contains(device.id),
-              onPin: {
-                store.send(.pinButtonTapped(device.id))
+        ScrollView {
+          LazyVStack(alignment: .leading, spacing: 0) {
+            ForEach(store.devices) { device in
+              Button {
+                store.send(.selectionChanged(device.id))
+              } label: {
+                Row(
+                  device: device,
+                  runtime: store.runtimeByID[device.runtimeID],
+                  deviceType: store.deviceTypeByID[device.deviceTypeID],
+                  installedAppCount: installedAppCount(for: device),
+                  isPinned: store.filters.pinnedDeviceIDs.contains(device.id),
+                  onPin: {
+                    store.send(.pinButtonTapped(device.id))
+                  }
+                )
+                .tag(device.id)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 4)
+                .contentShape(.rect)
+                .background {
+                  RoundedRectangle(cornerRadius: 8)
+                    .fill(.quaternary)
+                    .padding(.horizontal, 8)
+                    .opacity(store.selectedDeviceID == device.id ? 1 : 0)
+                }
               }
-            )
-            .tag(device.id)
+              .buttonStyle(.plain)
+            }
           }
+          .padding(.vertical, 8)
+          .animation(.spring, value: store.devices)
         }
-        .listStyle(.inset)
+        .scrollIndicators(.hidden)
       }
     }
-    .background(.background)
   }
 
   private func installedAppCount(for device: SimulatorDevice) -> Int? {
@@ -121,38 +95,6 @@ struct DeviceListView: View {
     }
 
     return store.installedAppsByDeviceID[device.id]?.count ?? 0
-  }
-}
-
-extension DeviceListView {
-  private struct DeviceFilterMenu: View {
-    @Binding var availabilityFilter: SimulatorFilters.DeviceAvailabilityFilter
-    @Binding var appPresenceFilter: SimulatorFilters.DeviceAppPresenceFilter
-
-    var body: some View {
-      Menu {
-        Picker("Availability", selection: $availabilityFilter) {
-          Text(SimulatorFilters.DeviceAvailabilityFilter.all.displayTitle)
-            .tag(SimulatorFilters.DeviceAvailabilityFilter.all)
-          Text(SimulatorFilters.DeviceAvailabilityFilter.available.displayTitle)
-            .tag(SimulatorFilters.DeviceAvailabilityFilter.available)
-          Text(SimulatorFilters.DeviceAvailabilityFilter.unavailable.displayTitle)
-            .tag(SimulatorFilters.DeviceAvailabilityFilter.unavailable)
-        }
-
-        Picker("Apps", selection: $appPresenceFilter) {
-          Text(SimulatorFilters.DeviceAppPresenceFilter.all.displayTitle)
-            .tag(SimulatorFilters.DeviceAppPresenceFilter.all)
-          Text(SimulatorFilters.DeviceAppPresenceFilter.hasApps.displayTitle)
-            .tag(SimulatorFilters.DeviceAppPresenceFilter.hasApps)
-          Text(SimulatorFilters.DeviceAppPresenceFilter.noApps.displayTitle)
-            .tag(SimulatorFilters.DeviceAppPresenceFilter.noApps)
-        }
-      } label: {
-        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
-      }
-      .help("Filter devices")
-    }
   }
 }
 
@@ -195,51 +137,6 @@ extension DeviceListView {
 }
 
 extension DeviceListView {
-  private struct ActiveDeviceFilters: View {
-    let filters: SimulatorFilters
-    let onClear: () -> Void
-
-    var body: some View {
-      HStack(spacing: 6) {
-        if filters.sidebarScope != .all {
-          FilterChip(title: filters.sidebarScope.displayTitle)
-        }
-
-        if filters.deviceAvailabilityFilter != .all {
-          FilterChip(title: filters.deviceAvailabilityFilter.displayTitle)
-        }
-
-        if filters.deviceAppPresenceFilter != .all {
-          FilterChip(title: filters.deviceAppPresenceFilter.displayTitle)
-        }
-
-        Spacer(minLength: 4)
-
-        Button("Clear") {
-          onClear()
-        }
-        .buttonStyle(.plain)
-        .font(.caption)
-      }
-    }
-  }
-}
-
-extension DeviceListView {
-  private struct FilterChip: View {
-    let title: String
-
-    var body: some View {
-      Text(title)
-        .font(.caption)
-        .padding(.horizontal, 7)
-        .padding(.vertical, 3)
-        .background(.quaternary.opacity(0.45), in: Capsule())
-    }
-  }
-}
-
-extension DeviceListView {
   private struct Row: View {
     let device: SimulatorDevice
     let runtime: SimulatorRuntime?
@@ -256,7 +153,7 @@ extension DeviceListView {
 
     var body: some View {
       HStack(spacing: 10) {
-        Image(systemName: device.platform.symbolName)
+        Image(systemName: device.symbolName)
           .font(.title3)
           .foregroundStyle(.secondary)
           .frame(width: 24)
@@ -278,15 +175,9 @@ extension DeviceListView {
             )
             .tint(device.state.statusTint)
 
-            if let installedAppCount {
+            if let installedAppCount, installedAppCount > 0 {
               StatusBadge(
-                title: "\(installedAppCount) apps",
-                systemImage: "app"
-              )
-            } else {
-              StatusBadge(
-                title: "Apps pending",
-                systemImage: "app"
+                title: "\(installedAppCount) apps"
               )
             }
           }

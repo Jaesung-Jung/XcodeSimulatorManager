@@ -262,35 +262,6 @@ struct WorkspaceFeatureTests {
   }
 
   @Test
-  func deviceAppPresenceFilterUsesVisibleAppProjection() {
-    let systemApp = MainWindowTestFixtures.makeInstalledApp(
-      deviceID: MainWindowTestFixtures.device.id,
-      bundleID: "com.apple.Preferences",
-      isSystemApp: true
-    )
-    let snapshot = MainWindowTestFixtures.makeSnapshot(
-      installedAppsByDeviceID: [
-        MainWindowTestFixtures.device.id: [systemApp]
-      ]
-    )
-    var state = WorkspaceFeature.State(
-      snapshot: snapshot,
-      selectedDeviceID: MainWindowTestFixtures.device.id,
-      installedAppsAvailability: .loaded
-    )
-
-    state.setDeviceAppPresenceFilter(.hasApps)
-
-    #expect(state.deviceList.devices.isEmpty)
-    #expect(state.deviceList.selectedDeviceID == nil)
-
-    state.setDeviceAppPresenceFilter(.noApps)
-
-    #expect(state.deviceList.devices.map(\.id) == [MainWindowTestFixtures.device.id])
-    #expect(state.deviceList.selectedDeviceID == MainWindowTestFixtures.device.id)
-  }
-
-  @Test
   func pinnedSidebarScopeProjectsVisibleDevices() {
     var state = WorkspaceFeature.State(
       snapshot: MainWindowTestFixtures.makeSnapshot(

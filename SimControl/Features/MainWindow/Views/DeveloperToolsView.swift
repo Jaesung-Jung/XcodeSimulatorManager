@@ -758,7 +758,6 @@ extension DeveloperToolsView {
           .font(.caption)
           .foregroundStyle(.secondary)
           .lineLimit(2)
-          .fixedSize(horizontal: false, vertical: true)
       }
     }
   }

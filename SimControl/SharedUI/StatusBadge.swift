@@ -24,7 +24,7 @@ struct StatusBadge: View {
     .padding(.horizontal, 7)
     .padding(.vertical, 3)
     .foregroundStyle(.tint)
-    .background(.quaternary.opacity(0.55), in: Capsule())
+    .background(.quaternary, in: Capsule())
     .accessibilityElement(children: .ignore)
     .accessibilityLabel(title)
   }

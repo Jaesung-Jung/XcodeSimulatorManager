@@ -130,16 +130,6 @@ struct WorkspaceFeature {
       rebuildAfterFilterChange()
     }
 
-    mutating func setDeviceAvailabilityFilter(_ filter: SimulatorFilters.DeviceAvailabilityFilter) {
-      filters.deviceAvailabilityFilter = filter
-      rebuildAfterFilterChange()
-    }
-
-    mutating func setDeviceAppPresenceFilter(_ filter: SimulatorFilters.DeviceAppPresenceFilter) {
-      filters.deviceAppPresenceFilter = filter
-      rebuildAfterFilterChange()
-    }
-
     mutating func setDeviceSort(_ sort: SimulatorFilters.DeviceSort) {
       filters.deviceSort = sort
       rebuildAfterFilterChange()
@@ -147,13 +137,6 @@ struct WorkspaceFeature {
 
     mutating func setDeviceSortDirection(_ direction: SimulatorFilters.SortDirection) {
       filters.deviceSortDirection = direction
-      rebuildAfterFilterChange()
-    }
-
-    mutating func clearDeviceFilters() {
-      filters.sidebarScope = .all
-      filters.deviceAvailabilityFilter = .all
-      filters.deviceAppPresenceFilter = .all
       rebuildAfterFilterChange()
     }
 
@@ -460,8 +443,6 @@ struct WorkspaceFeature {
     private func filteredDevices(_ devices: [SimulatorDevice]) -> [SimulatorDevice] {
       devices.filter { device in
         deviceMatchesSidebarScope(device)
-          && deviceMatchesAvailabilityFilter(device)
-          && deviceMatchesAppPresenceFilter(device)
           && deviceMatchesSearch(device)
       }
     }
@@ -480,29 +461,6 @@ struct WorkspaceFeature {
         device.runtimeID == runtimeID
       case .state(let state):
         device.state == state
-      }
-    }
-
-    private func deviceMatchesAvailabilityFilter(_ device: SimulatorDevice) -> Bool {
-      switch filters.deviceAvailabilityFilter {
-      case .all:
-        true
-      case .available:
-        device.isAvailable
-      case .unavailable:
-        !device.isAvailable
-      }
-    }
-
-    private func deviceMatchesAppPresenceFilter(_ device: SimulatorDevice) -> Bool {
-      let apps = filteredApps(snapshot?.installedAppsByDeviceID[device.id] ?? [])
-      switch filters.deviceAppPresenceFilter {
-      case .all:
-        return true
-      case .hasApps:
-        return !apps.isEmpty
-      case .noApps:
-        return apps.isEmpty
       }
     }
 
@@ -754,24 +712,12 @@ struct WorkspaceFeature {
         state.togglePinnedDevice(id: id)
         return .none
 
-      case .deviceList(.deviceAvailabilityFilterChanged(let filter)):
-        state.setDeviceAvailabilityFilter(filter)
-        return .none
-
-      case .deviceList(.deviceAppPresenceFilterChanged(let filter)):
-        state.setDeviceAppPresenceFilter(filter)
-        return .none
-
       case .deviceList(.deviceSortChanged(let sort)):
         state.setDeviceSort(sort)
         return .none
 
       case .deviceList(.deviceSortDirectionChanged(let direction)):
         state.setDeviceSortDirection(direction)
-        return .none
-
-      case .deviceList(.clearDeviceFiltersButtonTapped):
-        state.clearDeviceFilters()
         return .none
 
       case .deviceDetail(.installedApps(.selectionChanged(let id))):

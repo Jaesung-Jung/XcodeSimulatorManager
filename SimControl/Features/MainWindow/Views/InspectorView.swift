@@ -293,7 +293,6 @@ extension InspectorView {
 
         Text(warning.message)
           .font(.caption)
-          .fixedSize(horizontal: false, vertical: true)
 
         if let relatedID = warning.relatedID {
           Text(relatedID)

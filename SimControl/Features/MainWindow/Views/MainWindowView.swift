@@ -3,6 +3,8 @@ import SwiftUI
 
 @MainActor
 struct MainWindowView: View {
+  @State private var isInspectorPresented = true
+
   let store: StoreOf<MainWindowFeature>
 
   private var isRefreshing: Bool {
@@ -49,63 +51,76 @@ struct MainWindowView: View {
       WorkspaceView(
         store: store.scope(state: \.workspace, action: \.workspace)
       )
-      .frame(minWidth: 580)
+    }
+    .inspector(isPresented: $isInspectorPresented) {
+      InspectorView(
+        store: store.scope(
+          state: \.workspace.inspector,
+          action: \.workspace.inspector
+        )
+      )
+      .background(.windowBackground)
     }
     .frame(minWidth: 1_120, minHeight: 720)
     .background(.windowBackground)
     .toolbar {
-      ToolbarItem(placement: .principal) {
-        TextField("Search", text: searchQuery)
-          .textFieldStyle(.roundedBorder)
-          .frame(width: 260)
-          .help("Search devices, apps, identifiers, and known paths")
-      }
+//      ToolbarItemGroup(placement: .status) {
+//        TextField("Search", text: searchQuery)
+//          .textFieldStyle(.roundedBorder)
+//          .frame(width: 260)
+//          .help("Search devices, apps, identifiers, and known paths")
+//      }
 
-      ToolbarItem(placement: .primaryAction) {
-        Button {
-          store.send(.createSimulatorButtonTapped)
-        } label: {
-          Label("Create Simulator", systemImage: "plus")
-        }
-        .disabled(!store.canCreateDevice)
-        .help("Create simulator")
-      }
-
-      ToolbarItem(placement: .primaryAction) {
-        Button {
-          store.send(.cloneSelectedSimulatorButtonTapped)
-        } label: {
-          Label("Clone Simulator", systemImage: "plus.square.on.square")
-        }
-        .disabled(!store.canCloneSelectedDevice)
-        .help("Clone selected simulator")
-      }
-
-      ToolbarItem(placement: .primaryAction) {
-        Button {
-          store.send(.pairDevicesButtonTapped)
-        } label: {
-          Label("Pair Simulators", systemImage: "link")
-        }
-        .disabled(!store.canPairDevices)
-        .help("Pair watch and phone simulators")
-      }
-
-      ToolbarItem(placement: .primaryAction) {
-        Button {
-          store.send(.refreshButtonTapped)
-        } label: {
-          if isRefreshing {
-            ProgressView()
-              .controlSize(.small)
-              .frame(width: 18, height: 18)
-          } else {
-            Label("Refresh", systemImage: "arrow.clockwise")
+      ToolbarItem {
+        ControlGroup {
+          Button {
+            store.send(.createSimulatorButtonTapped)
+          } label: {
+            Label("Create Simulator", systemImage: "plus")
           }
+          .disabled(!store.canCreateDevice)
+          .help("Create simulator")
+
+          Button {
+            store.send(.cloneSelectedSimulatorButtonTapped)
+          } label: {
+            Label("Clone Simulator", systemImage: "plus.square.on.square")
+          }
+          .disabled(!store.canCloneSelectedDevice)
+          .help("Clone selected simulator")
+
+          Button {
+            store.send(.pairDevicesButtonTapped)
+          } label: {
+            Label("Pair Simulators", systemImage: "link")
+          }
+          .disabled(!store.canPairDevices)
+          .help("Pair watch and phone simulators")
+
+          Button {
+            store.send(.refreshButtonTapped)
+          } label: {
+            if isRefreshing {
+              ProgressView()
+                .controlSize(.small)
+                .frame(width: 18, height: 18)
+            } else {
+              Label("Refresh", systemImage: "arrow.clockwise")
+            }
+          }
+          .disabled(isRefreshing)
+          .help("Refresh simulator inventory")
+          .keyboardShortcut("r", modifiers: .command)
         }
-        .disabled(isRefreshing)
-        .help("Refresh simulator inventory")
-        .keyboardShortcut("r", modifiers: .command)
+      }
+
+      ToolbarItemGroup(placement: .primaryAction) {
+        Button {
+          isInspectorPresented.toggle()
+        } label: {
+          Label("Inspector", systemImage: "sidebar.trailing")
+        }
+        .help(isInspectorPresented ? "Hide inspector" : "Show inspector")
       }
     }
     .sheet(item: lifecycleSheet) { sheet in

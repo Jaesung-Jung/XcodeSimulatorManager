@@ -619,7 +619,6 @@ extension InstalledAppsView {
           Text(message)
             .font(.caption)
             .foregroundStyle(.secondary)
-            .fixedSize(horizontal: false, vertical: true)
         }
 
         Spacer()

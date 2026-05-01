@@ -31,18 +31,6 @@ struct SimulatorFilters: Equatable {
     case dataSize
   }
 
-  enum DeviceAvailabilityFilter: Equatable, Hashable {
-    case all
-    case available
-    case unavailable
-  }
-
-  enum DeviceAppPresenceFilter: Equatable, Hashable {
-    case all
-    case hasApps
-    case noApps
-  }
-
   enum AppSystemFilter: Equatable, Hashable {
     case user
     case system
@@ -59,8 +47,6 @@ struct SimulatorFilters: Equatable {
 
   var searchQuery: String
   var sidebarScope: SidebarScope
-  var deviceAvailabilityFilter: DeviceAvailabilityFilter
-  var deviceAppPresenceFilter: DeviceAppPresenceFilter
   var deviceSort: DeviceSort
   var deviceSortDirection: SortDirection
   var appSystemFilter: AppSystemFilter
@@ -75,8 +61,6 @@ struct SimulatorFilters: Equatable {
   init(
     searchQuery: String = "",
     sidebarScope: SidebarScope = .all,
-    deviceAvailabilityFilter: DeviceAvailabilityFilter = .all,
-    deviceAppPresenceFilter: DeviceAppPresenceFilter = .all,
     deviceSort: DeviceSort = .name,
     deviceSortDirection: SortDirection = .ascending,
     appSystemFilter: AppSystemFilter = .user,
@@ -90,8 +74,6 @@ struct SimulatorFilters: Equatable {
   ) {
     self.searchQuery = searchQuery
     self.sidebarScope = sidebarScope
-    self.deviceAvailabilityFilter = deviceAvailabilityFilter
-    self.deviceAppPresenceFilter = deviceAppPresenceFilter
     self.deviceSort = deviceSort
     self.deviceSortDirection = deviceSortDirection
     self.appSystemFilter = appSystemFilter
@@ -110,12 +92,6 @@ struct SimulatorFilters: Equatable {
 
   var hasSearchQuery: Bool {
     !trimmedSearchQuery.isEmpty
-  }
-
-  var hasActiveDeviceFilters: Bool {
-    sidebarScope != .all
-      || deviceAvailabilityFilter != .all
-      || deviceAppPresenceFilter != .all
   }
 
   var hasActiveAppFilters: Bool {

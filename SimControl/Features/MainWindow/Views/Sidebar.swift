@@ -57,14 +57,6 @@ struct Sidebar: View {
       .sorted { $0.title < $1.title }
   }
 
-  private var xcodeTitle: String {
-    guard let snapshot = store.snapshot else {
-      return "Xcode"
-    }
-
-    return snapshot.xcode.isValid ? "Xcode Ready" : "Xcode Issue"
-  }
-
   private var xcodeValue: String {
     if store.refreshState == .refreshing {
       return "Loading"
@@ -160,7 +152,7 @@ struct Sidebar: View {
 
       Section("Environment") {
         BarItem(
-          title: LocalizedStringKey(xcodeTitle),
+          title: "Xcode",
           systemImage: "hammer",
           value: xcodeValue
         )
@@ -199,7 +191,6 @@ extension Sidebar {
     var body: some View {
       HStack(spacing: 8) {
         Image(systemName: systemImage)
-          .foregroundStyle(.tint)
           .frame(width: 18)
           .accessibilityHidden(true)
 

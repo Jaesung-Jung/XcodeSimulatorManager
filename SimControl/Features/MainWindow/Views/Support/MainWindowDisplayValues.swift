@@ -20,15 +20,32 @@ extension SimulatorPlatform {
   var symbolName: String {
     switch self {
     case .iOS:
-      "iphone"
+      "ipad.landscape.and.iphone"
     case .watchOS:
       "applewatch"
     case .tvOS:
       "appletv"
     case .visionOS:
-      "visionpro"
+      "vision.pro"
     case .unknown:
-      "display"
+      "questionmark.circle.dashed"
+    }
+  }
+}
+
+extension SimulatorDevice {
+  var symbolName: String {
+    switch platform {
+    case .iOS:
+      name.lowercased().hasPrefix("ipad") ? "ipad.landscape" : "iphone"
+    case .watchOS:
+      "applewatch"
+    case .tvOS:
+      "appletv"
+    case .visionOS:
+      "vision.pro"
+    case .unknown:
+      "questionmark.circle.dashed"
     }
   }
 }
@@ -174,32 +191,6 @@ extension SimulatorFilters.AppSort {
       "Version"
     case .dataSize:
       "Data Size"
-    }
-  }
-}
-
-extension SimulatorFilters.DeviceAvailabilityFilter {
-  var displayTitle: String {
-    switch self {
-    case .all:
-      "Any Availability"
-    case .available:
-      "Available"
-    case .unavailable:
-      "Unavailable"
-    }
-  }
-}
-
-extension SimulatorFilters.DeviceAppPresenceFilter {
-  var displayTitle: String {
-    switch self {
-    case .all:
-      "Any App Count"
-    case .hasApps:
-      "Has Apps"
-    case .noApps:
-      "No Apps"
     }
   }
 }

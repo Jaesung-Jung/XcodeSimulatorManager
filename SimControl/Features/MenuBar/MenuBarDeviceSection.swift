@@ -127,7 +127,7 @@ extension MenuBarDeviceSection {
       Button {
         onSelect()
       } label: {
-        Label(title, systemImage: device.platform.symbolName)
+        Label(title, systemImage: device.symbolName)
       }
     }
   }

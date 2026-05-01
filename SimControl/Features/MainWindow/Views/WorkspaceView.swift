@@ -6,18 +6,7 @@ struct WorkspaceView: View {
   let store: StoreOf<WorkspaceFeature>
 
   var body: some View {
-    HStack(spacing: 0) {
-      DetailContent(store: store)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-      Divider()
-
-      InspectorView(
-        store: store.scope(state: \.inspector, action: \.inspector)
-      )
-      .frame(width: 320)
-    }
-    .background(.windowBackground)
+    DetailContent(store: store)
   }
 }
 
@@ -34,7 +23,6 @@ extension WorkspaceView {
           message: "Refresh completed, but no simulator devices were returned.",
           systemImage: "iphone.slash"
         )
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
       } else if store.deviceDetail.device != nil {
         DeviceDetailView(
           store: store.scope(state: \.deviceDetail, action: \.deviceDetail)
@@ -45,7 +33,6 @@ extension WorkspaceView {
           message: "Choose a device from the list to inspect its runtime, folders, apps, and recent command results.",
           systemImage: "sidebar.left"
         )
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
       }
     }
   }
@@ -62,21 +49,18 @@ extension WorkspaceView {
           title: "Refreshing Inventory",
           message: "Loading simulator devices from the active Xcode selection."
         )
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
       case .failed(let diagnostic):
         EmptyStateView(
           title: "Refresh Failed",
           message: LocalizedStringKey(diagnostic),
           systemImage: "exclamationmark.triangle"
         )
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
       case .idle:
         EmptyStateView(
           title: "Simulator Inventory",
           message: "Refresh simulator inventory to load devices from the active Xcode selection.",
           systemImage: "iphone"
         )
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
       }
     }
   }

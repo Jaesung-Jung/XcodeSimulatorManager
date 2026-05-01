@@ -37,11 +37,8 @@ struct DeviceListFeature {
   enum Action: Equatable {
     case selectionChanged(String?)
     case pinButtonTapped(String)
-    case deviceAvailabilityFilterChanged(SimulatorFilters.DeviceAvailabilityFilter)
-    case deviceAppPresenceFilterChanged(SimulatorFilters.DeviceAppPresenceFilter)
     case deviceSortChanged(SimulatorFilters.DeviceSort)
     case deviceSortDirectionChanged(SimulatorFilters.SortDirection)
-    case clearDeviceFiltersButtonTapped
   }
 
   var body: some ReducerOf<Self> {
@@ -52,11 +49,8 @@ struct DeviceListFeature {
         return .none
 
       case .pinButtonTapped,
-           .deviceAvailabilityFilterChanged,
-           .deviceAppPresenceFilterChanged,
            .deviceSortChanged,
-           .deviceSortDirectionChanged,
-           .clearDeviceFiltersButtonTapped:
+           .deviceSortDirectionChanged:
         return .none
       }
     }
