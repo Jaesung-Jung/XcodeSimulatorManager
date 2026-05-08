@@ -14,6 +14,8 @@ Apple and system apps are hidden by default. A setting can show them when a user
 
 SimControl reads app metadata from the installed `.app/Info.plist`. App names use `CFBundleDisplayName`, then `CFBundleName`, then the bundle identifier as fallback.
 
+Icon paths are resolved from bundle icon metadata such as `CFBundleIconFile`, `CFBundleIconFiles`, `CFBundleIcons`, and `CFBundleIcons~ipad`. If those entries do not resolve to a usable PNG, SimControl falls back to AppIcon-named PNG files in the app bundle.
+
 App details include:
 
 - Icon
@@ -25,7 +27,7 @@ App details include:
 - Data container
 - App Groups
 
-If the app icon cannot be resolved, SimControl displays a default app icon. Icon loading does not block the main UI.
+If the app icon cannot be resolved or loaded as a valid image, SimControl displays a default app icon. Icon loading happens in the row view and does not block inventory refresh.
 
 ## Launch
 
@@ -57,16 +59,16 @@ If the target simulator is shut down, SimControl follows the boot-before-install
 
 ## App Groups
 
-SimControl shows App Group containers associated with installed apps when they can be detected. Apple and system groups are hidden by default.
+SimControl shows App Group containers associated with installed apps when they can be detected from entitlement metadata and matched to CoreSimulator App Group containers. Apple and system groups can be hidden with the scanner's system-app filtering mode.
 
 Each App Group entry shows its group identifier and path and can be opened in Finder.
 
 ## Database Files
 
-SimControl can detect common database files inside an app's data container, including Realm and SQLite files. If database files are present, the app detail view provides an open action.
+SimControl detects common database files inside an app's data container, including Realm and SQLite files. App rows show a database-count badge when files are present.
 
 When multiple database files are found, the user can choose which file to open. Files are opened with the system default app.
 
 ## Size Calculation
 
-Bundle size and data container size are calculated on demand. Size calculation runs outside the main thread and shows a loading or not-calculated state until the result is available.
+Data container size is calculated during app container scanning by walking files under the data container and summing file sizes. The UI shows the calculated value when available and keeps the value absent when the data container cannot be read or is not known.

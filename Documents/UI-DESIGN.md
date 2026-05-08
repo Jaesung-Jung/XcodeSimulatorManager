@@ -212,19 +212,19 @@ Metrics should be compact panels with 8 px corner radius or less. They are infor
 
 ### Installed Apps
 
-Installed apps are shown inside the selected device context. This section should support both quick action and inspection.
+Installed apps are shown inside the selected device context. This section supports quick action, filtering, sorting, and inspection.
 
-Current Phase 10 behavior shows an `App Inventory Not Loaded` placeholder because `AppContainerScanner` is intentionally not implemented yet. This is a phase boundary, not a runtime scan failure. The definitive `No Installed Apps` state should only appear after installed app inventory has been loaded.
+If app inventory has not been loaded yet, the section shows `App Inventory Not Loaded`. After refresh has loaded app inventory, an empty result is shown as `No Installed Apps` or as a filtered empty state when app filters hide all discovered apps.
 
 Each app row shows:
 
-- App icon or fallback symbol
+- Resolved app icon or fallback symbol
 - Display name
 - Bundle identifier
 - Version and build
 - Data size when calculated
-- Launch action
-- Open container action
+- Database-file count when detected
+- Selection state for detail actions
 
 Selecting an app updates the inspector. App actions operate on the selected simulator and app pair.
 
@@ -239,6 +239,8 @@ Common app actions:
 - Open App Group container
 - Copy bundle identifier
 - Install onto another compatible simulator
+
+Current row icons are loaded from the scanner-provided icon path using AppKit `NSImage` at the SwiftUI/AppKit boundary. Missing or invalid icon files fall back to the system app symbol without blocking the main UI.
 
 Destructive actions must require confirmation. They should not be placed as prominent default actions in the row.
 
@@ -491,7 +493,6 @@ The TCA feature store remains responsible for selection, filters, action state, 
 Near-term UI refinements:
 
 - Add persistent selected-device and selected-app restoration.
-- Add installed app scanning through `AppContainerScanner`.
 - Add sidebar selection, filtering, pinned items, and search integration.
 - Add real command-state disabled reasons.
 - Add settings scene for environment and menu bar preferences.
