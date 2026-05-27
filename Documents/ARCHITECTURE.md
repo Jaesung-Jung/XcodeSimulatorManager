@@ -20,7 +20,7 @@ flowchart TB
     Window["Main Window"]
     Menu["Menu Bar"]
     Settings["Settings"]
-    Future["Future service placeholders"]
+    Supporting["Supporting services"]
 
     App --> Delegate
     App --> Container
@@ -35,10 +35,10 @@ flowchart TB
     Window --> Store
     Menu --> Container
     Settings --> Container
-    Container -. later phases .-> Future
+    Container --> Supporting
 ```
 
-The main-window UI sends user intent to scoped TCA stores. `MainWindowFeature` is the root effect boundary: it coordinates refresh work through `SimulatorRepository`, then publishes updated state through child features. Process execution stays outside the UI layer. File scanning, monitoring, link management, and permission handling have placeholder services and are wired in later phases.
+The main-window UI sends user intent to scoped TCA stores. `MainWindowFeature` is the root effect boundary: it coordinates refresh work through `SimulatorRepository`, then publishes updated state through child features. Process execution stays outside the UI layer. File scanning, monitoring, link management, and permission handling live in dedicated services that can be wired into features as each surface needs them.
 
 ## Application Lifecycle
 
@@ -202,7 +202,9 @@ The current refresh follows this shape:
 5. Collect mapping warnings.
 6. Return a new `SimulatorSnapshot`.
 
-Installed app scanning, link-folder updates, and file monitoring are later-phase repository responsibilities. Until the scanner is wired, `installedAppsByDeviceID` is not authoritative real app inventory.
+Installed app scanning is part of refresh. `SimulatorRepository` asks `AppContainerScanner` to scan each simulator device after `simctl list -j` has been mapped into domain devices, then stores non-empty results in `installedAppsByDeviceID`. Scanner warnings are appended to the snapshot warning list so missing or unreadable CoreSimulator folders do not fail the whole refresh.
+
+Link-folder updates and file monitoring remain separate service responsibilities.
 
 Command actions follow this shape:
 
@@ -240,15 +242,13 @@ openSimulatorApp()
 
 `selectedXcodePath()` runs `xcode-select -p`. `list()` runs `xcrun simctl list -j`. `openSimulatorApp()` runs `open -a Simulator`. `CommandExecutor` resolves bare command names against the inherited process `PATH` first, then macOS default executable directories, so service code does not hard-code system executable paths.
 
-Future typed service methods will cover boot, shutdown, app launch, install/uninstall, device creation, erase/delete, pairing, app container lookup, URL opening, push notification, privacy, location, screenshots, and video recording.
+Typed service methods cover current simulator and app commands: boot, bootstatus, shutdown, create, clone, rename, erase, delete, pair, unpair, launch, terminate, uninstall, install, app container lookup, URL opening, push notification, privacy permission changes, location, and status bar overrides. Screenshot and video recording commands remain future additions.
 
 Service methods do not update UI state. They execute commands and return typed results to the repository.
 
 ## App Container Scanner
 
-`AppContainerScanner` is currently a placeholder. Phase 15 wires it into `SimulatorRepository`.
-
-When implemented, `AppContainerScanner` will read CoreSimulator folders to discover installed apps, including apps on shutdown simulators.
+`AppContainerScanner` reads CoreSimulator folders to discover installed apps, including apps on shutdown simulators.
 
 It scans:
 
@@ -258,7 +258,9 @@ It scans:
 ~/Library/Developer/CoreSimulator/Devices/<UDID>/data/Containers/Shared/AppGroup
 ```
 
-The scanner matches bundle and data containers using `.com.apple.mobile_container_manager.metadata.plist`, then reads app metadata from `.app/Info.plist`. It also discovers App Groups, app icons, common database files, and container paths.
+The scanner matches bundle and data containers using `.com.apple.mobile_container_manager.metadata.plist`, then reads app metadata from `.app/Info.plist`. It also discovers App Groups from entitlement plists, app icons from bundle icon metadata and AppIcon PNG fallbacks, common database files, data-container byte size, and container paths.
+
+System apps and system App Groups can be filtered out by constructing the scanner with `hidesSystemApps: true`.
 
 CoreSimulator internal layout can change between Xcode versions, so scanner failures should be reported as warnings instead of app crashes.
 

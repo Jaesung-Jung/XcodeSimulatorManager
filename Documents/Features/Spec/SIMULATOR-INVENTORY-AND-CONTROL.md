@@ -57,7 +57,7 @@ Broken pair records or missing devices are handled as recoverable state rather t
 
 ## Refresh
 
-Users can refresh manually from the main window or menu bar. Refresh creates a new simulator snapshot from `simctl` output and relevant CoreSimulator file-system data.
+Users can refresh manually from the main window or menu bar. Refresh creates a new simulator snapshot from `simctl` output and relevant CoreSimulator file-system data, including installed app container inventory.
 
 SimControl also watches CoreSimulator folders for changes such as device creation, device deletion, boot or shutdown transitions, and app installation changes. File events are debounced before refresh to avoid repeated work.
 
