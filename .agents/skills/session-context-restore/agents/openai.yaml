@@ -1,4 +1,0 @@
-interface:
-  display_name: "Session Context Restore"
-  short_description: "Explicitly restore saved handoff and workstream context"
-  default_prompt: "Use $session-context-restore when I explicitly ask to restore context, resume from handoff, inspect saved session state, or continue a saved workstream from .agent-state."

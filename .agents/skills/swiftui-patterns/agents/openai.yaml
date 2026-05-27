@@ -1,4 +1,0 @@
-interface:
-  display_name: "SwiftUI UI Patterns"
-  short_description: "Default SwiftUI UI implementation patterns"
-  default_prompt: "Use $swiftui-patterns as the default skill to design, implement, or evolve this SwiftUI UI when the work includes new behavior or normal UI changes, with modern Observation, strong component patterns, and clear state ownership."
