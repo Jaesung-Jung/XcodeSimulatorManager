@@ -1,4 +1,0 @@
-interface:
-  display_name: "SwiftUI Advanced"
-  short_description: "Handle advanced SwiftUI patterns"
-  default_prompt: "Use $swiftui-advanced when this SwiftUI work depends on advanced gestures, animation choreography, adaptive layout branching, or architecture tradeoffs."
