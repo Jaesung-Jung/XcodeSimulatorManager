@@ -2,9 +2,9 @@ import ComposableArchitecture
 import SimControlDomain
 
 @Reducer
-struct InstalledAppsFeature {
+public struct InstalledAppsFeature {
   @ObservableState
-  struct State: Equatable {
+  public struct State: Equatable {
     var apps: [InstalledApp]
     var availability: InstalledAppsAvailability
     var device: SimulatorDevice?
@@ -113,7 +113,7 @@ struct InstalledAppsFeature {
     }
   }
 
-  enum Action: Equatable {
+  public enum Action: Equatable {
     case selectionChanged(String?)
     case launchButtonTapped(String)
     case terminateButtonTapped(String)
@@ -136,7 +136,7 @@ struct InstalledAppsFeature {
     case clearAppFiltersButtonTapped
   }
 
-  var body: some ReducerOf<Self> {
+  public var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
       case .selectionChanged(let id):

@@ -1,3 +1,4 @@
+import MainWindowFeature
 import SwiftUI
 
 @main
@@ -7,7 +8,7 @@ struct SimControlApp: App {
   @State private var appContainer = AppContainer()
 
   var body: some Scene {
-    WindowGroup("SimControl", id: AppSceneID.mainWindow) {
+    WindowGroup("SimControl", id: MainWindowSceneID.mainWindow) {
       MainWindowView(store: appContainer.mainWindowStore)
     }
 

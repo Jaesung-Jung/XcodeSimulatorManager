@@ -12,12 +12,29 @@ let package = Package(
     .library(name: "SimControlInfrastructure", targets: ["SimControlInfrastructure"]),
     .library(name: "SimControlClients", targets: ["SimControlClients"]),
     .library(name: "SimControlClientsLive", targets: ["SimControlClientsLive"]),
-    .library(name: "MainWindowWorkflows", targets: ["MainWindowWorkflows"])
+    .library(name: "MainWindowWorkflows", targets: ["MainWindowWorkflows"]),
+    .library(name: "MainWindowFeature", targets: ["MainWindowFeature"])
   ],
   dependencies: [
     .package(
       url: "https://github.com/pointfreeco/swift-dependencies",
       from: "1.12.0"
+    ),
+    .package(
+      url: "https://github.com/pointfreeco/swift-composable-architecture.git",
+      from: "1.25.0"
+    ),
+    .package(
+      url: "https://github.com/pointfreeco/swift-case-paths",
+      from: "1.7.3"
+    ),
+    .package(
+      url: "https://github.com/pointfreeco/swift-perception",
+      from: "2.0.10"
+    ),
+    .package(
+      url: "https://github.com/pointfreeco/xctest-dynamic-overlay",
+      from: "1.9.0"
     )
   ],
   targets: [
@@ -33,6 +50,10 @@ let package = Package(
         .product(
           name: "Dependencies",
           package: "swift-dependencies"
+        ),
+        .product(
+          name: "IssueReporting",
+          package: "xctest-dynamic-overlay"
         )
       ]
     ),
@@ -50,6 +71,34 @@ let package = Package(
         "SimControlDomain"
       ]
     ),
+    .target(
+      name: "MainWindowFeature",
+      dependencies: [
+        "MainWindowWorkflows",
+        "SimControlClients",
+        "SimControlDomain",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        ),
+        .product(
+          name: "CasePaths",
+          package: "swift-case-paths"
+        ),
+        .product(
+          name: "IssueReporting",
+          package: "xctest-dynamic-overlay"
+        ),
+        .product(
+          name: "Perception",
+          package: "swift-perception"
+        ),
+        .product(
+          name: "PerceptionCore",
+          package: "swift-perception"
+        )
+      ]
+    ),
     .testTarget(
       name: "SimControlDomainTests",
       dependencies: ["SimControlDomain"]
@@ -63,6 +112,18 @@ let package = Package(
       dependencies: [
         "MainWindowWorkflows",
         "SimControlClients"
+      ]
+    ),
+    .testTarget(
+      name: "MainWindowFeatureTests",
+      dependencies: [
+        "MainWindowFeature",
+        "SimControlClients",
+        "SimControlDomain",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
       ]
     )
   ]

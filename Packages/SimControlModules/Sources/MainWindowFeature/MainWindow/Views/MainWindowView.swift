@@ -3,10 +3,14 @@ import SimControlDomain
 import SwiftUI
 
 @MainActor
-struct MainWindowView: View {
+public struct MainWindowView: View {
   @State private var isInspectorPresented = true
 
   let store: StoreOf<MainWindowFeature>
+
+  public init(store: StoreOf<MainWindowFeature>) {
+    self.store = store
+  }
 
   private var isRefreshing: Bool {
     store.workspace.refreshState == .refreshing
@@ -30,7 +34,7 @@ struct MainWindowView: View {
     )
   }
 
-  var body: some View {
+  public var body: some View {
     NavigationSplitView {
       Sidebar(
         store: store.scope(state: \.sidebar, action: \.sidebar),

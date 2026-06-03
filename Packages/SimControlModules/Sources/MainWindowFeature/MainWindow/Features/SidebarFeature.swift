@@ -2,9 +2,9 @@ import ComposableArchitecture
 import SimControlDomain
 
 @Reducer
-struct SidebarFeature {
+public struct SidebarFeature {
   @ObservableState
-  struct State: Equatable {
+  public struct State: Equatable {
     var snapshot: SimulatorSnapshot?
     var refreshState: InventoryRefreshState
 
@@ -17,9 +17,9 @@ struct SidebarFeature {
     }
   }
 
-  enum Action: Equatable {}
+  public enum Action: Equatable {}
 
-  var body: some ReducerOf<Self> {
+  public var body: some ReducerOf<Self> {
     EmptyReducer()
   }
 }

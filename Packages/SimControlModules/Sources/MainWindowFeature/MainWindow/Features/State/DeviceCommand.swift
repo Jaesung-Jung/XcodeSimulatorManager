@@ -1,4 +1,4 @@
-enum DeviceCommand {
+public enum DeviceCommand {
   case boot
   case shutdown
   case create

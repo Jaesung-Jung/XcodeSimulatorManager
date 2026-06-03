@@ -2,7 +2,7 @@ import ComposableArchitecture
 import SimControlDomain
 import Testing
 
-@testable import SimControl
+@testable import MainWindowFeature
 
 @MainActor
 struct DeveloperToolsFeatureTests {

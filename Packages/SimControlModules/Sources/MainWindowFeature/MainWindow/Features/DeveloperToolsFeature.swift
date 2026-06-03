@@ -3,18 +3,18 @@ import SimControlDomain
 import Foundation
 
 @Reducer
-struct DeveloperToolsFeature {
-  struct LocationCoordinateInput: Equatable, Hashable, Identifiable {
+public struct DeveloperToolsFeature {
+  public struct LocationCoordinateInput: Equatable, Hashable, Identifiable {
     let name: String
     let latitude: String
     let longitude: String
 
-    var id: String {
+    public var id: String {
       "\(latitude),\(longitude)"
     }
   }
 
-  enum LocationPreset: String, CaseIterable, Equatable, Identifiable {
+  public enum LocationPreset: String, CaseIterable, Equatable, Identifiable {
     case applePark
     case sanFrancisco
     case london
@@ -22,7 +22,7 @@ struct DeveloperToolsFeature {
     case seoul
     case custom
 
-    var id: String {
+    public var id: String {
       rawValue
     }
 
@@ -81,12 +81,12 @@ struct DeveloperToolsFeature {
     }
   }
 
-  enum PrivacyAction: String, CaseIterable, Equatable, Identifiable {
+  public enum PrivacyAction: String, CaseIterable, Equatable, Identifiable {
     case grant
     case revoke
     case reset
 
-    var id: String {
+    public var id: String {
       rawValue
     }
 
@@ -106,7 +106,7 @@ struct DeveloperToolsFeature {
     }
   }
 
-  enum PrivacyService: String, CaseIterable, Equatable, Identifiable {
+  public enum PrivacyService: String, CaseIterable, Equatable, Identifiable {
     case all
     case calendar
     case camera
@@ -124,7 +124,7 @@ struct DeveloperToolsFeature {
     case notifications
     case bluetooth
 
-    var id: String {
+    public var id: String {
       rawValue
     }
 
@@ -224,7 +224,7 @@ struct DeveloperToolsFeature {
     }
   }
 
-  enum StatusBarDataNetwork: String, CaseIterable, Equatable, Identifiable {
+  public enum StatusBarDataNetwork: String, CaseIterable, Equatable, Identifiable {
     case hide
     case wifi
     case threeG
@@ -237,7 +237,7 @@ struct DeveloperToolsFeature {
     case fiveGUWB
     case fiveGUC
 
-    var id: String {
+    public var id: String {
       rawValue
     }
 
@@ -296,12 +296,12 @@ struct DeveloperToolsFeature {
     }
   }
 
-  enum StatusBarWifiMode: String, CaseIterable, Equatable, Identifiable {
+  public enum StatusBarWifiMode: String, CaseIterable, Equatable, Identifiable {
     case searching
     case failed
     case active
 
-    var id: String {
+    public var id: String {
       rawValue
     }
 
@@ -321,13 +321,13 @@ struct DeveloperToolsFeature {
     }
   }
 
-  enum StatusBarCellularMode: String, CaseIterable, Equatable, Identifiable {
+  public enum StatusBarCellularMode: String, CaseIterable, Equatable, Identifiable {
     case notSupported
     case searching
     case failed
     case active
 
-    var id: String {
+    public var id: String {
       rawValue
     }
 
@@ -358,12 +358,12 @@ struct DeveloperToolsFeature {
     }
   }
 
-  enum StatusBarBatteryState: String, CaseIterable, Equatable, Identifiable {
+  public enum StatusBarBatteryState: String, CaseIterable, Equatable, Identifiable {
     case charging
     case charged
     case discharging
 
-    var id: String {
+    public var id: String {
       rawValue
     }
 
@@ -384,7 +384,7 @@ struct DeveloperToolsFeature {
   }
 
   @ObservableState
-  struct State: Equatable {
+  public struct State: Equatable {
     var device: SimulatorDevice?
     var installedApps: [InstalledApp]
     var selectedAppID: String?
@@ -863,7 +863,7 @@ struct DeveloperToolsFeature {
     """
   }
 
-  enum Action: Equatable {
+  public enum Action: Equatable {
     case deepLinkURLChanged(String)
     case recentDeepLinkURLSelected(String)
     case openDeepLinkButtonTapped
@@ -895,7 +895,7 @@ struct DeveloperToolsFeature {
     case clearStatusBarOverrideButtonTapped
   }
 
-  var body: some ReducerOf<Self> {
+  public var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
       case .deepLinkURLChanged(let urlString):

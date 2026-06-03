@@ -4,12 +4,16 @@ import ComposableArchitecture
 import SwiftUI
 
 @MainActor
-struct MenuBarRootView: View {
+public struct MenuBarRootView: View {
   @Environment(\.openWindow) private var openWindow
 
   let store: StoreOf<MainWindowFeature>
 
-  var body: some View {
+  public init(store: StoreOf<MainWindowFeature>) {
+    self.store = store
+  }
+
+  public var body: some View {
     Group {
       StatusSection(
         snapshot: store.workspace.snapshot,
@@ -36,7 +40,7 @@ struct MenuBarRootView: View {
   }
 
   private func openMainWindow() {
-    openWindow(id: AppSceneID.mainWindow)
+    openWindow(id: MainWindowSceneID.mainWindow)
     NSApplication.shared.activate()
   }
 }

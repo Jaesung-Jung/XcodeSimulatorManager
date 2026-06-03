@@ -2,9 +2,9 @@ import ComposableArchitecture
 import SimControlDomain
 
 @Reducer
-struct DeviceListFeature {
+public struct DeviceListFeature {
   @ObservableState
-  struct State: Equatable {
+  public struct State: Equatable {
     var devices: [SimulatorDevice]
     var runtimeByID: [String: SimulatorRuntime]
     var deviceTypeByID: [String: SimulatorDeviceType]
@@ -35,14 +35,14 @@ struct DeviceListFeature {
     }
   }
 
-  enum Action: Equatable {
+  public enum Action: Equatable {
     case selectionChanged(String?)
     case pinButtonTapped(String)
     case deviceSortChanged(SimulatorFilters.DeviceSort)
     case deviceSortDirectionChanged(SimulatorFilters.SortDirection)
   }
 
-  var body: some ReducerOf<Self> {
+  public var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
       case .selectionChanged(let id):

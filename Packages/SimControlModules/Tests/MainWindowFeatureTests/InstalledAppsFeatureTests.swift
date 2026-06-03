@@ -3,7 +3,7 @@ import Foundation
 import SimControlDomain
 import Testing
 
-@testable import SimControl
+@testable import MainWindowFeature
 
 @MainActor
 struct InstalledAppsFeatureTests {

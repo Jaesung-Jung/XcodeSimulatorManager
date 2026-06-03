@@ -2,9 +2,9 @@ import ComposableArchitecture
 import SimControlDomain
 
 @Reducer
-struct WorkspaceFeature {
+public struct WorkspaceFeature {
   @ObservableState
-  struct State: Equatable {
+  public struct State: Equatable {
     var snapshot: SimulatorSnapshot?
     var refreshState: InventoryRefreshState
     var filters: SimulatorFilters
@@ -345,7 +345,7 @@ struct WorkspaceFeature {
     }
   }
 
-  enum Action: Equatable {
+  public enum Action: Equatable {
     case searchQueryChanged(String)
     case sidebarScopeChanged(SimulatorFilters.SidebarScope)
     case deviceList(DeviceListFeature.Action)
@@ -353,7 +353,7 @@ struct WorkspaceFeature {
     case inspector(InspectorFeature.Action)
   }
 
-  var body: some ReducerOf<Self> {
+  public var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
       case .searchQueryChanged(let query):

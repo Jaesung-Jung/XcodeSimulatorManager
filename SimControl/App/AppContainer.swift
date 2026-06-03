@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import MainWindowFeature
 import SimControlClients
 import SimControlClientsLive
 import SimControlInfrastructure
@@ -34,7 +35,7 @@ final class AppContainer {
     self.simulatorRepository = simulatorRepository
     settingsStore = SettingsStore()
     actionLogStore = ActionLogStore()
-    mainWindowStore = Store(initialState: MainWindowFeature.State()) {
+    mainWindowStore = Store(initialState: MainWindowFeature.State.initial) {
       MainWindowFeature()
     } withDependencies: {
       $0.simulatorRepository = .live(repository: simulatorRepository)

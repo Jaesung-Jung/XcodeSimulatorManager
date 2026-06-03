@@ -1,4 +1,4 @@
-struct DeviceCommandState: Equatable {
+public struct DeviceCommandState: Equatable {
   let command: DeviceCommand
   let deviceID: String?
 

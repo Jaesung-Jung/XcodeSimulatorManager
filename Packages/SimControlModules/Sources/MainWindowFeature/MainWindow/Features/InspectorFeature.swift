@@ -2,9 +2,9 @@ import ComposableArchitecture
 import SimControlDomain
 
 @Reducer
-struct InspectorFeature {
+public struct InspectorFeature {
   @ObservableState
-  struct State: Equatable {
+  public struct State: Equatable {
     var snapshot: SimulatorSnapshot?
     var device: SimulatorDevice?
     var runtime: SimulatorRuntime?
@@ -26,7 +26,7 @@ struct InspectorFeature {
     }
   }
 
-  enum Action: Equatable {
+  public enum Action: Equatable {
     case openDeviceDataFolderButtonTapped(String)
     case copyDeviceDataPathButtonTapped(String)
     case openDeviceLogFolderButtonTapped(String)
@@ -43,7 +43,7 @@ struct InspectorFeature {
     case copyAppGroupContainerButtonTapped(String, String)
   }
 
-  var body: some ReducerOf<Self> {
+  public var body: some ReducerOf<Self> {
     Reduce { _, _ in
       .none
     }

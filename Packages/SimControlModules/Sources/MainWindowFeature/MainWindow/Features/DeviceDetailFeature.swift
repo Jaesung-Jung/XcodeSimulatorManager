@@ -2,9 +2,9 @@ import ComposableArchitecture
 import SimControlDomain
 
 @Reducer
-struct DeviceDetailFeature {
-  struct DevicePairSummary: Equatable, Identifiable {
-    let id: String
+public struct DeviceDetailFeature {
+  public struct DevicePairSummary: Equatable, Identifiable {
+    public let id: String
     let phoneDeviceID: String
     let phoneName: String
     let phoneUDID: String
@@ -15,7 +15,7 @@ struct DeviceDetailFeature {
   }
 
   @ObservableState
-  struct State: Equatable {
+  public struct State: Equatable {
     var device: SimulatorDevice?
     var runtime: SimulatorRuntime?
     var deviceType: SimulatorDeviceType?
@@ -72,7 +72,7 @@ struct DeviceDetailFeature {
     }
   }
 
-  enum Action: Equatable {
+  public enum Action: Equatable {
     case bootButtonTapped(String)
     case shutdownButtonTapped(String)
     case openSimulatorAppButtonTapped
@@ -91,7 +91,7 @@ struct DeviceDetailFeature {
     case developerTools(DeveloperToolsFeature.Action)
   }
 
-  var body: some ReducerOf<Self> {
+  public var body: some ReducerOf<Self> {
     Reduce { _, action in
       switch action {
       case .bootButtonTapped,

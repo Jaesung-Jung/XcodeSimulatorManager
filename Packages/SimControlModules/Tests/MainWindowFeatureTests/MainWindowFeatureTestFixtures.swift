@@ -2,7 +2,7 @@ import Foundation
 import SimControlClients
 import SimControlDomain
 
-@testable import SimControl
+@testable import MainWindowFeature
 
 enum MainWindowTestFixtures {
   static let runtime = SimulatorRuntime(

@@ -5,13 +5,15 @@ import SimControlDomain
 import Foundation
 
 @Reducer
-struct MainWindowFeature {
+public struct MainWindowFeature {
   private static let menuBarAutoRefreshInterval: TimeInterval = 60
 
   @Dependency(\.appSandboxReset) private var appSandboxReset
   @Dependency(\.coreSimulatorService) private var coreSimulatorService
   @Dependency(\.pathAction) private var pathAction
   @Dependency(\.simulatorRepository) private var simulatorRepository
+
+  public init() {}
 
   private enum AppContainerPathTarget: Equatable, Sendable {
     case bundle
@@ -41,7 +43,7 @@ struct MainWindowFeature {
     }
   }
 
-  enum DeviceLifecycleSheet: Equatable, Identifiable {
+  public enum DeviceLifecycleSheet: Equatable, Identifiable {
     case create(CreateDeviceFormState)
     case clone(CloneDeviceFormState)
     case rename(RenameDeviceFormState)
@@ -53,7 +55,7 @@ struct MainWindowFeature {
     case resetAppSandbox(AppDestructiveConfirmationState)
     case installAppOnSimulator(InstallAppTargetFormState)
 
-    var id: String {
+    public var id: String {
       switch self {
       case .create:
         "create"
@@ -79,13 +81,13 @@ struct MainWindowFeature {
     }
   }
 
-  struct DeviceDestructiveConfirmationState: Equatable {
+  public struct DeviceDestructiveConfirmationState: Equatable {
     let deviceID: String
     let deviceName: String
     let deviceUDID: String
   }
 
-  struct CreateDeviceFormState: Equatable {
+  public struct CreateDeviceFormState: Equatable {
     var name: String
     var runtimeID: String
     var deviceTypeID: String
@@ -101,20 +103,20 @@ struct MainWindowFeature {
     }
   }
 
-  struct CloneDeviceFormState: Equatable {
+  public struct CloneDeviceFormState: Equatable {
     let sourceDeviceID: String
     let sourceName: String
     var name: String
   }
 
-  struct RenameDeviceFormState: Equatable {
+  public struct RenameDeviceFormState: Equatable {
     let deviceID: String
     let currentName: String
     var name: String
   }
 
-  struct PairDeviceCandidate: Equatable, Identifiable {
-    let id: String
+  public struct PairDeviceCandidate: Equatable, Identifiable {
+    public let id: String
     let name: String
     let udid: String
 
@@ -125,12 +127,12 @@ struct MainWindowFeature {
     }
   }
 
-  struct PairDevicesFormState: Equatable {
+  public struct PairDevicesFormState: Equatable {
     var phoneDeviceID: String
     var watchDeviceID: String
   }
 
-  struct UnpairDeviceConfirmationState: Equatable {
+  public struct UnpairDeviceConfirmationState: Equatable {
     let pairID: String
     let phoneName: String
     let phoneUDID: String
@@ -138,7 +140,7 @@ struct MainWindowFeature {
     let watchUDID: String
   }
 
-  struct AppDestructiveConfirmationState: Equatable {
+  public struct AppDestructiveConfirmationState: Equatable {
     let appID: String
     let appName: String
     let bundleID: String
@@ -148,8 +150,8 @@ struct MainWindowFeature {
     let dataContainerPath: String?
   }
 
-  struct InstallAppTargetCandidate: Equatable, Identifiable {
-    let id: String
+  public struct InstallAppTargetCandidate: Equatable, Identifiable {
+    public let id: String
     let name: String
     let udid: String
     let state: SimulatorDevice.State
@@ -162,7 +164,7 @@ struct MainWindowFeature {
     }
   }
 
-  struct InstallAppTargetFormState: Equatable {
+  public struct InstallAppTargetFormState: Equatable {
     let sourceAppID: String
     let sourceDeviceID: String
     let appName: String
@@ -173,7 +175,7 @@ struct MainWindowFeature {
   }
 
   @ObservableState
-  struct State: Equatable {
+  public struct State: Equatable {
     var lastMenuBarAutoRefreshAttemptAt: Date?
     var lifecycleSheet: DeviceLifecycleSheet?
     var sidebar: SidebarFeature.State
@@ -211,6 +213,10 @@ struct MainWindowFeature {
         isOpeningSimulatorApp: isOpeningSimulatorApp,
         filters: filters
       )
+    }
+
+    public static var initial: Self {
+      Self()
     }
 
     var canCreateDevice: Bool {
@@ -414,7 +420,7 @@ struct MainWindowFeature {
     }
   }
 
-  enum Action: Equatable {
+  public enum Action: Equatable {
     case task
     case menuBarPresented(at: Date)
     case refreshButtonTapped
@@ -468,7 +474,7 @@ struct MainWindowFeature {
     case workspace(WorkspaceFeature.Action)
   }
 
-  var body: some ReducerOf<Self> {
+  public var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
       case .task:

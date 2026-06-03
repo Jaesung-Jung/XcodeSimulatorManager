@@ -4,7 +4,7 @@ import SimControlDomain
 import Foundation
 import Testing
 
-@testable import SimControl
+@testable import MainWindowFeature
 
 @MainActor
 struct MainWindowFeatureTests {
