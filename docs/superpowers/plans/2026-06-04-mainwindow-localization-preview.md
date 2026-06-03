@@ -66,23 +66,23 @@ git status --short -- .gitignore
 - 수정: 하드코딩된 사용자 노출 문자열을 가진 SwiftUI view 파일
 - 수정: `scripts/verify-modularization.sh`
 
-- [ ] **Step 1: feature target별 하드코딩 문자열 인벤토리 작성**
+- [x] **Step 1: feature target별 하드코딩 문자열 인벤토리 작성**
 
 SwiftUI view 파일에서 `Text("...")`, `Section("...")`, `Toggle("...")`, `Button("...")`, `Label("...", systemImage:)`, `TextField("...")` 호출부를 검색해 feature target별로 분류합니다.
 
-- [ ] **Step 2: resource 기반 localization 패턴 확정**
+- [x] **Step 2: resource 기반 localization 패턴 확정**
 
 저장소에 기존 localization 패턴이 있으면 재사용합니다. 없다면 Swift Package resource에서 feature module의 bundle을 통해 문자열을 읽는 최소 helper를 도입합니다.
 
-- [ ] **Step 3: Settings child feature부터 적용**
+- [x] **Step 3: Settings child feature부터 적용**
 
 최근 분리된 Settings child feature의 문자열을 feature-owned resource로 이동하고 해당 package test를 실행합니다.
 
-- [ ] **Step 4: MainWindowFeature 주요 view로 확장**
+- [x] **Step 4: MainWindowFeature 주요 view로 확장**
 
 Preview나 test에서 자주 다루는 MainWindowFeature view의 사용자 노출 문자열을 resource 기반 문자열로 교체합니다.
 
-- [ ] **Step 5: localization 검증**
+- [x] **Step 5: localization 검증**
 
 실행:
 
@@ -91,6 +91,8 @@ swift test --package-path Packages/SimControlModules
 scripts/verify-modularization.sh
 git diff --check
 ```
+
+확인 결과: Settings/MainWindow 관련 package test 94개가 통과했고, `scripts/verify-modularization.sh`가 package test와 Xcode test까지 통과했습니다.
 
 ### Task 3: preview harness
 

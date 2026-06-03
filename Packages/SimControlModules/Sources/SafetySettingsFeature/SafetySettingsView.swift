@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlLocalization
 import SwiftUI
 
 /// Renders safety settings.
@@ -17,8 +18,12 @@ public struct SafetySettingsView: View {
   }
 
   public var body: some View {
-    Section("Safety") {
-      Toggle("Confirm Destructive Actions", isOn: confirmsDestructiveActions)
+    Section {
+      Toggle(isOn: confirmsDestructiveActions) {
+        Text(.localizable("settings.safety.confirm_destructive_actions"), bundle: .module)
+      }
+    } header: {
+      Text(.localizable("settings.safety.section"), bundle: .module)
     }
   }
 }

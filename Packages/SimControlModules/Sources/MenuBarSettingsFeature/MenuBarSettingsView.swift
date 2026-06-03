@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlLocalization
 import SwiftUI
 
 /// Renders menu bar settings.
@@ -17,8 +18,12 @@ public struct MenuBarSettingsView: View {
   }
 
   public var body: some View {
-    Section("Menu Bar") {
-      Toggle("Show Menu Bar Extra", isOn: showsMenuBarExtra)
+    Section {
+      Toggle(isOn: showsMenuBarExtra) {
+        Text(.localizable("settings.menu_bar.show_menu_bar_extra"), bundle: .module)
+      }
+    } header: {
+      Text(.localizable("settings.menu_bar.section"), bundle: .module)
     }
   }
 }

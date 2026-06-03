@@ -2,6 +2,7 @@ import ComposableArchitecture
 import DeviceListFeature
 import InspectorFeature
 import SidebarFeature
+import SimControlLocalization
 import SimControlDomain
 import SwiftUI
 import WorkspaceFeature
@@ -73,38 +74,43 @@ public struct MainWindowView: View {
     .frame(minWidth: 1_120, minHeight: 720)
     .background(.windowBackground)
     .toolbar {
-//      ToolbarItemGroup(placement: .status) {
-//        TextField("Search", text: searchQuery)
-//          .textFieldStyle(.roundedBorder)
-//          .frame(width: 260)
-//          .help("Search devices, apps, identifiers, and known paths")
-//      }
-
       ToolbarItem {
         ControlGroup {
           Button {
             store.send(.createSimulatorButtonTapped)
           } label: {
-            Label("Create Simulator", systemImage: "plus")
+            Label {
+              Text(.localizable("main_window.toolbar.create_simulator"), bundle: .module)
+            } icon: {
+              Image(systemName: "plus")
+            }
           }
           .disabled(!store.canCreateDevice)
-          .help("Create simulator")
+          .help(String.localizable("main_window.toolbar.create_simulator.help", bundle: .module))
 
           Button {
             store.send(.cloneSelectedSimulatorButtonTapped)
           } label: {
-            Label("Clone Simulator", systemImage: "plus.square.on.square")
+            Label {
+              Text(.localizable("main_window.toolbar.clone_simulator"), bundle: .module)
+            } icon: {
+              Image(systemName: "plus.square.on.square")
+            }
           }
           .disabled(!store.canCloneSelectedDevice)
-          .help("Clone selected simulator")
+          .help(String.localizable("main_window.toolbar.clone_simulator.help", bundle: .module))
 
           Button {
             store.send(.pairDevicesButtonTapped)
           } label: {
-            Label("Pair Simulators", systemImage: "link")
+            Label {
+              Text(.localizable("main_window.toolbar.pair_simulators"), bundle: .module)
+            } icon: {
+              Image(systemName: "link")
+            }
           }
           .disabled(!store.canPairDevices)
-          .help("Pair watch and phone simulators")
+          .help(String.localizable("main_window.toolbar.pair_simulators.help", bundle: .module))
 
           Button {
             store.send(.refreshButtonTapped)
@@ -114,11 +120,15 @@ public struct MainWindowView: View {
                 .controlSize(.small)
                 .frame(width: 18, height: 18)
             } else {
-              Label("Refresh", systemImage: "arrow.clockwise")
+              Label {
+                Text(.localizable("main_window.toolbar.refresh"), bundle: .module)
+              } icon: {
+                Image(systemName: "arrow.clockwise")
+              }
             }
           }
           .disabled(isRefreshing)
-          .help("Refresh simulator inventory")
+          .help(String.localizable("main_window.toolbar.refresh.help", bundle: .module))
           .keyboardShortcut("r", modifiers: .command)
         }
       }
@@ -127,9 +137,18 @@ public struct MainWindowView: View {
         Button {
           isInspectorPresented.toggle()
         } label: {
-          Label("Inspector", systemImage: "sidebar.trailing")
+          Label {
+            Text(.localizable("main_window.toolbar.inspector"), bundle: .module)
+          } icon: {
+            Image(systemName: "sidebar.trailing")
+          }
         }
-        .help(isInspectorPresented ? "Hide inspector" : "Show inspector")
+        .help(
+          String.localizable(
+            isInspectorPresented ? "main_window.toolbar.hide_inspector.help" : "main_window.toolbar.show_inspector.help",
+            bundle: .module
+          )
+        )
       }
     }
     .sheet(item: lifecycleSheet) { sheet in
@@ -154,9 +173,9 @@ public struct MainWindowView: View {
         }
       case .erase(let confirmationState):
         DeviceDestructiveConfirmationView(
-          title: "Erase Simulator",
-          message: "Erase this simulator's contents and settings.",
-          actionTitle: "Erase",
+          titleKey: "main_window.erase.title",
+          messageKey: "main_window.erase.message",
+          actionTitleKey: "main_window.erase.action",
           systemImage: "eraser",
           confirmationState: confirmationState
         ) { confirmationState in
@@ -164,9 +183,9 @@ public struct MainWindowView: View {
         }
       case .delete(let confirmationState):
         DeviceDestructiveConfirmationView(
-          title: "Delete Simulator",
-          message: "Delete this simulator.",
-          actionTitle: "Delete",
+          titleKey: "main_window.delete.title",
+          messageKey: "main_window.delete.message",
+          actionTitleKey: "main_window.delete.action",
           systemImage: "trash",
           confirmationState: confirmationState
         ) { confirmationState in
@@ -186,9 +205,9 @@ public struct MainWindowView: View {
         }
       case .uninstallApp(let confirmationState):
         AppDestructiveConfirmationView(
-          title: "Uninstall App",
-          message: "Uninstall this app from the selected simulator.",
-          actionTitle: "Uninstall",
+          titleKey: "main_window.uninstall_app.title",
+          messageKey: "main_window.uninstall_app.message",
+          actionTitleKey: "main_window.uninstall_app.action",
           systemImage: "trash",
           confirmationState: confirmationState
         ) { confirmationState in
@@ -196,9 +215,9 @@ public struct MainWindowView: View {
         }
       case .resetAppSandbox(let confirmationState):
         AppDestructiveConfirmationView(
-          title: "Reset Sandbox",
-          message: "Delete this app's sandbox contents while keeping the app installed.",
-          actionTitle: "Reset",
+          titleKey: "main_window.reset_sandbox.title",
+          messageKey: "main_window.reset_sandbox.message",
+          actionTitleKey: "main_window.reset_sandbox.action",
           systemImage: "folder.badge.minus",
           confirmationState: confirmationState
         ) { confirmationState in

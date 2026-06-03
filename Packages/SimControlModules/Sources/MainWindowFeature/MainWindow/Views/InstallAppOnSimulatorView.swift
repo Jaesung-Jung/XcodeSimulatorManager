@@ -1,4 +1,5 @@
 import MainWindowDisplaySupport
+import SimControlLocalization
 import SwiftUI
 
 struct InstallAppOnSimulatorView: View {
@@ -30,39 +31,69 @@ struct InstallAppOnSimulatorView: View {
   var body: some View {
     NavigationStack {
       Form {
-        Section("App") {
-          LabeledContent("Name", value: formState.appName)
-          LabeledContent("Bundle ID", value: formState.bundleID)
-          LabeledContent("Bundle", value: formState.appBundlePath.path)
+        Section {
+          LabeledContent(
+            String.localizable("main_window.common.name", bundle: .module),
+            value: formState.appName
+          )
+          LabeledContent(
+            String.localizable("main_window.common.bundle_id", bundle: .module),
+            value: formState.bundleID
+          )
+          LabeledContent(
+            String.localizable("main_window.common.bundle", bundle: .module),
+            value: formState.appBundlePath.path
+          )
+        } header: {
+          Text(.localizable("main_window.common.app"), bundle: .module)
         }
 
-        Section("Target") {
-          Picker("Simulator", selection: $formState.targetDeviceID) {
+        Section {
+          Picker(selection: $formState.targetDeviceID) {
             ForEach(targetCandidates) { candidate in
               Text(candidate.name)
                 .tag(candidate.id)
             }
+          } label: {
+            Text(.localizable("main_window.common.simulator"), bundle: .module)
           }
 
-          Toggle("Launch after install", isOn: $formState.launchAfterInstall)
+          Toggle(isOn: $formState.launchAfterInstall) {
+            Text(.localizable("main_window.install_app.launch_after_install"), bundle: .module)
+          }
 
-          LabeledContent("State", value: selectedTarget?.state.displayTitle ?? "Not available")
-          LabeledContent("UDID", value: selectedTarget?.udid ?? "Not available")
+          LabeledContent(
+            String.localizable("main_window.common.state", bundle: .module),
+            value: selectedTarget?.state.displayTitle ?? String.localizable(
+              "main_window.common.not_available",
+              bundle: .module
+            )
+          )
+          LabeledContent(
+            String.localizable("main_window.common.udid", bundle: .module),
+            value: selectedTarget?.udid ?? String.localizable("main_window.common.not_available", bundle: .module)
+          )
+        } header: {
+          Text(.localizable("main_window.common.target"), bundle: .module)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle("Install App")
+      .navigationTitle(String.localizable("main_window.install_app.title", bundle: .module))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
-          Button("Cancel") {
+          Button {
             dismiss()
+          } label: {
+            Text(.localizable("main_window.common.cancel"), bundle: .module)
           }
         }
 
         ToolbarItem(placement: .confirmationAction) {
-          Button("Install") {
+          Button {
             onSubmit(formState)
             dismiss()
+          } label: {
+            Text(.localizable("main_window.install_app.action"), bundle: .module)
           }
           .disabled(!canSubmit)
         }

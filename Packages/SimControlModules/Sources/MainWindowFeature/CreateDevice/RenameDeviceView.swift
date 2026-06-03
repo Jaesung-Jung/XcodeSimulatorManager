@@ -1,3 +1,4 @@
+import SimControlLocalization
 import SwiftUI
 
 struct RenameDeviceView: View {
@@ -28,23 +29,29 @@ struct RenameDeviceView: View {
             .font(.subheadline)
             .foregroundStyle(.secondary)
 
-          TextField("Name", text: $formState.name)
+          TextField(text: $formState.name) {
+            Text(.localizable("main_window.common.name"), bundle: .module)
+          }
             .textFieldStyle(.roundedBorder)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle("Rename Simulator")
+      .navigationTitle(String.localizable("main_window.rename.title", bundle: .module))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
-          Button("Cancel") {
+          Button {
             dismiss()
+          } label: {
+            Text(.localizable("main_window.common.cancel"), bundle: .module)
           }
         }
 
         ToolbarItem(placement: .confirmationAction) {
-          Button("Rename") {
+          Button {
             onSubmit(formState)
             dismiss()
+          } label: {
+            Text(.localizable("main_window.rename.action"), bundle: .module)
           }
           .disabled(!canSubmit)
         }

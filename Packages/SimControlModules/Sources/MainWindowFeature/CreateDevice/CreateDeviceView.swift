@@ -1,5 +1,6 @@
-import SwiftUI
+import SimControlLocalization
 import SimControlDomain
+import SwiftUI
 
 struct CreateDeviceView: View {
   @Environment(\.dismiss) private var dismiss
@@ -35,16 +36,20 @@ struct CreateDeviceView: View {
     compatibleDeviceTypes.first { $0.id == formState.deviceTypeID }
   }
 
-  private var compatibilityTitle: String {
+  private var compatibilityMessage: Text {
     guard let selectedRuntime else {
-      return "No available runtime selected."
+      return Text(.localizable("main_window.create.no_runtime"), bundle: .module)
     }
 
     guard !selectedRuntime.supportedDeviceTypeIDs.isEmpty else {
-      return "Runtime compatibility is not reported; all device types are shown."
+      return Text(.localizable("main_window.create.unreported_compatibility"), bundle: .module)
     }
 
-    return "\(compatibleDeviceTypes.count) compatible device types"
+    return Text.localizable(
+      "main_window.create.compatible_device_types_count",
+      bundle: .module,
+      compatibleDeviceTypes.count
+    )
   }
 
   private var canSubmit: Bool {
@@ -73,41 +78,51 @@ struct CreateDeviceView: View {
     NavigationStack {
       Form {
         Section {
-          TextField("Name", text: $formState.name)
+          TextField(text: $formState.name) {
+            Text(.localizable("main_window.common.name"), bundle: .module)
+          }
             .textFieldStyle(.roundedBorder)
 
-          Picker("Runtime", selection: $formState.runtimeID) {
+          Picker(selection: $formState.runtimeID) {
             ForEach(availableRuntimes) { runtime in
               Text(runtime.name)
                 .tag(runtime.id)
             }
+          } label: {
+            Text(.localizable("main_window.create.runtime"), bundle: .module)
           }
 
-          Picker("Device Type", selection: $formState.deviceTypeID) {
+          Picker(selection: $formState.deviceTypeID) {
             ForEach(compatibleDeviceTypes) { deviceType in
               Text(deviceType.name)
                 .tag(deviceType.id)
             }
+          } label: {
+            Text(.localizable("main_window.create.device_type"), bundle: .module)
           }
 
-          Text(compatibilityTitle)
+          compatibilityMessage
             .font(.caption)
             .foregroundStyle(.secondary)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle("Create Simulator")
+      .navigationTitle(String.localizable("main_window.create.title", bundle: .module))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
-          Button("Cancel") {
+          Button {
             dismiss()
+          } label: {
+            Text(.localizable("main_window.common.cancel"), bundle: .module)
           }
         }
 
         ToolbarItem(placement: .confirmationAction) {
-          Button("Create") {
+          Button {
             onSubmit(formState)
             dismiss()
+          } label: {
+            Text(.localizable("main_window.create.action"), bundle: .module)
           }
           .disabled(!canSubmit)
         }

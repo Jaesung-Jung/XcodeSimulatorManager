@@ -1,3 +1,4 @@
+import SimControlLocalization
 import SwiftUI
 
 struct PairDevicesView: View {
@@ -37,39 +38,55 @@ struct PairDevicesView: View {
     NavigationStack {
       Form {
         Section {
-          Picker("Phone", selection: $formState.phoneDeviceID) {
+          Picker(selection: $formState.phoneDeviceID) {
             ForEach(phoneCandidates) { candidate in
               Text(candidate.name)
                 .tag(candidate.id)
             }
+          } label: {
+            Text(.localizable("main_window.common.phone"), bundle: .module)
           }
 
-          Picker("Watch", selection: $formState.watchDeviceID) {
+          Picker(selection: $formState.watchDeviceID) {
             ForEach(watchCandidates) { candidate in
               Text(candidate.name)
                 .tag(candidate.id)
             }
+          } label: {
+            Text(.localizable("main_window.common.watch"), bundle: .module)
           }
         }
 
-        Section("Selected Devices") {
-          LabeledContent("Phone UDID", value: selectedPhone?.udid ?? "Not available")
-          LabeledContent("Watch UDID", value: selectedWatch?.udid ?? "Not available")
+        Section {
+          LabeledContent(
+            String.localizable("main_window.pair.phone_udid", bundle: .module),
+            value: selectedPhone?.udid ?? String.localizable("main_window.common.not_available", bundle: .module)
+          )
+          LabeledContent(
+            String.localizable("main_window.pair.watch_udid", bundle: .module),
+            value: selectedWatch?.udid ?? String.localizable("main_window.common.not_available", bundle: .module)
+          )
+        } header: {
+          Text(.localizable("main_window.pair.selected_devices"), bundle: .module)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle("Pair Simulators")
+      .navigationTitle(String.localizable("main_window.pair.title", bundle: .module))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
-          Button("Cancel") {
+          Button {
             dismiss()
+          } label: {
+            Text(.localizable("main_window.common.cancel"), bundle: .module)
           }
         }
 
         ToolbarItem(placement: .confirmationAction) {
-          Button("Pair") {
+          Button {
             onSubmit(formState)
             dismiss()
+          } label: {
+            Text(.localizable("main_window.pair.action"), bundle: .module)
           }
           .disabled(!canSubmit)
         }

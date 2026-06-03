@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlLocalization
 import SwiftUI
 
 /// Renders link folder settings.
@@ -17,12 +18,15 @@ public struct LinkFolderSettingsView: View {
   }
 
   public var body: some View {
-    Section("Link Folder") {
+    Section {
       TextField(
-        "Folder Path",
         text: linkFolderPath,
-        prompt: Text("~/Library/Application Support/SimControl/Links")
-      )
+        prompt: Text(.localizable("settings.link_folder.path_prompt"), bundle: .module)
+      ) {
+        Text(.localizable("settings.link_folder.path"), bundle: .module)
+      }
+    } header: {
+      Text(.localizable("settings.link_folder.section"), bundle: .module)
     }
   }
 }

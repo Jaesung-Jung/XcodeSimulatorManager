@@ -1,11 +1,12 @@
+import SimControlLocalization
 import SwiftUI
 
 struct DeviceDestructiveConfirmationView: View {
   @Environment(\.dismiss) private var dismiss
 
-  let title: LocalizedStringKey
-  let message: LocalizedStringKey
-  let actionTitle: LocalizedStringKey
+  let titleKey: String
+  let messageKey: String
+  let actionTitleKey: String
   let systemImage: String
   let confirmationState: MainWindowFeature.DeviceDestructiveConfirmationState
   let onConfirm: (MainWindowFeature.DeviceDestructiveConfirmationState) -> Void
@@ -15,23 +16,33 @@ struct DeviceDestructiveConfirmationView: View {
       Form {
         Section {
           Label {
-            Text(message)
+            Text(.localizable(messageKey), bundle: .module)
           } icon: {
             Image(systemName: systemImage)
           }
         }
 
-        Section("Device") {
-          LabeledContent("Name", value: confirmationState.deviceName)
-          LabeledContent("UDID", value: confirmationState.deviceUDID)
+        Section {
+          LabeledContent(
+            String.localizable("main_window.common.name", bundle: .module),
+            value: confirmationState.deviceName
+          )
+          LabeledContent(
+            String.localizable("main_window.common.udid", bundle: .module),
+            value: confirmationState.deviceUDID
+          )
+        } header: {
+          Text(.localizable("main_window.common.device"), bundle: .module)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(title)
+      .navigationTitle(String.localizable(titleKey, bundle: .module))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
-          Button("Cancel") {
+          Button {
             dismiss()
+          } label: {
+            Text(.localizable("main_window.common.cancel"), bundle: .module)
           }
         }
 
@@ -40,7 +51,7 @@ struct DeviceDestructiveConfirmationView: View {
             onConfirm(confirmationState)
             dismiss()
           } label: {
-            Text(actionTitle)
+            Text(.localizable(actionTitleKey), bundle: .module)
           }
         }
       }

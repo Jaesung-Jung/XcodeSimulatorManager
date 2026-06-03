@@ -1,11 +1,12 @@
+import SimControlLocalization
 import SwiftUI
 
 struct AppDestructiveConfirmationView: View {
   @Environment(\.dismiss) private var dismiss
 
-  let title: LocalizedStringKey
-  let message: LocalizedStringKey
-  let actionTitle: LocalizedStringKey
+  let titleKey: String
+  let messageKey: String
+  let actionTitleKey: String
   let systemImage: String
   let confirmationState: MainWindowFeature.AppDestructiveConfirmationState
   let onConfirm: (MainWindowFeature.AppDestructiveConfirmationState) -> Void
@@ -15,34 +16,57 @@ struct AppDestructiveConfirmationView: View {
       Form {
         Section {
           Label {
-            Text(message)
+            Text(.localizable(messageKey), bundle: .module)
           } icon: {
             Image(systemName: systemImage)
           }
         }
 
-        Section("App") {
-          LabeledContent("Name", value: confirmationState.appName)
-          LabeledContent("Bundle ID", value: confirmationState.bundleID)
+        Section {
+          LabeledContent(
+            String.localizable("main_window.common.name", bundle: .module),
+            value: confirmationState.appName
+          )
+          LabeledContent(
+            String.localizable("main_window.common.bundle_id", bundle: .module),
+            value: confirmationState.bundleID
+          )
+        } header: {
+          Text(.localizable("main_window.common.app"), bundle: .module)
         }
 
-        Section("Device") {
-          LabeledContent("Name", value: confirmationState.deviceName)
-          LabeledContent("UDID", value: confirmationState.deviceUDID)
+        Section {
+          LabeledContent(
+            String.localizable("main_window.common.name", bundle: .module),
+            value: confirmationState.deviceName
+          )
+          LabeledContent(
+            String.localizable("main_window.common.udid", bundle: .module),
+            value: confirmationState.deviceUDID
+          )
+        } header: {
+          Text(.localizable("main_window.common.device"), bundle: .module)
         }
 
         if let dataContainerPath = confirmationState.dataContainerPath {
-          Section("Sandbox") {
-            LabeledContent("Path", value: dataContainerPath)
+          Section {
+            LabeledContent(
+              String.localizable("main_window.common.path", bundle: .module),
+              value: dataContainerPath
+            )
+          } header: {
+            Text(.localizable("main_window.common.sandbox"), bundle: .module)
           }
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(title)
+      .navigationTitle(String.localizable(titleKey, bundle: .module))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
-          Button("Cancel") {
+          Button {
             dismiss()
+          } label: {
+            Text(.localizable("main_window.common.cancel"), bundle: .module)
           }
         }
 
@@ -51,7 +75,7 @@ struct AppDestructiveConfirmationView: View {
             onConfirm(confirmationState)
             dismiss()
           } label: {
-            Text(actionTitle)
+            Text(.localizable(actionTitleKey), bundle: .module)
           }
         }
       }

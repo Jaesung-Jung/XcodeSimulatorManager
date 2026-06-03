@@ -1,0 +1,3 @@
+"settings.link_folder.section" = "Link Folder";
+"settings.link_folder.path" = "Folder Path";
+"settings.link_folder.path_prompt" = "~/Library/Application Support/SimControl/Links";

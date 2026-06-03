@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
   name: "SimControlModules",
+  defaultLocalization: "en",
   platforms: [
     .macOS(.v14)
   ],
@@ -21,6 +22,7 @@ let package = Package(
     .library(name: "MainWindowWorkflows", targets: ["MainWindowWorkflows"]),
     .library(name: "MainWindowFeatureSupport", targets: ["MainWindowFeatureSupport"]),
     .library(name: "MainWindowDisplaySupport", targets: ["MainWindowDisplaySupport"]),
+    .library(name: "SimControlLocalization", targets: ["SimControlLocalization"]),
     .library(name: "SimControlSharedUI", targets: ["SimControlSharedUI"]),
     .library(name: "DeviceListFeature", targets: ["DeviceListFeature"]),
     .library(name: "InstalledAppsFeature", targets: ["InstalledAppsFeature"]),
@@ -139,6 +141,7 @@ let package = Package(
       name: "MainWindowDisplaySupport",
       dependencies: ["SimControlDomain"]
     ),
+    .target(name: "SimControlLocalization"),
     .target(name: "SimControlSharedUI"),
     .target(
       name: "DeviceListFeature",
@@ -249,6 +252,7 @@ let package = Package(
         "MainWindowFeatureSupport",
         "MainWindowWorkflows",
         "SimControlClients",
+        "SimControlLocalization",
         "SimControlSharedUI",
         "SimControlDomain",
         .product(
@@ -271,7 +275,8 @@ let package = Package(
           name: "PerceptionCore",
           package: "swift-perception"
         )
-      ]
+      ],
+      resources: [.process("Resources")]
     ),
     .target(
       name: "MenuBarFeature",
@@ -289,56 +294,68 @@ let package = Package(
     .target(
       name: "GeneralSettingsFeature",
       dependencies: [
+        "SimControlLocalization",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
         )
-      ]
+      ],
+      resources: [.process("Resources")]
     ),
     .target(
       name: "MenuBarSettingsFeature",
       dependencies: [
+        "SimControlLocalization",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
         )
-      ]
+      ],
+      resources: [.process("Resources")]
     ),
     .target(
       name: "SafetySettingsFeature",
       dependencies: [
+        "SimControlLocalization",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
         )
-      ]
+      ],
+      resources: [.process("Resources")]
     ),
     .target(
       name: "XcodeSettingsFeature",
       dependencies: [
+        "SimControlLocalization",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
         )
-      ]
+      ],
+      resources: [.process("Resources")]
     ),
     .target(
       name: "LinkFolderSettingsFeature",
       dependencies: [
+        "SimControlLocalization",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
         )
-      ]
+      ],
+      resources: [.process("Resources")]
     ),
     .target(
       name: "DiagnosticsSettingsFeature",
       dependencies: [
+        "SimControlLocalization",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
         )
-      ]
+      ],
+      resources: [.process("Resources")]
     ),
     .target(
       name: "SettingsFeature",

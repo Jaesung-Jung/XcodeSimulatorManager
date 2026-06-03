@@ -1,3 +1,4 @@
+import SimControlLocalization
 import SwiftUI
 
 struct UnpairDeviceConfirmationView: View {
@@ -11,28 +12,46 @@ struct UnpairDeviceConfirmationView: View {
       Form {
         Section {
           Label {
-            Text("Remove this watch and phone pair.")
+            Text(.localizable("main_window.unpair.message"), bundle: .module)
           } icon: {
             Image(systemName: "link.badge.minus")
           }
         }
 
-        Section("Phone") {
-          LabeledContent("Name", value: confirmationState.phoneName)
-          LabeledContent("UDID", value: confirmationState.phoneUDID)
+        Section {
+          LabeledContent(
+            String.localizable("main_window.common.name", bundle: .module),
+            value: confirmationState.phoneName
+          )
+          LabeledContent(
+            String.localizable("main_window.common.udid", bundle: .module),
+            value: confirmationState.phoneUDID
+          )
+        } header: {
+          Text(.localizable("main_window.common.phone"), bundle: .module)
         }
 
-        Section("Watch") {
-          LabeledContent("Name", value: confirmationState.watchName)
-          LabeledContent("UDID", value: confirmationState.watchUDID)
+        Section {
+          LabeledContent(
+            String.localizable("main_window.common.name", bundle: .module),
+            value: confirmationState.watchName
+          )
+          LabeledContent(
+            String.localizable("main_window.common.udid", bundle: .module),
+            value: confirmationState.watchUDID
+          )
+        } header: {
+          Text(.localizable("main_window.common.watch"), bundle: .module)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle("Unpair Simulators")
+      .navigationTitle(String.localizable("main_window.unpair.title", bundle: .module))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
-          Button("Cancel") {
+          Button {
             dismiss()
+          } label: {
+            Text(.localizable("main_window.common.cancel"), bundle: .module)
           }
         }
 
@@ -41,7 +60,7 @@ struct UnpairDeviceConfirmationView: View {
             onConfirm(confirmationState)
             dismiss()
           } label: {
-            Text("Unpair")
+            Text(.localizable("main_window.unpair.action"), bundle: .module)
           }
         }
       }

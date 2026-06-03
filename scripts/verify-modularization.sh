@@ -152,6 +152,11 @@ assert_no_match \
   "${SETTINGS_CHILD_FEATURE_SOURCES[@]}"
 
 assert_no_match \
+  "Settings child feature의 사용자 노출 문자열은 .localizable(...)과 feature-owned resource를 사용해야 합니다." \
+  '(^|[^A-Za-z])(Text|Section|Toggle|Button|Label|TextField|Picker)\("[^"]+' \
+  "${SETTINGS_CHILD_FEATURE_SOURCES[@]}"
+
+assert_no_match \
   "MenuBarFeature는 MainWindowFeature를 직접 import하면 안 됩니다." \
   '^import MainWindowFeature\b' \
   "$PACKAGE_SOURCES/MenuBarFeature"

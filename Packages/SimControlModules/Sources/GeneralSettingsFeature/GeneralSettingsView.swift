@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlLocalization
 import SwiftUI
 
 /// Renders general app settings.
@@ -17,8 +18,12 @@ public struct GeneralSettingsView: View {
   }
 
   public var body: some View {
-    Section("General") {
-      Toggle("Launch at Login", isOn: launchesAtLogin)
+    Section {
+      Toggle(isOn: launchesAtLogin) {
+        Text(.localizable("settings.general.launch_at_login"), bundle: .module)
+      }
+    } header: {
+      Text(.localizable("settings.general.section"), bundle: .module)
     }
   }
 }
