@@ -4,10 +4,14 @@ import SimControlSharedUI
 import SimControlDomain
 import SwiftUI
 
-struct InspectorView: View {
-  let store: StoreOf<InspectorFeature>
+public struct InspectorView: View {
+  private let store: StoreOf<InspectorFeature>
 
-  var body: some View {
+  public init(store: StoreOf<InspectorFeature>) {
+    self.store = store
+  }
+
+  public var body: some View {
     ScrollView {
       VStack(alignment: .leading, spacing: 18) {
         if let device = store.device {
@@ -319,7 +323,7 @@ extension InspectorView {
 
 #Preview {
   InspectorView(
-    store: Store(initialState: MainWindowFeature.State.preview.workspace.inspector) {
+    store: Store(initialState: InspectorFeature.State()) {
       InspectorFeature()
     }
   )

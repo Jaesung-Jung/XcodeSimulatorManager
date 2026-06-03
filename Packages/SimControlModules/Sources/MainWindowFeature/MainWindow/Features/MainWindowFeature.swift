@@ -2,6 +2,7 @@ import ComposableArchitecture
 import DeveloperToolsFeature
 import DeviceDetailFeature
 import DeviceListFeature
+import InspectorFeature
 import MainWindowFeatureSupport
 import MainWindowWorkflows
 import SimControlClients

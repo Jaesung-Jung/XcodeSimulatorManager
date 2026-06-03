@@ -3,15 +3,17 @@ import SimControlDomain
 
 @Reducer
 public struct InspectorFeature {
+  public init() {}
+
   @ObservableState
   public struct State: Equatable {
-    var snapshot: SimulatorSnapshot?
-    var device: SimulatorDevice?
-    var runtime: SimulatorRuntime?
-    var deviceType: SimulatorDeviceType?
-    var selectedApp: InstalledApp?
+    public var snapshot: SimulatorSnapshot?
+    public var device: SimulatorDevice?
+    public var runtime: SimulatorRuntime?
+    public var deviceType: SimulatorDeviceType?
+    public var selectedApp: InstalledApp?
 
-    init(
+    public init(
       snapshot: SimulatorSnapshot? = nil,
       device: SimulatorDevice? = nil,
       runtime: SimulatorRuntime? = nil,
