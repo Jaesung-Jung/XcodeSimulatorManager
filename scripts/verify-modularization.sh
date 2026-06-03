@@ -208,6 +208,11 @@ assert_max_lines \
   250 \
   "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature.swift"
 
+assert_max_lines \
+  "MainWindowFeature+Reducer.swift는 route dispatcher만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+Reducer.swift"
+
 assert_no_app_swift_sources_outside_app
 
 assert_path_present \
