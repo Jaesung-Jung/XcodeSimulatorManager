@@ -12,7 +12,7 @@
 
 ## 현재 구현 상태
 
-2026-06-04 기준 1차 작업은 다음 범위까지 완료했다.
+2026-06-04 기준 Swift Package target 분리 1차 작업은 다음 범위까지 완료했다.
 
 - `Packages/SimControlModules` local package 생성.
 - `SimControlDomain`, `SimControlClients`, `SimControlClientsLive` target 구성.
@@ -35,7 +35,9 @@
 - 반복 검증 스크립트 `scripts/verify-modularization.sh` 추가.
 - service/feature/client/workflow 경계 검사를 `scripts/verify-modularization.sh`에 추가.
 
-남은 후속 작업은 선택 사항이다. 필요할 때 feature별 preview harness, resource/localization 소유권, root package 전환 여부를 검토한다.
+다만 이 상태를 아키텍처 개선 완료로 보지 않는다. target 분리는 진행됐지만, `MainWindowFeature`는 여전히 scene feature가 너무 많은 command intent와 response application을 해석한다. 또한 최근 작업에서 파일 줄 수를 줄이기 위해 `MainWindowFeature+...` extension 파일이 과도하게 늘어난 상태이므로, 다음 작업은 더 많은 파일 분리가 아니라 책임 있는 reducer/workflow 경계로 재정렬하는 것이다.
+
+라인 수 제한은 완료 기준에서 제외한다. 100-200줄 파일을 기계적으로 쪼개는 작업은 이 계획의 목표가 아니다.
 
 ## 전체 작업 순서
 
@@ -52,6 +54,24 @@
 11. Placeholder 타입 정리.
 12. Preview/resource/localization 정리.
 13. Root package 전환 여부 결정.
+
+## 방향 수정: MainWindowFeature 책임 재설계 우선
+
+다음 작업은 파일 크기를 줄이는 리팩터링이 아니다. `MainWindowFeature`가 scene composition 이상의 책임을 갖고 있는 문제를 해결한다.
+
+목표 상태:
+
+- `MainWindowFeature`는 scene state 조합, navigation/sheet routing, child action delegation, workflow response application만 담당한다.
+- Device lifecycle, installed app command, developer tool command, path action은 각각 workflow client 또는 child reducer가 소유한다.
+- `MainWindowFeature+...` extension 파일은 책임 경계가 아니라 임시 구현 조각이다. 실제 경계가 정해지면 관련 파일을 합치거나 child feature target으로 이동한다.
+- 테스트는 파일별이 아니라 책임별로 나눈다. command sequence는 workflow test, form/state editing은 child feature test, root scene delegation은 main window reducer test로 남긴다.
+
+검증 기준:
+
+- import 방향과 live/concrete service 생성 금지는 `scripts/verify-modularization.sh`로 유지한다.
+- line count guard는 사용하지 않는다.
+- `swift test --package-path Packages/SimControlModules`와 `xcodebuild test`가 동작을 검증한다.
+- 다음 구현 계획은 `MainWindowFeature`의 action ownership map을 먼저 만들고, 가장 결합도가 높은 command group을 child reducer 또는 workflow boundary로 옮기는 순서로 작성한다.
 
 ## Task 1: Baseline 확인과 package skeleton 생성
 
@@ -606,6 +626,7 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 - `SimControlDomain`, concrete service target, `SimControlInfrastructure`가 금지된 상위 레이어를 import하지 않는다.
 - concrete service 생성은 app composition root 또는 live target에만 있다.
 - `MainWindowFeature.swift`의 workflow-heavy action handling이 workflow client와 child feature로 분산된다.
+- `MainWindowFeature+...` extension 파일 수 증가는 완료 기준이 아니며, 실제 책임 경계가 확정되면 통합 또는 child feature target 이동 대상으로 본다.
 - app target은 scene, assets, app delegate, dependency wiring 중심으로 축소된다.
 
 ## 참고 자료

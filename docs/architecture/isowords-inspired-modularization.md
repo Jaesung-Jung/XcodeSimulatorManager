@@ -1,7 +1,7 @@
 # isowords 기반 SimControl 모듈화 아키텍처
 
 **작성일:** 2026-06-04
-**현 상태:** Swift Package 기반 마이크로 모듈화 적용 완료
+**현 상태:** Swift Package target 분리 진행 완료, MainWindowFeature 책임 재설계 진행 중
 
 ## 목적
 
@@ -9,13 +9,27 @@ SimControl의 아키텍처를 `pointfreeco/isowords`의 방향성에 맞춰 재�
 
 - 앱 타깃은 composition root로 축소한다.
 - domain, client interface, live adapter, workflow, feature, concrete service를 컴파일 타임 모듈로 분리한다.
-- 큰 feature는 작은 feature target을 조합한다.
+- 큰 feature는 작은 feature target 또는 child reducer를 조합하되, 파일 줄 수가 아니라 독립 책임을 기준으로 경계를 정한다.
 - concrete service는 feature/client/workflow 레이어에서 직접 생성하지 않는다.
 - 모듈 경계는 `scripts/verify-modularization.sh`로 반복 검증한다.
 
-## 현재 모듈 수
+## 중요한 방향 정정
+
+이 문서의 목적은 100-200줄 파일을 기계적으로 더 작은 extension 파일로 쪼개는 것이 아니다. 파일 분리는 책임 경계를 드러내기 위한 임시 수단일 수 있지만, 그 자체가 성공 기준은 아니다.
+
+성공 기준은 다음과 같다.
+
+- `MainWindowFeature`가 device lifecycle, installed app command, developer tool command, path action, inventory refresh sequence를 직접 모두 실행하지 않는다.
+- 반복 command sequence는 `MainWindowWorkflows` 또는 실제 child feature reducer가 소유한다.
+- `MainWindowFeature`는 scene composition, navigation/sheet routing, child action delegation, workflow response application에 집중한다.
+- 테스트도 파일 크기가 아니라 경계별로 이동한다. command sequence는 workflow test, UI intent는 child feature test, scene delegation은 main window reducer test로 검증한다.
+- 과도하게 늘어난 `MainWindowFeature+...` extension 파일은 최종 구조가 아니다. 다음 단계에서는 관련 파일을 실제 책임 단위로 합치거나 child reducer/target으로 추출한다.
+
+## 현재 target 수
 
 현재 `Packages/SimControlModules`에는 30개 library product가 있다. 이제 단순한 5-7개 레이어 분리가 아니라, feature와 service가 각각 작은 target으로 분리된 마이크로 모듈라이제이션 구조다.
+
+다만 target 수가 충분하다는 사실이 아키텍처 완료를 의미하지는 않는다. 특히 `MainWindowFeature` 내부에는 여전히 scene feature가 직접 해석하는 action과 workflow response가 많고, 최근 작업으로 extension 파일 수가 늘어난 상태다. 이 부분은 파일 수를 더 늘리는 방식이 아니라 책임을 가진 child reducer와 workflow boundary로 재정리해야 한다.
 
 ### Domain
 
@@ -287,7 +301,7 @@ feature 간 공유되지만 domain은 아닌 타입과 표시 helper를 소유�
 
 앱 scene 단위의 feature를 소유한다.
 
-- `MainWindowFeature`: main window reducer, view, sheet/confirmation, workflow 호출.
+- `MainWindowFeature`: 현재는 main window reducer, view, sheet/confirmation, workflow 호출을 소유한다. 목표는 scene composition, navigation/sheet routing, child action delegation으로 축소하는 것이다.
 - `MenuBarFeature`: menu bar extra UI, menu bar state projection, menu-specific action.
 - `SettingsFeature`: settings scene reducer, child settings composition, SwiftUI root view, user settings persistence orchestration.
 
@@ -306,7 +320,7 @@ feature 간 공유되지만 domain은 아닌 타입과 표시 helper를 소유�
 
 ## 금지 의존성
 
-`scripts/verify-modularization.sh`에서 다음 규칙을 검사한다.
+`scripts/verify-modularization.sh`에서 다음 규칙을 검사한다. 이 스크립트는 줄 수를 아키텍처 품질 기준으로 삼지 않고, import 방향과 target 경계를 반복 검증한다.
 
 - `SimControlDomain`은 UI, TCA, dependency, 상위 모듈을 import하지 않는다.
 - 순수 service target은 UI/AppKit, TCA, dependency, 상위 모듈을 import하지 않는다.
@@ -336,14 +350,15 @@ swift test --package-path Packages/SimControlModules
 xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'platform=macOS,arch=arm64,name=My Mac' -parallel-testing-enabled NO
 ```
 
-## 남은 선택지
+## 남은 핵심 작업
 
-현재 구조는 local package 방식으로 안정화되어 있다. 후속으로 고려할 수 있는 선택지는 다음 정도다.
+현재 구조는 local package 방식으로 빌드 가능한 상태까지 왔다. 하지만 `MainWindowFeature` 책임 축소는 아직 끝나지 않았다. 다음 작업은 선택 사항이 아니라 아키텍처 개선의 본류다.
 
-- `MenuBarFeature`에 독립 workflow가 필요해질 때 menu bar 전용 client 도입.
-- feature별 preview app 또는 preview harness 추가.
-- resource/localization을 feature target 소유로 이동.
-- repository layout을 isowords처럼 root `Package.swift` 중심으로 승격할지 결정.
+- `MainWindowFeature`에 흩어진 device lifecycle, installed app, developer tool, path action action handling을 실제 child reducer 또는 workflow boundary로 옮긴다.
+- 현재 과도하게 쪼개진 `MainWindowFeature+...` extension 파일은 책임 단위가 확정될 때 통합하거나 target으로 승격한다.
+- `MainWindowFeatureTests`에 남은 scenario를 workflow test, child feature test, scene delegation test로 재배치한다.
+- resource/localization은 feature target 소유권에 맞게 정리한다.
+- root `Package.swift` 승격은 위 책임 경계가 안정된 뒤 다시 결정한다.
 
 현 단계에서는 root package 승격보다 현재 local package 구조를 유지하는 쪽이 더 비용 대비 효과가 좋다.
 
