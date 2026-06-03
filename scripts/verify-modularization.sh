@@ -206,6 +206,11 @@ assert_max_lines \
   "$PACKAGE_SOURCES/CoreSimulatorService/CoreSimulatorService.swift"
 
 assert_max_lines \
+  "SimulatorInventoryQuery.swift는 query facade와 저장 상태만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/SimControlDomain/SimulatorInventoryQuery.swift"
+
+assert_max_lines \
   "SimulatorRepository.swift는 actor contract와 refresh entry만 남겨 180줄 이하로 유지합니다." \
   180 \
   "$PACKAGE_SOURCES/SimulatorRepositoryService/SimulatorRepository.swift"
