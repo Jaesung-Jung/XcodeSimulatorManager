@@ -1,24 +1,6 @@
 import SimControlClients
 import SimControlDomain
 
-/// The command and optional refresh outputs produced by a developer tool workflow.
-public struct DeveloperToolWorkflowResult: Equatable {
-  public let commandResults: [CommandResult]
-  public let refreshResult: SimulatorRefreshResult?
-  public let preferredSelectedDeviceID: SimulatorDevice.ID?
-
-  /// Creates a developer tool workflow result.
-  public init(
-    commandResults: [CommandResult],
-    refreshResult: SimulatorRefreshResult?,
-    preferredSelectedDeviceID: SimulatorDevice.ID?
-  ) {
-    self.commandResults = commandResults
-    self.refreshResult = refreshResult
-    self.preferredSelectedDeviceID = preferredSelectedDeviceID
-  }
-}
-
 /// Runs developer tool command sequences outside the reducer.
 public struct DeveloperToolWorkflowClient: Sendable {
   public var openURL: @Sendable (
@@ -181,66 +163,4 @@ public extension DeveloperToolWorkflowClient {
       }
     )
   }
-}
-
-private func runBootableDeveloperToolCommand(
-  deviceID: SimulatorDevice.ID,
-  deviceState: SimulatorDevice.State,
-  coreSimulatorService: CoreSimulatorClient,
-  simulatorRepository: SimulatorRepositoryClient,
-  run: @escaping @Sendable () async -> CommandResult
-) async -> DeveloperToolWorkflowResult {
-  var commandResults: [CommandResult] = []
-  let shouldBoot = deviceState == .shutdown
-
-  if shouldBoot {
-    let bootResult = await coreSimulatorService.bootDeviceIfNeeded(deviceID)
-    commandResults.append(bootResult)
-
-    guard bootResult.succeeded else {
-      return await refreshDeveloperToolResult(
-        commandResults: commandResults,
-        simulatorRepository: simulatorRepository,
-        preferredSelectedDeviceID: deviceID
-      )
-    }
-  }
-
-  commandResults.append(await run())
-
-  guard shouldBoot else {
-    return DeveloperToolWorkflowResult(
-      commandResults: commandResults,
-      refreshResult: nil,
-      preferredSelectedDeviceID: nil
-    )
-  }
-
-  return await refreshDeveloperToolResult(
-    commandResults: commandResults,
-    simulatorRepository: simulatorRepository,
-    preferredSelectedDeviceID: deviceID
-  )
-}
-
-private func runBootedDeveloperToolCommand(
-  run: @escaping @Sendable () async -> CommandResult
-) async -> DeveloperToolWorkflowResult {
-  DeveloperToolWorkflowResult(
-    commandResults: [await run()],
-    refreshResult: nil,
-    preferredSelectedDeviceID: nil
-  )
-}
-
-private func refreshDeveloperToolResult(
-  commandResults: [CommandResult],
-  simulatorRepository: SimulatorRepositoryClient,
-  preferredSelectedDeviceID: SimulatorDevice.ID
-) async -> DeveloperToolWorkflowResult {
-  DeveloperToolWorkflowResult(
-    commandResults: commandResults,
-    refreshResult: await simulatorRepository.refresh(),
-    preferredSelectedDeviceID: preferredSelectedDeviceID
-  )
 }
