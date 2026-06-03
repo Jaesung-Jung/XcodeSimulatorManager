@@ -274,6 +274,11 @@ assert_max_lines \
   "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Views/MainWindowView.swift"
 
 assert_max_lines \
+  "MainWindowDisplayValues.swift는 platform/device/state display projection만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/MainWindowDisplaySupport/MainWindowDisplayValues.swift"
+
+assert_max_lines \
   "InstalledAppWorkflowClient.swift는 public model/endpoint contract와 live assembly만 남겨 180줄 이하로 유지합니다." \
   180 \
   "$PACKAGE_SOURCES/MainWindowWorkflows/InstalledAppWorkflowClient.swift"
