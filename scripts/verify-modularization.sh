@@ -195,6 +195,11 @@ assert_no_match \
   "$PACKAGE_SOURCES/MainWindowWorkflows" \
   "${FEATURE_SOURCES[@]}"
 
+assert_max_lines \
+  "AppContainerScanner.swift는 public entry와 scan orchestration만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/AppContainerScanningService/AppContainerScanner.swift"
+
 assert_no_match \
   "Swift source는 150자를 넘는 줄을 만들지 않습니다." \
   '.{151,}' \
