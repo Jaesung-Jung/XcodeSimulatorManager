@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlClients
 import SimControlInfrastructure
 
 @MainActor

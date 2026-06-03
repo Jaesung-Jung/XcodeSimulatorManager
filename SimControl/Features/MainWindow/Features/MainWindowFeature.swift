@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlClients
 import SimControlDomain
 import SimControlInfrastructure
 import Foundation
@@ -1818,7 +1819,7 @@ struct MainWindowFeature {
   private func runDeveloperToolCommand(
     _ state: inout State,
     command: DeviceCommand,
-    run: @escaping @Sendable (CoreSimulatorServiceClient, String) async -> CommandResult
+    run: @escaping @Sendable (CoreSimulatorClient, String) async -> CommandResult
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
           state.workspace.appCommandState == nil,
@@ -1885,7 +1886,7 @@ struct MainWindowFeature {
   private func runBootedDeveloperToolCommand(
     _ state: inout State,
     command: DeviceCommand,
-    run: @escaping @Sendable (CoreSimulatorServiceClient, String) async -> CommandResult
+    run: @escaping @Sendable (CoreSimulatorClient, String) async -> CommandResult
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
           state.workspace.appCommandState == nil,
