@@ -5,9 +5,9 @@ import Foundation
 /// `SimulatorDevice` describes the simulator itself and the paths that are safe
 /// for other layers to display or pass to filesystem services. It does not
 /// execute `simctl` commands or inspect the filesystem directly.
-struct SimulatorDevice: Identifiable, Equatable, Hashable {
+public struct SimulatorDevice: Identifiable, Equatable, Hashable {
   /// The boot lifecycle state of a simulator device.
-  enum State: String, Equatable, Hashable {
+  public enum State: String, Equatable, Hashable {
     /// The simulator is being created.
     case creating
 
@@ -28,38 +28,67 @@ struct SimulatorDevice: Identifiable, Equatable, Hashable {
   }
 
   /// A stable identifier for this simulator device.
-  let id: String
+  public let id: String
 
   /// The CoreSimulator UDID.
-  let udid: String
+  public let udid: String
 
   /// The user-visible simulator name.
-  let name: String
+  public let name: String
 
   /// The identifier of the runtime used by this device.
-  let runtimeID: String
+  public let runtimeID: String
 
   /// The identifier of the device type used by this device.
-  let deviceTypeID: String
+  public let deviceTypeID: String
 
   /// The platform family for the device.
-  let platform: SimulatorPlatform
+  public let platform: SimulatorPlatform
 
   /// The current boot lifecycle state.
-  let state: State
+  public let state: State
 
   /// Indicates whether CoreSimulator reports the device as available.
-  let isAvailable: Bool
+  public let isAvailable: Bool
 
   /// The simulator data directory URL, when known.
-  let dataPath: URL?
+  public let dataPath: URL?
 
   /// The simulator log directory URL, when known.
-  let logPath: URL?
+  public let logPath: URL?
 
   /// The last boot time, when CoreSimulator provides it.
-  let lastBootedAt: Date?
+  public let lastBootedAt: Date?
 
   /// The calculated data directory size in bytes, when available.
-  let dataPathSize: Int64?
+  public let dataPathSize: Int64?
+
+  /// Creates a simulator device inventory value.
+  public init(
+    id: String,
+    udid: String,
+    name: String,
+    runtimeID: String,
+    deviceTypeID: String,
+    platform: SimulatorPlatform,
+    state: State,
+    isAvailable: Bool,
+    dataPath: URL?,
+    logPath: URL?,
+    lastBootedAt: Date?,
+    dataPathSize: Int64?
+  ) {
+    self.id = id
+    self.udid = udid
+    self.name = name
+    self.runtimeID = runtimeID
+    self.deviceTypeID = deviceTypeID
+    self.platform = platform
+    self.state = state
+    self.isAvailable = isAvailable
+    self.dataPath = dataPath
+    self.logPath = logPath
+    self.lastBootedAt = lastBootedAt
+    self.dataPathSize = dataPathSize
+  }
 }

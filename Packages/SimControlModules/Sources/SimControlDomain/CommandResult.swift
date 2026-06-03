@@ -5,33 +5,54 @@ import Foundation
 /// `CommandResult` is intentionally a plain value type so command execution can
 /// remain isolated in the service layer while stores and views can still render
 /// command diagnostics such as stderr, exit code, and elapsed time.
-struct CommandResult: Identifiable, Equatable, Hashable {
+public struct CommandResult: Identifiable, Equatable, Hashable {
   /// A stable identifier for the command result.
-  let id: String
+  public let id: String
 
   /// The executable path or launch name that was invoked.
-  let executable: String
+  public let executable: String
 
   /// The arguments passed to the executable.
-  let arguments: [String]
+  public let arguments: [String]
 
   /// The captured standard output.
-  let stdout: String
+  public let stdout: String
 
   /// The captured standard error.
-  let stderr: String
+  public let stderr: String
 
   /// The process exit code returned by the operating system.
-  let exitCode: Int32
+  public let exitCode: Int32
 
   /// The elapsed execution time in seconds.
-  let duration: TimeInterval
+  public let duration: TimeInterval
 
   /// The time at which command execution started.
-  let startedAt: Date
+  public let startedAt: Date
+
+  /// Creates a captured command result value.
+  public init(
+    id: String,
+    executable: String,
+    arguments: [String],
+    stdout: String,
+    stderr: String,
+    exitCode: Int32,
+    duration: TimeInterval,
+    startedAt: Date
+  ) {
+    self.id = id
+    self.executable = executable
+    self.arguments = arguments
+    self.stdout = stdout
+    self.stderr = stderr
+    self.exitCode = exitCode
+    self.duration = duration
+    self.startedAt = startedAt
+  }
 
   /// Indicates whether the command completed with a zero exit code.
-  var succeeded: Bool {
+  public var succeeded: Bool {
     exitCode == 0
   }
 }

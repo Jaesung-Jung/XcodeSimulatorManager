@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlDomain
 import SwiftUI
 
 struct DeviceDetailView: View {

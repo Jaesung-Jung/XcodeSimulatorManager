@@ -1,4 +1,5 @@
 import Foundation
+import SimControlDomain
 import Darwin
 
 /// Runs external commands and captures their complete result.

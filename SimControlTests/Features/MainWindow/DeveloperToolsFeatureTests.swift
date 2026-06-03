@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlDomain
 import Testing
 
 @testable import SimControl

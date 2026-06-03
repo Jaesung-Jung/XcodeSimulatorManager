@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlDomain
 import Foundation
 
 struct PathActionClient: Sendable {

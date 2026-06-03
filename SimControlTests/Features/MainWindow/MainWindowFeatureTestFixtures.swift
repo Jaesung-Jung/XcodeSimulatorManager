@@ -1,4 +1,5 @@
 import Foundation
+import SimControlDomain
 
 @testable import SimControl
 

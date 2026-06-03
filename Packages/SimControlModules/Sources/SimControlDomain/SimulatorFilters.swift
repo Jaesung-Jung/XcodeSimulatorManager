@@ -1,7 +1,9 @@
 import Foundation
 
-struct SimulatorFilters: Equatable {
-  enum SidebarScope: Equatable, Hashable {
+/// User-selected filters and sort options for simulator inventory projection.
+public struct SimulatorFilters: Equatable {
+  /// The sidebar grouping or filter currently applied to devices.
+  public enum SidebarScope: Equatable, Hashable {
     case all
     case pinned
     case warnings
@@ -10,12 +12,14 @@ struct SimulatorFilters: Equatable {
     case state(SimulatorDevice.State)
   }
 
-  enum SortDirection: Equatable, Hashable {
+  /// A sort direction used by device and app lists.
+  public enum SortDirection: Equatable, Hashable {
     case ascending
     case descending
   }
 
-  enum DeviceSort: Equatable, Hashable {
+  /// Device list sort keys.
+  public enum DeviceSort: Equatable, Hashable {
     case name
     case state
     case runtime
@@ -24,20 +28,23 @@ struct SimulatorFilters: Equatable {
     case dataSize
   }
 
-  enum AppSort: Equatable, Hashable {
+  /// Installed app list sort keys.
+  public enum AppSort: Equatable, Hashable {
     case name
     case bundleID
     case version
     case dataSize
   }
 
-  enum AppSystemFilter: Equatable, Hashable {
+  /// Whether installed app lists show user apps, system apps, or both.
+  public enum AppSystemFilter: Equatable, Hashable {
     case user
     case system
     case all
   }
 
-  enum PresenceFilter: Equatable, Hashable {
+  /// Whether an optional app-related value must be present, absent, or either.
+  public enum PresenceFilter: Equatable, Hashable {
     case all
     case present
     case absent
@@ -45,20 +52,21 @@ struct SimulatorFilters: Equatable {
 
   private static let recentTargetLimit = 8
 
-  var searchQuery: String
-  var sidebarScope: SidebarScope
-  var deviceSort: DeviceSort
-  var deviceSortDirection: SortDirection
-  var appSystemFilter: AppSystemFilter
-  var appGroupFilter: PresenceFilter
-  var appDatabaseFilter: PresenceFilter
-  var appSort: AppSort
-  var appSortDirection: SortDirection
-  var pinnedDeviceIDs: Set<String>
-  var pinnedAppIDs: Set<String>
-  var recentAppIDs: [String]
+  public var searchQuery: String
+  public var sidebarScope: SidebarScope
+  public var deviceSort: DeviceSort
+  public var deviceSortDirection: SortDirection
+  public var appSystemFilter: AppSystemFilter
+  public var appGroupFilter: PresenceFilter
+  public var appDatabaseFilter: PresenceFilter
+  public var appSort: AppSort
+  public var appSortDirection: SortDirection
+  public var pinnedDeviceIDs: Set<String>
+  public var pinnedAppIDs: Set<String>
+  public var recentAppIDs: [String]
 
-  init(
+  /// Creates simulator inventory filters with app-focused defaults.
+  public init(
     searchQuery: String = "",
     sidebarScope: SidebarScope = .all,
     deviceSort: DeviceSort = .name,
@@ -86,21 +94,25 @@ struct SimulatorFilters: Equatable {
     self.recentAppIDs = Self.deduplicatedRecentIDs(recentAppIDs)
   }
 
-  var trimmedSearchQuery: String {
+  /// The search query with surrounding whitespace removed.
+  public var trimmedSearchQuery: String {
     searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
   }
 
-  var hasSearchQuery: Bool {
+  /// Whether the current search query contains non-whitespace text.
+  public var hasSearchQuery: Bool {
     !trimmedSearchQuery.isEmpty
   }
 
-  var hasActiveAppFilters: Bool {
+  /// Whether app-specific filters differ from the default user-app view.
+  public var hasActiveAppFilters: Bool {
     appSystemFilter != .user
       || appGroupFilter != .all
       || appDatabaseFilter != .all
   }
 
-  mutating func recordRecentAppID(_ id: String) {
+  /// Records a recently selected app identifier, keeping the most recent value first.
+  public mutating func recordRecentAppID(_ id: String) {
     recentAppIDs = Self.recentIDs(afterRecording: id, in: recentAppIDs)
   }
 

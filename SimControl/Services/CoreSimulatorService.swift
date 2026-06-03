@@ -1,4 +1,5 @@
 import Foundation
+import SimControlDomain
 
 /// Wraps `xcrun`, `simctl`, and Simulator.app process boundaries.
 struct CoreSimulatorService {

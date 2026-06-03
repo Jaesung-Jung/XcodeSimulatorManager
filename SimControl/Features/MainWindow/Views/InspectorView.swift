@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlDomain
 import SwiftUI
 
 struct InspectorView: View {

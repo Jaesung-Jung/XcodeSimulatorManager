@@ -1,4 +1,5 @@
 import AppKit
+import SimControlDomain
 import ComposableArchitecture
 import SwiftUI
 

@@ -2,7 +2,7 @@
 ///
 /// The value is intentionally small and tolerant of unknown platform strings so
 /// the parser can keep inventory visible even when Xcode adds new platforms.
-enum SimulatorPlatform: String, Equatable, Hashable {
+public enum SimulatorPlatform: String, Equatable, Hashable {
   /// iOS simulator platform.
   case iOS
 
@@ -24,25 +24,44 @@ enum SimulatorPlatform: String, Equatable, Hashable {
 /// Runtime values are based on structured `simctl list -j` fields where
 /// possible. Unavailable runtimes remain part of the snapshot so the UI can
 /// explain compatibility and environment issues.
-struct SimulatorRuntime: Identifiable, Equatable, Hashable {
+public struct SimulatorRuntime: Identifiable, Equatable, Hashable {
   /// The CoreSimulator runtime identifier.
-  let id: String
+  public let id: String
 
   /// The user-visible runtime name.
-  let name: String
+  public let name: String
 
   /// The runtime version string.
-  let version: String
+  public let version: String
 
   /// The runtime build version string.
-  let buildVersion: String
+  public let buildVersion: String
 
   /// The platform family for the runtime.
-  let platform: SimulatorPlatform
+  public let platform: SimulatorPlatform
 
   /// Indicates whether CoreSimulator reports the runtime as available.
-  let isAvailable: Bool
+  public let isAvailable: Bool
 
   /// Device type identifiers reported as compatible with this runtime.
-  let supportedDeviceTypeIDs: [String]
+  public let supportedDeviceTypeIDs: [String]
+
+  /// Creates a simulator runtime value.
+  public init(
+    id: String,
+    name: String,
+    version: String,
+    buildVersion: String,
+    platform: SimulatorPlatform,
+    isAvailable: Bool,
+    supportedDeviceTypeIDs: [String]
+  ) {
+    self.id = id
+    self.name = name
+    self.version = version
+    self.buildVersion = buildVersion
+    self.platform = platform
+    self.isAvailable = isAvailable
+    self.supportedDeviceTypeIDs = supportedDeviceTypeIDs
+  }
 }

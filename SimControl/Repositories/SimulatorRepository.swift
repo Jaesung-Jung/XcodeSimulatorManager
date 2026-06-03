@@ -1,4 +1,5 @@
 import Foundation
+import SimControlDomain
 
 /// Builds domain snapshots from CoreSimulator service output.
 actor SimulatorRepository {

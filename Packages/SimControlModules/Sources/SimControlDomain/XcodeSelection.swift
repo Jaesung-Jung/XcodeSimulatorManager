@@ -5,13 +5,24 @@ import Foundation
 /// `XcodeSelection` captures the environment used to run `xcrun` and `simctl`.
 /// It is a value description only; validation and command execution remain in
 /// the service layer.
-struct XcodeSelection: Equatable, Hashable {
+public struct XcodeSelection: Equatable, Hashable {
   /// The selected Xcode developer directory URL, when known.
-  let developerPath: URL?
+  public let developerPath: URL?
 
   /// The detected Xcode version, when available.
-  let version: String?
+  public let version: String?
 
   /// Indicates whether the selected Xcode environment is usable.
-  let isValid: Bool
+  public let isValid: Bool
+
+  /// Creates an Xcode selection value.
+  public init(
+    developerPath: URL?,
+    version: String?,
+    isValid: Bool
+  ) {
+    self.developerPath = developerPath
+    self.version = version
+    self.isValid = isValid
+  }
 }

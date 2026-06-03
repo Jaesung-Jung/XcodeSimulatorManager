@@ -1,4 +1,5 @@
 import SwiftUI
+import SimControlDomain
 
 struct CreateDeviceView: View {
   @Environment(\.dismiss) private var dismiss

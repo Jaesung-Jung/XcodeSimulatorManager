@@ -1,5 +1,5 @@
 import Testing
-@testable import SimControl
+import SimControlDomain
 
 @MainActor
 @Suite

@@ -1,4 +1,5 @@
 import Foundation
+import SimControlDomain
 
 /// Reads CoreSimulator app container folders and builds installed app entries.
 struct AppContainerScanner {

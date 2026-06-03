@@ -6,9 +6,9 @@ import Foundation
 /// shell command that may have been used to perform it. It can represent
 /// successful actions, failed actions, and actions cancelled before command
 /// execution, while optionally preserving the underlying ``CommandResult``.
-struct ActionResult: Identifiable, Equatable, Hashable {
+public struct ActionResult: Identifiable, Equatable, Hashable {
   /// The final outcome of a user-initiated action.
-  enum Outcome: String, Equatable, Hashable {
+  public enum Outcome: String, Equatable, Hashable {
     /// The action completed successfully.
     case success
 
@@ -20,20 +20,37 @@ struct ActionResult: Identifiable, Equatable, Hashable {
   }
 
   /// A stable identifier for this action result.
-  let id: String
+  public let id: String
 
   /// A short user-facing action title, such as "Boot Device".
-  let title: String
+  public let title: String
 
   /// The final outcome for the action.
-  let outcome: Outcome
+  public let outcome: Outcome
 
   /// Optional user-facing detail about the action outcome.
-  let message: String?
+  public let message: String?
 
   /// The command result associated with the action, when a command was run.
-  let commandResult: CommandResult?
+  public let commandResult: CommandResult?
 
   /// The time at which the action result was produced.
-  let occurredAt: Date
+  public let occurredAt: Date
+
+  /// Creates a user-visible action result.
+  public init(
+    id: String,
+    title: String,
+    outcome: Outcome,
+    message: String?,
+    commandResult: CommandResult?,
+    occurredAt: Date
+  ) {
+    self.id = id
+    self.title = title
+    self.outcome = outcome
+    self.message = message
+    self.commandResult = commandResult
+    self.occurredAt = occurredAt
+  }
 }

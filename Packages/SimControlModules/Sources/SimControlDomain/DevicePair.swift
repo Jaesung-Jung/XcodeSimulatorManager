@@ -3,9 +3,9 @@
 /// Pair records come from CoreSimulator inventory and may refer to missing or
 /// unavailable devices. The repository can keep such records visible as
 /// recoverable state instead of treating them as refresh failures.
-struct DevicePair: Identifiable, Equatable, Hashable {
+public struct DevicePair: Identifiable, Equatable, Hashable {
   /// The known availability state of the pair.
-  enum State: String, Equatable, Hashable {
+  public enum State: String, Equatable, Hashable {
     /// The pair is active and usable.
     case active
 
@@ -20,14 +20,27 @@ struct DevicePair: Identifiable, Equatable, Hashable {
   }
 
   /// A stable identifier for the pair.
-  let id: String
+  public let id: String
 
   /// The identifier of the paired phone simulator.
-  let phoneDeviceID: String
+  public let phoneDeviceID: String
 
   /// The identifier of the paired watch simulator.
-  let watchDeviceID: String
+  public let watchDeviceID: String
 
   /// The current pair state.
-  let state: State
+  public let state: State
+
+  /// Creates a simulator device pair value.
+  public init(
+    id: String,
+    phoneDeviceID: String,
+    watchDeviceID: String,
+    state: State
+  ) {
+    self.id = id
+    self.phoneDeviceID = phoneDeviceID
+    self.watchDeviceID = watchDeviceID
+    self.state = state
+  }
 }

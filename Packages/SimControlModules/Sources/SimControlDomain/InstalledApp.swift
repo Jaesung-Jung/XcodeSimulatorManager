@@ -5,50 +5,51 @@ import Foundation
 /// `InstalledApp` combines app metadata read from the installed bundle with the
 /// CoreSimulator container locations that SimControl can present or act on. It
 /// stores paths as URLs but does not perform filesystem operations itself.
-struct InstalledApp: Identifiable, Equatable, Hashable {
+public struct InstalledApp: Identifiable, Equatable, Hashable {
   /// A stable identifier for this installed app entry.
-  let id: String
+  public let id: String
 
   /// The app bundle identifier.
-  let bundleID: String
+  public let bundleID: String
 
   /// The display name chosen for presentation.
-  let displayName: String
+  public let displayName: String
 
   /// The app short version string, when available.
-  let version: String?
+  public let version: String?
 
   /// The app build version string, when available.
-  let build: String?
+  public let build: String?
 
   /// The identifier of the simulator device that contains this app.
-  let deviceID: String
+  public let deviceID: String
 
   /// The bundle container URL, when known.
-  let bundleContainer: URL?
+  public let bundleContainer: URL?
 
   /// The data container URL, when known.
-  let dataContainer: URL?
+  public let dataContainer: URL?
 
   /// The installed `.app` bundle URL, when known.
-  let appBundlePath: URL?
+  public let appBundlePath: URL?
 
   /// App Group containers associated with the app.
-  let appGroups: [AppGroupContainer]
+  public let appGroups: [AppGroupContainer]
 
   /// A resolved icon file URL, when one has been discovered.
-  let iconPath: URL?
+  public let iconPath: URL?
 
   /// Indicates whether the bundle identifier belongs to an Apple/system app.
-  let isSystemApp: Bool
+  public let isSystemApp: Bool
 
   /// Detected database files inside the app data container.
-  let databaseFiles: [URL]
+  public let databaseFiles: [URL]
 
   /// The calculated data container size in bytes, when available.
-  let dataContainerSize: Int64?
+  public let dataContainerSize: Int64?
 
-  init(
+  /// Creates an installed app inventory value.
+  public init(
     id: String,
     bundleID: String,
     displayName: String,

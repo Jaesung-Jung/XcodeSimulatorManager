@@ -1,4 +1,5 @@
 import AppKit
+import SimControlDomain
 import Foundation
 
 /// Performs user-visible filesystem path actions such as opening Finder and copying paths.

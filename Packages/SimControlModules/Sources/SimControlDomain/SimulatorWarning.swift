@@ -3,9 +3,9 @@
 /// Warnings keep partial inventory useful by preserving context for unavailable
 /// runtimes, missing paths, permission issues, parser fallbacks, and related
 /// non-fatal problems.
-struct SimulatorWarning: Identifiable, Equatable, Hashable {
+public struct SimulatorWarning: Identifiable, Equatable, Hashable {
   /// The importance of a simulator warning.
-  enum Severity: String, Equatable, Hashable {
+  public enum Severity: String, Equatable, Hashable {
     /// Informational context that does not block work.
     case info
 
@@ -17,7 +17,7 @@ struct SimulatorWarning: Identifiable, Equatable, Hashable {
   }
 
   /// The subsystem or domain area that produced a warning.
-  enum Category: String, Equatable, Hashable {
+  public enum Category: String, Equatable, Hashable {
     /// Xcode selection or environment warning.
     case xcode
 
@@ -50,17 +50,32 @@ struct SimulatorWarning: Identifiable, Equatable, Hashable {
   }
 
   /// A stable identifier for the warning.
-  let id: String
+  public let id: String
 
   /// The warning severity.
-  let severity: Severity
+  public let severity: Severity
 
   /// The category that best describes the warning source.
-  let category: Category
+  public let category: Category
 
   /// A user-facing warning message.
-  let message: String
+  public let message: String
 
   /// An optional related domain identifier, such as a device or runtime id.
-  let relatedID: String?
+  public let relatedID: String?
+
+  /// Creates a recoverable simulator warning value.
+  public init(
+    id: String,
+    severity: Severity,
+    category: Category,
+    message: String,
+    relatedID: String?
+  ) {
+    self.id = id
+    self.severity = severity
+    self.category = category
+    self.message = message
+    self.relatedID = relatedID
+  }
 }

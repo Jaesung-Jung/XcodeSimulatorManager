@@ -1,4 +1,5 @@
 import Foundation
+import SimControlDomain
 import SwiftUI
 
 extension SimulatorPlatform {

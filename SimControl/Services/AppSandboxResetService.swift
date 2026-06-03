@@ -1,4 +1,5 @@
 import Foundation
+import SimControlDomain
 
 /// Clears an installed app's data container without deleting the container root.
 struct AppSandboxResetService {
