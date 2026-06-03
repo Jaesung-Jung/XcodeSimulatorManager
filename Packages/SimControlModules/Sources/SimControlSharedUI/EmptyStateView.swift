@@ -1,16 +1,17 @@
 import SwiftUI
 
-struct EmptyStateView: View {
+/// A compact placeholder view for empty or unavailable content states.
+public struct EmptyStateView: View {
   let title: LocalizedStringKey
   let message: LocalizedStringKey
   let systemImage: String
   let action: Action?
 
-  init(
+  public init(
     title: LocalizedStringKey,
     message: LocalizedStringKey,
     systemImage: String,
-    action: EmptyStateView.Action? = nil,
+    action: EmptyStateView.Action? = nil
   ) {
     self.title = title
     self.message = message
@@ -18,7 +19,7 @@ struct EmptyStateView: View {
     self.action = action
   }
 
-  var body: some View {
+  public var body: some View {
     VStack(spacing: 12) {
       Image(systemName: systemImage)
         .font(.system(size: 32, weight: .regular))
@@ -45,11 +46,12 @@ struct EmptyStateView: View {
 }
 
 extension EmptyStateView {
-  struct Action {
+  /// A button action displayed below the empty state message.
+  public struct Action {
     let title: LocalizedStringKey
     let handler: @MainActor () -> Void
 
-    static func action(_ title: LocalizedStringKey, handler: @MainActor @escaping () -> Void) -> Action {
+    public static func action(_ title: LocalizedStringKey, handler: @MainActor @escaping () -> Void) -> Action {
       Action(title: title, handler: handler)
     }
   }

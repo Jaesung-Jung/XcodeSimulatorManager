@@ -13,6 +13,7 @@ let package = Package(
     .library(name: "SimControlClients", targets: ["SimControlClients"]),
     .library(name: "SimControlClientsLive", targets: ["SimControlClientsLive"]),
     .library(name: "MainWindowWorkflows", targets: ["MainWindowWorkflows"]),
+    .library(name: "SimControlSharedUI", targets: ["SimControlSharedUI"]),
     .library(name: "MainWindowFeature", targets: ["MainWindowFeature"]),
     .library(name: "SettingsFeature", targets: ["SettingsFeature"])
   ],
@@ -72,11 +73,13 @@ let package = Package(
         "SimControlDomain"
       ]
     ),
+    .target(name: "SimControlSharedUI"),
     .target(
       name: "MainWindowFeature",
       dependencies: [
         "MainWindowWorkflows",
         "SimControlClients",
+        "SimControlSharedUI",
         "SimControlDomain",
         .product(
           name: "ComposableArchitecture",
@@ -131,6 +134,10 @@ let package = Package(
     .testTarget(
       name: "SettingsFeatureTests",
       dependencies: ["SettingsFeature"]
+    ),
+    .testTarget(
+      name: "SimControlSharedUITests",
+      dependencies: ["SimControlSharedUI"]
     )
   ]
 )

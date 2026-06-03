@@ -1,10 +1,16 @@
 import SwiftUI
 
-struct SectionHeader: View {
+/// A small icon-and-title header used by grouped tool sections.
+public struct SectionHeader: View {
   let title: LocalizedStringKey
   let systemImage: String
 
-  var body: some View {
+  public init(title: LocalizedStringKey, systemImage: String) {
+    self.title = title
+    self.systemImage = systemImage
+  }
+
+  public var body: some View {
     HStack(spacing: 6) {
       Image(systemName: systemImage)
         .foregroundStyle(.secondary)

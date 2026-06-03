@@ -1,15 +1,16 @@
 import SwiftUI
 
-struct StatusBadge: View {
+/// A compact status label with an optional SF Symbol.
+public struct StatusBadge: View {
   let title: LocalizedStringKey
   let systemImage: String?
 
-  init(title: LocalizedStringKey, systemImage: String? = nil) {
+  public init(title: LocalizedStringKey, systemImage: String? = nil) {
     self.title = title
     self.systemImage = systemImage
   }
 
-  var body: some View {
+  public var body: some View {
     HStack(spacing: 4) {
       if let systemImage {
         Image(systemName: systemImage)
