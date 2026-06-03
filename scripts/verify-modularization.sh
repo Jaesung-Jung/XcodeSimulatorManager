@@ -268,6 +268,11 @@ assert_max_lines \
   180 \
   "$PACKAGE_SOURCES/InstalledAppsFeature/InstalledAppsView.swift"
 
+assert_max_lines \
+  "DeviceDetailView.swift는 root view 조합만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/DeviceDetailFeature/DeviceDetailView.swift"
+
 assert_no_app_swift_sources_outside_app
 
 assert_path_present \
