@@ -1,17 +1,22 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct SafetySettingsView: View {
-  let store: StoreOf<SettingsFeature>
+/// Renders safety settings.
+public struct SafetySettingsView: View {
+  private let store: StoreOf<SafetySettingsFeature>
+
+  public init(store: StoreOf<SafetySettingsFeature>) {
+    self.store = store
+  }
 
   private var confirmsDestructiveActions: Binding<Bool> {
     Binding(
-      get: { store.settings.confirmsDestructiveActions },
+      get: { store.confirmsDestructiveActions },
       set: { store.send(.confirmsDestructiveActionsChanged($0)) }
     )
   }
 
-  var body: some View {
+  public var body: some View {
     Section("Safety") {
       Toggle("Confirm Destructive Actions", isOn: confirmsDestructiveActions)
     }

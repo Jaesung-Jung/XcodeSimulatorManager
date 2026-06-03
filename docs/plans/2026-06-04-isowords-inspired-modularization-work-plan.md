@@ -27,6 +27,8 @@
 - `SettingsFeature` target으로 settings scene reducer/state/view 이동.
 - `SimControlClients.UserSettingsClient`와 `SimControlClientsLive.UserSettingsClient+Live` 도입.
 - `AppContainer`에서 `settingsStore`를 생성하고 `UserDefaults` 기반 live 설정 저장 주입.
+- `GeneralSettingsFeature`, `MenuBarSettingsFeature`, `SafetySettingsFeature`, `XcodeSettingsFeature`, `LinkFolderSettingsFeature`, `DiagnosticsSettingsFeature`로 settings section micro target 분리.
+- `SettingsFeature`는 settings child feature state/action을 조합하고 user settings load/save orchestration만 담당하도록 정리.
 - 각 feature/service/support target의 smoke/behavior test를 package test target으로 이동.
 - app target은 `AppContainer`, scene 선언, app delegate, asset 중심으로 축소.
 - 책임 없는 app target placeholder였던 `Services/`, `State/`, old feature/source directory 제거.

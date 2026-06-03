@@ -1,38 +1,93 @@
 import ComposableArchitecture
+import DiagnosticsSettingsFeature
+import GeneralSettingsFeature
+import LinkFolderSettingsFeature
+import MenuBarSettingsFeature
+import SafetySettingsFeature
 import SimControlClients
+import XcodeSettingsFeature
 
 @Reducer
 public struct SettingsFeature {
-  @Dependency(\.userSettings) private var userSettings
-
   public init() {}
 
   @ObservableState
   public struct State: Equatable {
-    public var settings: SimControlUserSettings
+    public var general: GeneralSettingsFeature.State
+    public var menuBar: MenuBarSettingsFeature.State
+    public var safety: SafetySettingsFeature.State
+    public var xcode: XcodeSettingsFeature.State
+    public var linkFolder: LinkFolderSettingsFeature.State
+    public var diagnostics: DiagnosticsSettingsFeature.State
     public var isLoading: Bool
 
     public init(
       settings: SimControlUserSettings = .defaults,
       isLoading: Bool = false
     ) {
-      self.settings = settings
+      general = GeneralSettingsFeature.State(launchesAtLogin: settings.launchesAtLogin)
+      menuBar = MenuBarSettingsFeature.State(showsMenuBarExtra: settings.showsMenuBarExtra)
+      safety = SafetySettingsFeature.State(confirmsDestructiveActions: settings.confirmsDestructiveActions)
+      xcode = XcodeSettingsFeature.State(preferredXcodeDeveloperPath: settings.preferredXcodeDeveloperPath)
+      linkFolder = LinkFolderSettingsFeature.State(linkFolderPath: settings.linkFolderPath)
+      diagnostics = DiagnosticsSettingsFeature.State(enablesDiagnostics: settings.enablesDiagnostics)
       self.isLoading = isLoading
+    }
+
+    public var settings: SimControlUserSettings {
+      get {
+        SimControlUserSettings(
+          launchesAtLogin: general.launchesAtLogin,
+          showsMenuBarExtra: menuBar.showsMenuBarExtra,
+          confirmsDestructiveActions: safety.confirmsDestructiveActions,
+          preferredXcodeDeveloperPath: xcode.preferredXcodeDeveloperPath,
+          linkFolderPath: linkFolder.linkFolderPath,
+          enablesDiagnostics: diagnostics.enablesDiagnostics
+        )
+      }
+      set {
+        general.launchesAtLogin = newValue.launchesAtLogin
+        menuBar.showsMenuBarExtra = newValue.showsMenuBarExtra
+        safety.confirmsDestructiveActions = newValue.confirmsDestructiveActions
+        xcode.preferredXcodeDeveloperPath = newValue.preferredXcodeDeveloperPath
+        linkFolder.linkFolderPath = newValue.linkFolderPath
+        diagnostics.enablesDiagnostics = newValue.enablesDiagnostics
+      }
     }
   }
 
   public enum Action: Equatable {
     case task
     case settingsLoaded(SimControlUserSettings)
-    case launchesAtLoginChanged(Bool)
-    case showsMenuBarExtraChanged(Bool)
-    case confirmsDestructiveActionsChanged(Bool)
-    case preferredXcodeDeveloperPathChanged(String)
-    case linkFolderPathChanged(String)
-    case enablesDiagnosticsChanged(Bool)
+    case general(GeneralSettingsFeature.Action)
+    case menuBar(MenuBarSettingsFeature.Action)
+    case safety(SafetySettingsFeature.Action)
+    case xcode(XcodeSettingsFeature.Action)
+    case linkFolder(LinkFolderSettingsFeature.Action)
+    case diagnostics(DiagnosticsSettingsFeature.Action)
   }
 
+  @Dependency(\.userSettings) private var userSettings
+
   public var body: some ReducerOf<Self> {
+    Scope(state: \.general, action: \.general) {
+      GeneralSettingsFeature()
+    }
+    Scope(state: \.menuBar, action: \.menuBar) {
+      MenuBarSettingsFeature()
+    }
+    Scope(state: \.safety, action: \.safety) {
+      SafetySettingsFeature()
+    }
+    Scope(state: \.xcode, action: \.xcode) {
+      XcodeSettingsFeature()
+    }
+    Scope(state: \.linkFolder, action: \.linkFolder) {
+      LinkFolderSettingsFeature()
+    }
+    Scope(state: \.diagnostics, action: \.diagnostics) {
+      DiagnosticsSettingsFeature()
+    }
     Reduce { state, action in
       switch action {
       case .task:
@@ -46,28 +101,7 @@ public struct SettingsFeature {
         state.settings = settings
         return .none
 
-      case .launchesAtLoginChanged(let launchesAtLogin):
-        state.settings.launchesAtLogin = launchesAtLogin
-        return save(state.settings)
-
-      case .showsMenuBarExtraChanged(let showsMenuBarExtra):
-        state.settings.showsMenuBarExtra = showsMenuBarExtra
-        return save(state.settings)
-
-      case .confirmsDestructiveActionsChanged(let confirmsDestructiveActions):
-        state.settings.confirmsDestructiveActions = confirmsDestructiveActions
-        return save(state.settings)
-
-      case .preferredXcodeDeveloperPathChanged(let preferredXcodeDeveloperPath):
-        state.settings.preferredXcodeDeveloperPath = preferredXcodeDeveloperPath
-        return save(state.settings)
-
-      case .linkFolderPathChanged(let linkFolderPath):
-        state.settings.linkFolderPath = linkFolderPath
-        return save(state.settings)
-
-      case .enablesDiagnosticsChanged(let enablesDiagnostics):
-        state.settings.enablesDiagnostics = enablesDiagnostics
+      case .general, .menuBar, .safety, .xcode, .linkFolder, .diagnostics:
         return save(state.settings)
       }
     }

@@ -31,6 +31,12 @@ let package = Package(
     .library(name: "WorkspaceFeature", targets: ["WorkspaceFeature"]),
     .library(name: "MenuBarFeature", targets: ["MenuBarFeature"]),
     .library(name: "MainWindowFeature", targets: ["MainWindowFeature"]),
+    .library(name: "GeneralSettingsFeature", targets: ["GeneralSettingsFeature"]),
+    .library(name: "MenuBarSettingsFeature", targets: ["MenuBarSettingsFeature"]),
+    .library(name: "SafetySettingsFeature", targets: ["SafetySettingsFeature"]),
+    .library(name: "XcodeSettingsFeature", targets: ["XcodeSettingsFeature"]),
+    .library(name: "LinkFolderSettingsFeature", targets: ["LinkFolderSettingsFeature"]),
+    .library(name: "DiagnosticsSettingsFeature", targets: ["DiagnosticsSettingsFeature"]),
     .library(name: "SettingsFeature", targets: ["SettingsFeature"])
   ],
   dependencies: [
@@ -281,9 +287,69 @@ let package = Package(
       ]
     ),
     .target(
+      name: "GeneralSettingsFeature",
+      dependencies: [
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .target(
+      name: "MenuBarSettingsFeature",
+      dependencies: [
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .target(
+      name: "SafetySettingsFeature",
+      dependencies: [
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .target(
+      name: "XcodeSettingsFeature",
+      dependencies: [
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .target(
+      name: "LinkFolderSettingsFeature",
+      dependencies: [
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .target(
+      name: "DiagnosticsSettingsFeature",
+      dependencies: [
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .target(
       name: "SettingsFeature",
       dependencies: [
+        "DiagnosticsSettingsFeature",
+        "GeneralSettingsFeature",
+        "LinkFolderSettingsFeature",
+        "MenuBarSettingsFeature",
+        "SafetySettingsFeature",
         "SimControlClients",
+        "XcodeSettingsFeature",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
@@ -374,6 +440,66 @@ let package = Package(
       dependencies: [
         "SettingsFeature",
         "SimControlClients",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .testTarget(
+      name: "GeneralSettingsFeatureTests",
+      dependencies: [
+        "GeneralSettingsFeature",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .testTarget(
+      name: "MenuBarSettingsFeatureTests",
+      dependencies: [
+        "MenuBarSettingsFeature",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .testTarget(
+      name: "SafetySettingsFeatureTests",
+      dependencies: [
+        "SafetySettingsFeature",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .testTarget(
+      name: "XcodeSettingsFeatureTests",
+      dependencies: [
+        "XcodeSettingsFeature",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .testTarget(
+      name: "LinkFolderSettingsFeatureTests",
+      dependencies: [
+        "LinkFolderSettingsFeature",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .testTarget(
+      name: "DiagnosticsSettingsFeatureTests",
+      dependencies: [
+        "DiagnosticsSettingsFeature",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"

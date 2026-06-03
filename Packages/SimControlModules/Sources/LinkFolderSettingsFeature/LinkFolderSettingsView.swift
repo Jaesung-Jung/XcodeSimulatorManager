@@ -1,17 +1,22 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct LinkFolderSettingsView: View {
-  let store: StoreOf<SettingsFeature>
+/// Renders link folder settings.
+public struct LinkFolderSettingsView: View {
+  private let store: StoreOf<LinkFolderSettingsFeature>
+
+  public init(store: StoreOf<LinkFolderSettingsFeature>) {
+    self.store = store
+  }
 
   private var linkFolderPath: Binding<String> {
     Binding(
-      get: { store.settings.linkFolderPath },
+      get: { store.linkFolderPath },
       set: { store.send(.linkFolderPathChanged($0)) }
     )
   }
 
-  var body: some View {
+  public var body: some View {
     Section("Link Folder") {
       TextField(
         "Folder Path",

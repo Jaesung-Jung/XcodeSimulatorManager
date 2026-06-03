@@ -15,7 +15,7 @@ SimControl의 아키텍처를 `pointfreeco/isowords`의 방향성에 맞춰 재�
 
 ## 현재 모듈 수
 
-현재 `Packages/SimControlModules`에는 24개 library product가 있다. 이제 단순한 5-7개 레이어 분리가 아니라, feature와 service가 각각 작은 target으로 분리된 마이크로 모듈라이제이션 구조다.
+현재 `Packages/SimControlModules`에는 30개 library product가 있다. 이제 단순한 5-7개 레이어 분리가 아니라, feature와 service가 각각 작은 target으로 분리된 마이크로 모듈라이제이션 구조다.
 
 ### Domain
 
@@ -57,6 +57,12 @@ SimControl의 아키텍처를 `pointfreeco/isowords`의 방향성에 맞춰 재�
 - `InspectorFeature`
 - `SidebarFeature`
 - `WorkspaceFeature`
+- `GeneralSettingsFeature`
+- `MenuBarSettingsFeature`
+- `SafetySettingsFeature`
+- `XcodeSettingsFeature`
+- `LinkFolderSettingsFeature`
+- `DiagnosticsSettingsFeature`
 
 ### Scene feature
 
@@ -88,6 +94,7 @@ flowchart TB
   MenuBarFeature --> Domain
 
   SettingsFeature --> Clients
+  SettingsFeature --> SettingsLeafFeatures["GeneralSettings / MenuBarSettings\nSafety / Xcode / LinkFolder / Diagnostics"]
 
   WorkspaceFeature --> LeafFeatures
   SidebarFeature --> Support
@@ -262,12 +269,19 @@ feature 간 공유되지만 domain은 아닌 타입과 표시 helper를 소유�
 - `InspectorFeature`
 - `SidebarFeature`
 - `WorkspaceFeature`
+- `GeneralSettingsFeature`
+- `MenuBarSettingsFeature`
+- `SafetySettingsFeature`
+- `XcodeSettingsFeature`
+- `LinkFolderSettingsFeature`
+- `DiagnosticsSettingsFeature`
 
 규칙:
 
 - domain, support, shared UI, TCA에 의존한다.
 - concrete service와 live client를 직접 import하지 않는다.
 - `WorkspaceFeature`는 leaf feature state를 조합하지만 command execution을 직접 수행하지 않는다.
+- settings child feature는 한 settings section의 reducer/state/view만 소유하고, root `SettingsFeature`나 sibling settings target을 import하지 않는다.
 
 ### Scene feature targets
 
@@ -275,11 +289,11 @@ feature 간 공유되지만 domain은 아닌 타입과 표시 helper를 소유�
 
 - `MainWindowFeature`: main window reducer, view, sheet/confirmation, workflow 호출.
 - `MenuBarFeature`: menu bar extra UI, menu bar state projection, menu-specific action.
-- `SettingsFeature`: settings scene reducer, state, SwiftUI view.
+- `SettingsFeature`: settings scene reducer, child settings composition, SwiftUI root view, user settings persistence orchestration.
 
 `MenuBarFeature`는 `MainWindowFeature`를 import하지 않는다. `MainWindowFeature`가 `WorkspaceFeature.State`에서 `MenuBarFeature.State`를 파생하고, `MenuBarFeature.Action`을 기존 refresh, open simulator, workspace selection workflow로 해석한다.
 
-`SettingsFeature`는 `SimControlClients.UserSettingsClient`만 사용한다. 사용자 설정의 live 저장 방식은 `SimControlClientsLive`가 `UserDefaults` adapter로 제공하고, 앱 target의 `AppContainer`가 `settingsStore`에 주입한다. 따라서 Settings scene은 독립적인 TCA feature로 테스트할 수 있고, concrete 저장 구현은 feature target 밖에 머문다.
+`SettingsFeature`는 `GeneralSettingsFeature`, `MenuBarSettingsFeature`, `SafetySettingsFeature`, `XcodeSettingsFeature`, `LinkFolderSettingsFeature`, `DiagnosticsSettingsFeature`를 조합하고 `SimControlClients.UserSettingsClient`만 사용한다. 사용자 설정의 live 저장 방식은 `SimControlClientsLive`가 `UserDefaults` adapter로 제공하고, 앱 target의 `AppContainer`가 `settingsStore`에 주입한다. 따라서 Settings scene은 독립적인 TCA feature로 테스트할 수 있고, concrete 저장 구현은 feature target 밖에 머문다.
 
 ## isowords에서 가져온 원칙
 
@@ -303,6 +317,7 @@ feature 간 공유되지만 domain은 아닌 타입과 표시 helper를 소유�
 - `MainWindowWorkflows`는 live 구현, concrete infrastructure, UI/TCA layer를 import하지 않는다.
 - feature target은 `SimControlInfrastructure`, `SimControlClientsLive`를 직접 import하지 않는다.
 - `SettingsFeature`는 `MainWindowFeature`, `MenuBarFeature`, live/infrastructure layer를 직접 import하지 않는다.
+- settings child feature는 root `SettingsFeature`, sibling settings target, client/live/infrastructure layer를 직접 import하지 않는다.
 - `MenuBarFeature`는 `MainWindowFeature`를 직접 import하지 않는다.
 - feature/workflow/client interface layer에서는 concrete service를 직접 생성하지 않는다.
 

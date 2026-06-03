@@ -33,7 +33,22 @@ FEATURE_SOURCES=(
   "$PACKAGE_SOURCES/WorkspaceFeature"
   "$PACKAGE_SOURCES/MenuBarFeature"
   "$PACKAGE_SOURCES/MainWindowFeature"
+  "$PACKAGE_SOURCES/GeneralSettingsFeature"
+  "$PACKAGE_SOURCES/MenuBarSettingsFeature"
+  "$PACKAGE_SOURCES/SafetySettingsFeature"
+  "$PACKAGE_SOURCES/XcodeSettingsFeature"
+  "$PACKAGE_SOURCES/LinkFolderSettingsFeature"
+  "$PACKAGE_SOURCES/DiagnosticsSettingsFeature"
   "$PACKAGE_SOURCES/SettingsFeature"
+)
+
+SETTINGS_CHILD_FEATURE_SOURCES=(
+  "$PACKAGE_SOURCES/GeneralSettingsFeature"
+  "$PACKAGE_SOURCES/MenuBarSettingsFeature"
+  "$PACKAGE_SOURCES/SafetySettingsFeature"
+  "$PACKAGE_SOURCES/XcodeSettingsFeature"
+  "$PACKAGE_SOURCES/LinkFolderSettingsFeature"
+  "$PACKAGE_SOURCES/DiagnosticsSettingsFeature"
 )
 
 assert_no_match() {
@@ -115,6 +130,11 @@ assert_no_match \
   "SettingsFeature는 app/main/menu feature나 live/infrastructure layer를 import하면 안 됩니다." \
   '^import (SimControlInfrastructure|SimControlClientsLive|MainWindowFeature|MenuBarFeature)\b' \
   "$PACKAGE_SOURCES/SettingsFeature"
+
+assert_no_match \
+  "Settings child feature는 root scene, sibling settings, client, live, infrastructure layer를 import하면 안 됩니다." \
+  '^import (SimControlClients|SimControlClientsLive|SimControlInfrastructure|MainWindowFeature|MenuBarFeature|SettingsFeature|.*SettingsFeature)\b' \
+  "${SETTINGS_CHILD_FEATURE_SOURCES[@]}"
 
 assert_no_match \
   "MenuBarFeature는 MainWindowFeature를 직접 import하면 안 됩니다." \

@@ -49,8 +49,8 @@ struct SettingsFeatureSmokeTests {
       }
     }
 
-    await store.send(.showsMenuBarExtraChanged(false)) {
-      $0.settings.showsMenuBarExtra = false
+    await store.send(.menuBar(.showsMenuBarExtraChanged(false))) {
+      $0.menuBar.showsMenuBarExtra = false
     }
     await store.finish()
 

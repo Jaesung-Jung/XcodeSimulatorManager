@@ -1,5 +1,11 @@
 import ComposableArchitecture
+import DiagnosticsSettingsFeature
+import GeneralSettingsFeature
+import LinkFolderSettingsFeature
+import MenuBarSettingsFeature
+import SafetySettingsFeature
 import SwiftUI
+import XcodeSettingsFeature
 
 /// Root view for the app settings scene.
 public struct SettingsRootView: View {
@@ -11,12 +17,42 @@ public struct SettingsRootView: View {
 
   public var body: some View {
     Form {
-      GeneralSettingsView(store: store)
-      MenuBarSettingsView(store: store)
-      SafetySettingsView(store: store)
-      XcodeSettingsView(store: store)
-      LinkFolderSettingsView(store: store)
-      DiagnosticsSettingsView(store: store)
+      GeneralSettingsView(
+        store: store.scope(
+          state: \.general,
+          action: \.general
+        )
+      )
+      MenuBarSettingsView(
+        store: store.scope(
+          state: \.menuBar,
+          action: \.menuBar
+        )
+      )
+      SafetySettingsView(
+        store: store.scope(
+          state: \.safety,
+          action: \.safety
+        )
+      )
+      XcodeSettingsView(
+        store: store.scope(
+          state: \.xcode,
+          action: \.xcode
+        )
+      )
+      LinkFolderSettingsView(
+        store: store.scope(
+          state: \.linkFolder,
+          action: \.linkFolder
+        )
+      )
+      DiagnosticsSettingsView(
+        store: store.scope(
+          state: \.diagnostics,
+          action: \.diagnostics
+        )
+      )
     }
     .formStyle(.grouped)
     .frame(minWidth: 520, minHeight: 420)

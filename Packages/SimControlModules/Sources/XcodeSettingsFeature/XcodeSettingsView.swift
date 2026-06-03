@@ -1,17 +1,22 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct XcodeSettingsView: View {
-  let store: StoreOf<SettingsFeature>
+/// Renders Xcode path settings.
+public struct XcodeSettingsView: View {
+  private let store: StoreOf<XcodeSettingsFeature>
+
+  public init(store: StoreOf<XcodeSettingsFeature>) {
+    self.store = store
+  }
 
   private var preferredXcodeDeveloperPath: Binding<String> {
     Binding(
-      get: { store.settings.preferredXcodeDeveloperPath },
+      get: { store.preferredXcodeDeveloperPath },
       set: { store.send(.preferredXcodeDeveloperPathChanged($0)) }
     )
   }
 
-  var body: some View {
+  public var body: some View {
     Section("Xcode") {
       TextField(
         "Developer Directory",
