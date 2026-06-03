@@ -5,10 +5,18 @@ import Foundation
 
 @Reducer
 public struct DeveloperToolsFeature {
+  public init() {}
+
   public struct LocationCoordinateInput: Equatable, Hashable, Identifiable {
-    let name: String
-    let latitude: String
-    let longitude: String
+    public let name: String
+    public let latitude: String
+    public let longitude: String
+
+    public init(name: String, latitude: String, longitude: String) {
+      self.name = name
+      self.latitude = latitude
+      self.longitude = longitude
+    }
 
     public var id: String {
       "\(latitude),\(longitude)"
@@ -27,7 +35,7 @@ public struct DeveloperToolsFeature {
       rawValue
     }
 
-    var displayTitle: String {
+    public var displayTitle: String {
       switch self {
       case .applePark:
         "Apple Park"
@@ -44,7 +52,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    var coordinate: LocationCoordinateInput? {
+    public var coordinate: LocationCoordinateInput? {
       switch self {
       case .applePark:
         LocationCoordinateInput(
@@ -91,7 +99,7 @@ public struct DeveloperToolsFeature {
       rawValue
     }
 
-    var displayTitle: String {
+    public var displayTitle: String {
       switch self {
       case .grant:
         "Grant"
@@ -102,7 +110,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    var requiresBundleID: Bool {
+    public var requiresBundleID: Bool {
       self == .grant || self == .revoke
     }
   }
@@ -129,7 +137,7 @@ public struct DeveloperToolsFeature {
       rawValue
     }
 
-    var displayTitle: String {
+    public var displayTitle: String {
       switch self {
       case .all:
         "All"
@@ -166,7 +174,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    var simctlArgument: String {
+    public var simctlArgument: String {
       switch self {
       case .all:
         "all"
@@ -203,7 +211,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    var unsupportedReason: String? {
+    public var unsupportedReason: String? {
       switch self {
       case .camera, .notifications, .bluetooth:
         "\(displayTitle) is not listed by this Xcode simctl privacy help."
@@ -242,7 +250,7 @@ public struct DeveloperToolsFeature {
       rawValue
     }
 
-    var displayTitle: String {
+    public var displayTitle: String {
       switch self {
       case .hide:
         "Hide"
@@ -269,7 +277,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    var simctlArgument: String {
+    public var simctlArgument: String {
       switch self {
       case .hide:
         "hide"
@@ -306,7 +314,7 @@ public struct DeveloperToolsFeature {
       rawValue
     }
 
-    var displayTitle: String {
+    public var displayTitle: String {
       switch self {
       case .searching:
         "Searching"
@@ -317,7 +325,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    var simctlArgument: String {
+    public var simctlArgument: String {
       rawValue
     }
   }
@@ -332,7 +340,7 @@ public struct DeveloperToolsFeature {
       rawValue
     }
 
-    var displayTitle: String {
+    public var displayTitle: String {
       switch self {
       case .notSupported:
         "Not Supported"
@@ -345,7 +353,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    var simctlArgument: String {
+    public var simctlArgument: String {
       switch self {
       case .notSupported:
         "notSupported"
@@ -368,7 +376,7 @@ public struct DeveloperToolsFeature {
       rawValue
     }
 
-    var displayTitle: String {
+    public var displayTitle: String {
       switch self {
       case .charging:
         "Charging"
@@ -379,41 +387,41 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    var simctlArgument: String {
+    public var simctlArgument: String {
       rawValue
     }
   }
 
   @ObservableState
   public struct State: Equatable {
-    var device: SimulatorDevice?
-    var installedApps: [InstalledApp]
-    var selectedAppID: String?
-    var deviceCommandState: DeviceCommandState?
-    var appCommandState: AppCommandState?
-    var deepLinkURLString: String
-    var recentDeepLinkURLs: [String]
-    var pushBundleID: String
-    var pushPayloadJSON: String
-    var privacyAction: PrivacyAction
-    var privacyService: PrivacyService
-    var privacyBundleID: String
-    var locationPreset: LocationPreset
-    var customLatitude: String
-    var customLongitude: String
-    var recentLocations: [LocationCoordinateInput]
-    var statusBarTime: String
-    var statusBarDataNetwork: StatusBarDataNetwork?
-    var statusBarWifiMode: StatusBarWifiMode?
-    var statusBarWifiBars: String
-    var statusBarCellularMode: StatusBarCellularMode?
-    var statusBarCellularBars: String
-    var statusBarOperatorNameIncluded: Bool
-    var statusBarOperatorName: String
-    var statusBarBatteryState: StatusBarBatteryState?
-    var statusBarBatteryLevel: String
+    public var device: SimulatorDevice?
+    public var installedApps: [InstalledApp]
+    public var selectedAppID: String?
+    public var deviceCommandState: DeviceCommandState?
+    public var appCommandState: AppCommandState?
+    public var deepLinkURLString: String
+    public var recentDeepLinkURLs: [String]
+    public var pushBundleID: String
+    public var pushPayloadJSON: String
+    public var privacyAction: PrivacyAction
+    public var privacyService: PrivacyService
+    public var privacyBundleID: String
+    public var locationPreset: LocationPreset
+    public var customLatitude: String
+    public var customLongitude: String
+    public var recentLocations: [LocationCoordinateInput]
+    public var statusBarTime: String
+    public var statusBarDataNetwork: StatusBarDataNetwork?
+    public var statusBarWifiMode: StatusBarWifiMode?
+    public var statusBarWifiBars: String
+    public var statusBarCellularMode: StatusBarCellularMode?
+    public var statusBarCellularBars: String
+    public var statusBarOperatorNameIncluded: Bool
+    public var statusBarOperatorName: String
+    public var statusBarBatteryState: StatusBarBatteryState?
+    public var statusBarBatteryLevel: String
 
-    init(
+    public init(
       device: SimulatorDevice? = nil,
       installedApps: [InstalledApp] = [],
       selectedAppID: String? = nil,
@@ -470,7 +478,7 @@ public struct DeveloperToolsFeature {
       applySelectedAppBundleIfNeeded()
     }
 
-    var selectedApp: InstalledApp? {
+    public var selectedApp: InstalledApp? {
       guard let selectedAppID else {
         return nil
       }
@@ -478,21 +486,21 @@ public struct DeveloperToolsFeature {
       return installedApps.first { $0.id == selectedAppID }
     }
 
-    var selectedAppBundleID: String? {
+    public var selectedAppBundleID: String? {
       selectedApp?.bundleID
     }
 
-    var appBundleIDOptions: [String] {
+    public var appBundleIDOptions: [String] {
       Array(Set(installedApps.map(\.bundleID).filter { !$0.isEmpty }))
         .sorted()
     }
 
-    var openDeepLinkDisabledReason: String? {
+    public var openDeepLinkDisabledReason: String? {
       runnableDeviceDisabledReason
         ?? Self.urlValidationError(deepLinkURLString)
     }
 
-    var sendPushDisabledReason: String? {
+    public var sendPushDisabledReason: String? {
       runnableDeviceDisabledReason
         ?? Self.pushPayloadValidationError(
           pushPayloadJSON,
@@ -500,7 +508,7 @@ public struct DeveloperToolsFeature {
         )
     }
 
-    var applyPrivacyDisabledReason: String? {
+    public var applyPrivacyDisabledReason: String? {
       if let runnableDeviceDisabledReason {
         return runnableDeviceDisabledReason
       }
@@ -516,25 +524,25 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
-    var setLocationDisabledReason: String? {
+    public var setLocationDisabledReason: String? {
       runnableDeviceDisabledReason
         ?? selectedLocationValidationError
     }
 
-    var clearLocationDisabledReason: String? {
+    public var clearLocationDisabledReason: String? {
       runnableDeviceDisabledReason
     }
 
-    var setStatusBarOverrideDisabledReason: String? {
+    public var setStatusBarOverrideDisabledReason: String? {
       bootedDeviceDisabledReason
         ?? statusBarOverrideValidationError
     }
 
-    var clearStatusBarOverrideDisabledReason: String? {
+    public var clearStatusBarOverrideDisabledReason: String? {
       bootedDeviceDisabledReason
     }
 
-    var selectedLocationCoordinate: LocationCoordinateInput? {
+    public var selectedLocationCoordinate: LocationCoordinateInput? {
       switch locationPreset {
       case .custom:
         LocationCoordinateInput(
@@ -551,7 +559,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    var statusBarOverrideArguments: [String] {
+    public var statusBarOverrideArguments: [String] {
       var arguments: [String] = []
       let time = Self.trimmed(statusBarTime)
       let wifiBars = Self.trimmed(statusBarWifiBars)
@@ -676,7 +684,7 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
-    mutating func updateContext(
+    public mutating func updateContext(
       device: SimulatorDevice?,
       installedApps: [InstalledApp],
       selectedAppID: String?,
@@ -698,7 +706,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    mutating func recordDeepLinkURL(_ urlString: String) {
+    public mutating func recordDeepLinkURL(_ urlString: String) {
       let urlString = Self.trimmed(urlString)
       guard !urlString.isEmpty else {
         return
@@ -709,7 +717,7 @@ public struct DeveloperToolsFeature {
       recentDeepLinkURLs = Array(recentDeepLinkURLs.prefix(5))
     }
 
-    mutating func recordLocation(_ location: LocationCoordinateInput) {
+    public mutating func recordLocation(_ location: LocationCoordinateInput) {
       guard Self.coordinateValidationError(
         latitude: location.latitude,
         longitude: location.longitude
@@ -722,7 +730,7 @@ public struct DeveloperToolsFeature {
       recentLocations = Array(recentLocations.prefix(5))
     }
 
-    mutating func applySelectedAppBundle() {
+    public mutating func applySelectedAppBundle() {
       guard let selectedAppBundleID else {
         return
       }
@@ -745,7 +753,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
-    static func urlValidationError(_ value: String) -> String? {
+    public static func urlValidationError(_ value: String) -> String? {
       let value = Self.trimmed(value)
 
       guard !value.isEmpty else {
@@ -771,7 +779,7 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
-    static func pushPayloadValidationError(
+    public static func pushPayloadValidationError(
       _ payloadJSON: String,
       bundleID: String
     ) -> String? {
@@ -809,7 +817,7 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
-    static func coordinateValidationError(
+    public static func coordinateValidationError(
       latitude: String,
       longitude: String
     ) -> String? {
@@ -830,7 +838,7 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
-    static func integerValidationError(
+    public static func integerValidationError(
       _ value: String,
       label: String,
       range: ClosedRange<Int>
@@ -851,11 +859,11 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
-    static func trimmed(_ value: String) -> String {
+    public static func trimmed(_ value: String) -> String {
       value.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    private static let defaultPushPayloadJSON = """
+    public static let defaultPushPayloadJSON = """
     {
       "aps": {
         "alert": "Hello from SimControl"

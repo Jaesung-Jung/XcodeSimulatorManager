@@ -4,8 +4,12 @@ import SimControlSharedUI
 import SimControlDomain
 import SwiftUI
 
-struct DeveloperToolsView: View {
-  let store: StoreOf<DeveloperToolsFeature>
+public struct DeveloperToolsView: View {
+  private let store: StoreOf<DeveloperToolsFeature>
+
+  public init(store: StoreOf<DeveloperToolsFeature>) {
+    self.store = store
+  }
 
   private var deepLinkURLString: Binding<String> {
     Binding(
@@ -133,7 +137,7 @@ struct DeveloperToolsView: View {
     )
   }
 
-  var body: some View {
+  public var body: some View {
     VStack(alignment: .leading, spacing: 10) {
       SectionHeader(title: "Developer Tools", systemImage: "wrench.and.screwdriver")
 
@@ -771,11 +775,7 @@ extension DeveloperToolsView {
 #Preview {
   DeveloperToolsView(
     store: Store(
-      initialState: DeveloperToolsFeature.State(
-        device: MainWindowPreviewFixtures.device,
-        installedApps: [MainWindowPreviewFixtures.app],
-        selectedAppID: MainWindowPreviewFixtures.app.id
-      )
+      initialState: DeveloperToolsFeature.State()
     ) {
       DeveloperToolsFeature()
     }

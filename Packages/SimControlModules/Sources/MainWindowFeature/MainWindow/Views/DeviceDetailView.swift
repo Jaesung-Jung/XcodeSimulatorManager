@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import DeveloperToolsFeature
 import InstalledAppsFeature
 import MainWindowDisplaySupport
 import MainWindowFeatureSupport

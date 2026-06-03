@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import DeveloperToolsFeature
 import DeviceListFeature
 import InstalledAppsFeature
 import SimControlDomain
