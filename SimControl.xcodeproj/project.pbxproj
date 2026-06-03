@@ -13,6 +13,7 @@
 		4B2826242FA4C2000006787D /* SimControlClientsLive in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2826252FA4C2000006787D /* SimControlClientsLive */; };
 		4B2826292FA4C4000006787D /* MainWindowFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2826282FA4C4000006787D /* MainWindowFeature */; };
 		4B28262B2FA4C5000006787D /* SettingsFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 4B28262A2FA4C5000006787D /* SettingsFeature */; };
+		4B28262D2FA4C6000006787D /* MenuBarFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 4B28262C2FA4C6000006787D /* MenuBarFeature */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 				4B2826222FA4C1000006787D /* SimControlClients in Frameworks */,
 				4B2826242FA4C2000006787D /* SimControlClientsLive in Frameworks */,
 				4B2826292FA4C4000006787D /* MainWindowFeature in Frameworks */,
+				4B28262D2FA4C6000006787D /* MenuBarFeature in Frameworks */,
 				4B28262B2FA4C5000006787D /* SettingsFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -110,6 +112,7 @@
 				4B2826232FA4C1000006787D /* SimControlClients */,
 				4B2826252FA4C2000006787D /* SimControlClientsLive */,
 				4B2826282FA4C4000006787D /* MainWindowFeature */,
+				4B28262C2FA4C6000006787D /* MenuBarFeature */,
 				4B28262A2FA4C5000006787D /* SettingsFeature */,
 			);
 			productName = SimControl;
@@ -521,6 +524,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4B2826112FA4B0000006787D /* XCLocalSwiftPackageReference "Packages/SimControlModules" */;
 			productName = SettingsFeature;
+		};
+		4B28262C2FA4C6000006787D /* MenuBarFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B2826112FA4B0000006787D /* XCLocalSwiftPackageReference "Packages/SimControlModules" */;
+			productName = MenuBarFeature;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

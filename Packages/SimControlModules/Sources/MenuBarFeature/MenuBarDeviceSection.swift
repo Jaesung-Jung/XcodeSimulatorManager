@@ -1,8 +1,12 @@
 import ComposableArchitecture
+import DeviceDetailFeature
 import DeviceListFeature
+import InstalledAppsFeature
 import MainWindowDisplaySupport
+import MainWindowFeature
 import SimControlDomain
 import SwiftUI
+import WorkspaceFeature
 
 @MainActor
 struct MenuBarDeviceSection: View {
@@ -160,7 +164,9 @@ extension MenuBarDeviceSection {
 
 #Preview {
   MenuBarDeviceSection(
-    store: .mainWindowPreview,
+    store: Store(initialState: MainWindowFeature.State.initial) {
+      MainWindowFeature()
+    },
     openMainWindow: {}
   )
 }

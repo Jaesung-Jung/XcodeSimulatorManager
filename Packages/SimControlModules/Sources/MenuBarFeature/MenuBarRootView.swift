@@ -1,8 +1,10 @@
 import AppKit
 import ComposableArchitecture
+import MainWindowFeature
 import MainWindowFeatureSupport
 import SimControlDomain
 import SwiftUI
+import WorkspaceFeature
 
 @MainActor
 public struct MenuBarRootView: View {
@@ -112,7 +114,11 @@ extension MenuBarRootView {
 #if DEBUG
 
 #Preview {
-  MenuBarRootView(store: .mainWindowPreview)
+  MenuBarRootView(
+    store: Store(initialState: MainWindowFeature.State.initial) {
+      MainWindowFeature()
+    }
+  )
 }
 
 #endif

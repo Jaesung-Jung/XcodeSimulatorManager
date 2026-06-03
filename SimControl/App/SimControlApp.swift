@@ -1,4 +1,5 @@
 import MainWindowFeature
+import MenuBarFeature
 import SettingsFeature
 import SwiftUI
 

@@ -1,6 +1,9 @@
 import AppKit
 import ComposableArchitecture
+import MainWindowFeature
+import MainWindowFeatureSupport
 import SwiftUI
+import WorkspaceFeature
 
 @MainActor
 struct MenuBarAppActionsView: View {
@@ -57,7 +60,9 @@ struct MenuBarAppActionsView: View {
 
 #Preview {
   MenuBarAppActionsView(
-    store: .mainWindowPreview,
+    store: Store(initialState: MainWindowFeature.State.initial) {
+      MainWindowFeature()
+    },
     openMainWindow: {}
   )
 }

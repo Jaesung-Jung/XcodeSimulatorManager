@@ -186,7 +186,7 @@ public struct MainWindowFeature {
     var lastMenuBarAutoRefreshAttemptAt: Date?
     var lifecycleSheet: DeviceLifecycleSheet?
     var sidebar: SidebarFeature.State
-    var workspace: WorkspaceFeature.State
+    public var workspace: WorkspaceFeature.State
 
     init(
       snapshot: SimulatorSnapshot? = nil,

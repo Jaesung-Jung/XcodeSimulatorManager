@@ -23,6 +23,7 @@ let package = Package(
     .library(name: "InspectorFeature", targets: ["InspectorFeature"]),
     .library(name: "SidebarFeature", targets: ["SidebarFeature"]),
     .library(name: "WorkspaceFeature", targets: ["WorkspaceFeature"]),
+    .library(name: "MenuBarFeature", targets: ["MenuBarFeature"]),
     .library(name: "MainWindowFeature", targets: ["MainWindowFeature"]),
     .library(name: "SettingsFeature", targets: ["SettingsFeature"])
   ],
@@ -220,6 +221,23 @@ let package = Package(
         )
       ]
     ),
+    .target(
+      name: "MenuBarFeature",
+      dependencies: [
+        "DeviceDetailFeature",
+        "DeviceListFeature",
+        "InstalledAppsFeature",
+        "MainWindowDisplaySupport",
+        "MainWindowFeature",
+        "MainWindowFeatureSupport",
+        "SimControlDomain",
+        "WorkspaceFeature",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
     .target(name: "SettingsFeature"),
     .testTarget(
       name: "SimControlDomainTests",
@@ -348,6 +366,17 @@ let package = Package(
       dependencies: [
         "MainWindowFeatureSupport",
         "WorkspaceFeature",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .testTarget(
+      name: "MenuBarFeatureTests",
+      dependencies: [
+        "MainWindowFeature",
+        "MenuBarFeature",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
