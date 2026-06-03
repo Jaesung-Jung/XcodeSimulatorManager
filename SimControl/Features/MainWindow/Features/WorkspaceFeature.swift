@@ -1,6 +1,5 @@
 import ComposableArchitecture
 import SimControlDomain
-import Foundation
 
 @Reducer
 struct WorkspaceFeature {
@@ -65,28 +64,24 @@ struct WorkspaceFeature {
       preferredSelectedDeviceID: String? = nil,
       preferredSelectedAppID: String? = nil
     ) {
-      let previousSelectedDeviceID = deviceList.selectedDeviceID
       self.snapshot = snapshot
 
-      let selectedDeviceID = validPreferredSelectedDeviceID(preferredSelectedDeviceID)
-        ?? validSelectedDeviceID()
-      let selectedAppID = validPreferredSelectedAppID(
-        preferredSelectedAppID,
-        selectedDeviceID: selectedDeviceID
-      ) ?? (
-        selectedDeviceID == previousSelectedDeviceID
-          ? validPreferredSelectedAppID(
-            deviceDetail.installedApps.selectedAppID,
-            selectedDeviceID: selectedDeviceID
-          )
-          : nil
+      let selection = inventoryQuery?.selectionAfterApplyingSnapshot(
+        current: SimulatorInventorySelection(
+          deviceID: deviceList.selectedDeviceID,
+          appID: deviceDetail.installedApps.selectedAppID
+        ),
+        preferred: SimulatorInventorySelection(
+          deviceID: preferredSelectedDeviceID,
+          appID: preferredSelectedAppID
+        )
       )
 
       self.refreshState = refreshState
       self.commandResults = commandResults
       installedAppsAvailability = .loaded
-      rebuildDeviceList(selectedDeviceID: selectedDeviceID)
-      rebuildDetail(selectedAppID: selectedAppID)
+      rebuildDeviceList(selectedDeviceID: selection?.deviceID)
+      rebuildDetail(selectedAppID: selection?.appID)
     }
 
     mutating func selectDevice(id: String?) {
@@ -119,10 +114,10 @@ struct WorkspaceFeature {
 
     mutating func setSearchQuery(_ query: String) {
       filters.searchQuery = query
-      let searchTarget = exactSearchTarget()
+      let searchTarget = inventoryQuery?.exactSearchTarget()
       rebuildAfterFilterChange(
-        preferredSelectedDeviceID: searchTarget.deviceID,
-        preferredSelectedAppID: searchTarget.appID
+        preferredSelectedDeviceID: searchTarget?.deviceID,
+        preferredSelectedAppID: searchTarget?.appID
       )
     }
 
@@ -219,10 +214,10 @@ struct WorkspaceFeature {
 
     private mutating func rebuildDeviceList(selectedDeviceID: String?) {
       deviceList = DeviceListFeature.State(
-        devices: visibleDevices,
-        runtimeByID: runtimeByID,
-        deviceTypeByID: deviceTypeByID,
-        installedAppsByDeviceID: visibleInstalledAppsByDeviceID,
+        devices: inventoryQuery?.visibleDevices() ?? [],
+        runtimeByID: inventoryQuery?.runtimeByID ?? [:],
+        deviceTypeByID: inventoryQuery?.deviceTypeByID ?? [:],
+        installedAppsByDeviceID: inventoryQuery?.visibleInstalledAppsByDeviceID() ?? [:],
         installedAppsAvailability: installedAppsAvailability,
         selectedDeviceID: selectedDeviceID,
         filters: filters,
@@ -234,7 +229,9 @@ struct WorkspaceFeature {
       let allInstalledApps = selectedDevice.map { device in
         snapshot?.installedAppsByDeviceID[device.id] ?? []
       } ?? []
-      let installedApps = selectedDevice.map(visibleApps) ?? []
+      let installedApps = selectedDevice.map {
+        inventoryQuery?.visibleApps(for: $0.id) ?? []
+      } ?? []
       var developerTools = deviceDetail.developerTools
       developerTools.updateContext(
         device: selectedDevice,
@@ -256,7 +253,7 @@ struct WorkspaceFeature {
           selectedAppID: selectedAppID,
           appCommandState: appCommandState,
           isDeviceCommandRunning: deviceCommandState != nil,
-          compatibleInstallTargetCount: compatibleInstallTargetCount(for: selectedDevice),
+          compatibleInstallTargetCount: inventoryQuery?.compatibleInstallTargetCount(for: selectedDevice) ?? 0,
           filters: filters,
           allAppsCount: allInstalledApps.count
         ),
@@ -279,409 +276,71 @@ struct WorkspaceFeature {
       )
     }
 
-    private func validSelectedDeviceID() -> String? {
-      guard let selectedDeviceID = deviceList.selectedDeviceID else {
-        return nil
-      }
-
-      return visibleDevices.contains(where: { $0.id == selectedDeviceID })
-        ? selectedDeviceID
-        : nil
-    }
-
-    private func validPreferredSelectedDeviceID(
-      _ preferredSelectedDeviceID: String?
-    ) -> String? {
-      guard let preferredSelectedDeviceID else {
-        return nil
-      }
-
-      return visibleDevices.contains(where: { $0.id == preferredSelectedDeviceID })
-        ? preferredSelectedDeviceID
-        : nil
-    }
-
-    private func validPreferredSelectedAppID(
-      _ preferredSelectedAppID: String?,
-      selectedDeviceID: String?
-    ) -> String? {
-      guard let preferredSelectedAppID,
-            let selectedDeviceID,
-            let selectedDevice = devices.first(where: { $0.id == selectedDeviceID }),
-            visibleApps(for: selectedDevice).contains(where: {
-              $0.id == preferredSelectedAppID
-            }) == true
-      else {
-        return nil
-      }
-
-      return preferredSelectedAppID
-    }
-
     private mutating func rebuildAfterFilterChange(
       preferredSelectedDeviceID: String? = nil,
       preferredSelectedAppID: String? = nil
     ) {
-      let selectedDeviceID = validPreferredSelectedDeviceID(preferredSelectedDeviceID)
-        ?? validSelectedDeviceID()
-        ?? visibleDevices.first?.id
-      let selectedAppID = validPreferredSelectedAppID(
-        preferredSelectedAppID,
-        selectedDeviceID: selectedDeviceID
-      ) ?? validPreferredSelectedAppID(
-        deviceDetail.installedApps.selectedAppID,
-        selectedDeviceID: selectedDeviceID
+      let selection = inventoryQuery?.selectionAfterFilterChange(
+        current: SimulatorInventorySelection(
+          deviceID: deviceList.selectedDeviceID,
+          appID: deviceDetail.installedApps.selectedAppID
+        ),
+        preferred: SimulatorInventorySelection(
+          deviceID: preferredSelectedDeviceID,
+          appID: preferredSelectedAppID
+        )
       )
 
-      rebuildDeviceList(selectedDeviceID: selectedDeviceID)
-      rebuildDetail(selectedAppID: selectedAppID)
+      rebuildDeviceList(selectedDeviceID: selection?.deviceID)
+      rebuildDetail(selectedAppID: selection?.appID)
     }
 
-    private func visibleApps(for device: SimulatorDevice) -> [InstalledApp] {
-      let apps = snapshot?.installedAppsByDeviceID[device.id] ?? []
-      return sortedApps(filteredApps(apps))
-    }
-
-    private var visibleInstalledAppsByDeviceID: [String: [InstalledApp]] {
-      guard let installedAppsByDeviceID = snapshot?.installedAppsByDeviceID else {
-        return [:]
+    private var inventoryQuery: SimulatorInventoryQuery? {
+      guard let snapshot else {
+        return nil
       }
 
-      return installedAppsByDeviceID.mapValues { filteredApps($0) }
-    }
-
-    private func filteredApps(_ apps: [InstalledApp]) -> [InstalledApp] {
-      apps.filter { app in
-        appMatchesSystemFilter(app)
-          && presence(app.appGroups.isEmpty, matches: filters.appGroupFilter)
-          && presence(app.databaseFiles.isEmpty, matches: filters.appDatabaseFilter)
-          && appMatchesSearch(app)
-      }
-    }
-
-    private func appMatchesSystemFilter(_ app: InstalledApp) -> Bool {
-      switch filters.appSystemFilter {
-      case .user:
-        !app.isSystemApp
-      case .system:
-        app.isSystemApp
-      case .all:
-        true
-      }
-    }
-
-    private func presence(_ isEmpty: Bool, matches filter: SimulatorFilters.PresenceFilter) -> Bool {
-      switch filter {
-      case .all:
-        true
-      case .present:
-        !isEmpty
-      case .absent:
-        isEmpty
-      }
-    }
-
-    private func appMatchesSearch(_ app: InstalledApp) -> Bool {
-      let query = filters.trimmedSearchQuery
-      guard !query.isEmpty else {
-        return true
-      }
-
-      return matches(query, in: appSearchCandidates(app))
-    }
-
-    private func appSearchCandidates(_ app: InstalledApp) -> [String] {
-      var candidates = [
-        app.displayName,
-        app.bundleID
-      ]
-
-      candidates.append(contentsOf: [
-        app.bundleContainer?.path,
-        app.dataContainer?.path,
-        app.appBundlePath?.path
-      ].compactMap { $0 })
-      candidates.append(contentsOf: app.appGroups.flatMap { [$0.groupID, $0.path.path] })
-      candidates.append(contentsOf: app.databaseFiles.map(\.path))
-
-      return candidates
-    }
-
-    private func sortedApps(_ apps: [InstalledApp]) -> [InstalledApp] {
-      apps.sorted { first, second in
-        let firstPinned = filters.pinnedAppIDs.contains(first.id)
-        let secondPinned = filters.pinnedAppIDs.contains(second.id)
-        if firstPinned != secondPinned {
-          return firstPinned
-        }
-
-        let comparison = appComparison(first, second)
-        if comparison == .orderedSame {
-          return first.id.localizedStandardCompare(second.id) == .orderedAscending
-        }
-
-        return ordered(comparison, direction: filters.appSortDirection)
-      }
-    }
-
-    private func appComparison(_ first: InstalledApp, _ second: InstalledApp) -> ComparisonResult {
-      switch filters.appSort {
-      case .name:
-        return first.displayName.localizedStandardCompare(second.displayName)
-      case .bundleID:
-        return first.bundleID.localizedStandardCompare(second.bundleID)
-      case .version:
-        return (first.version ?? "").localizedStandardCompare(second.version ?? "")
-      case .dataSize:
-        return compare(first.dataContainerSize ?? -1, second.dataContainerSize ?? -1)
-      }
-    }
-
-    private var visibleDevices: [SimulatorDevice] {
-      sortedDevices(filteredDevices(devices))
-    }
-
-    private func filteredDevices(_ devices: [SimulatorDevice]) -> [SimulatorDevice] {
-      devices.filter { device in
-        deviceMatchesSidebarScope(device)
-          && deviceMatchesSearch(device)
-      }
-    }
-
-    private func deviceMatchesSidebarScope(_ device: SimulatorDevice) -> Bool {
-      switch filters.sidebarScope {
-      case .all:
-        true
-      case .pinned:
-        filters.pinnedDeviceIDs.contains(device.id)
-      case .warnings:
-        snapshot?.warnings.contains { $0.relatedID == device.id } == true
-      case .platform(let platform):
-        device.platform == platform
-      case .runtime(let runtimeID):
-        device.runtimeID == runtimeID
-      case .state(let state):
-        device.state == state
-      }
-    }
-
-    private func deviceMatchesSearch(_ device: SimulatorDevice) -> Bool {
-      let query = filters.trimmedSearchQuery
-      guard !query.isEmpty else {
-        return true
-      }
-
-      if matches(query, in: deviceSearchCandidates(device)) {
-        return true
-      }
-
-      return !filteredApps(snapshot?.installedAppsByDeviceID[device.id] ?? []).isEmpty
-    }
-
-    private func deviceSearchCandidates(_ device: SimulatorDevice) -> [String] {
-      var candidates = [
-        device.id,
-        device.udid,
-        device.name,
-        device.platform.displayTitle,
-        device.state.displayTitle,
-        device.runtimeID,
-        device.deviceTypeID
-      ]
-
-      if let runtime = runtimeByID[device.runtimeID] {
-        candidates.append(contentsOf: [
-          runtime.id,
-          runtime.name,
-          runtime.version,
-          runtime.buildVersion,
-          runtime.platform.displayTitle
-        ])
-      }
-
-      if let deviceType = deviceTypeByID[device.deviceTypeID] {
-        candidates.append(contentsOf: [
-          deviceType.id,
-          deviceType.name,
-          deviceType.productFamily,
-          deviceType.modelIdentifier
-        ].compactMap { $0 })
-      }
-
-      candidates.append(contentsOf: [
-        device.dataPath?.path,
-        device.logPath?.path
-      ].compactMap { $0 })
-
-      return candidates
-    }
-
-    private func sortedDevices(_ devices: [SimulatorDevice]) -> [SimulatorDevice] {
-      devices.sorted { first, second in
-        let firstPinned = filters.pinnedDeviceIDs.contains(first.id)
-        let secondPinned = filters.pinnedDeviceIDs.contains(second.id)
-        if firstPinned != secondPinned {
-          return firstPinned
-        }
-
-        let comparison = deviceComparison(first, second)
-        if comparison == .orderedSame {
-          return first.id.localizedStandardCompare(second.id) == .orderedAscending
-        }
-
-        return ordered(comparison, direction: filters.deviceSortDirection)
-      }
-    }
-
-    private func deviceComparison(_ first: SimulatorDevice, _ second: SimulatorDevice) -> ComparisonResult {
-      switch filters.deviceSort {
-      case .name:
-        return first.name.localizedStandardCompare(second.name)
-      case .state:
-        return first.state.displayTitle.localizedStandardCompare(second.state.displayTitle)
-      case .runtime:
-        return (runtimeByID[first.runtimeID]?.name ?? first.runtimeID)
-          .localizedStandardCompare(runtimeByID[second.runtimeID]?.name ?? second.runtimeID)
-      case .platform:
-        return first.platform.displayTitle.localizedStandardCompare(second.platform.displayTitle)
-      case .lastBootedAt:
-        return compare(first.lastBootedAt?.timeIntervalSince1970 ?? -1, second.lastBootedAt?.timeIntervalSince1970 ?? -1)
-      case .dataSize:
-        return compare(first.dataPathSize ?? -1, second.dataPathSize ?? -1)
-      }
-    }
-
-    private func exactSearchTarget() -> (deviceID: String?, appID: String?) {
-      let query = filters.trimmedSearchQuery
-      guard !query.isEmpty else {
-        return (nil, nil)
-      }
-
-      if let device = devices.first(where: {
-        $0.udid.compare(query, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame
-          || $0.id.compare(query, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame
-      }) {
-        return (device.id, nil)
-      }
-
-      for apps in (snapshot?.installedAppsByDeviceID ?? [:]).values {
-        if let app = apps.first(where: {
-          $0.bundleID.compare(query, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame
-        }) {
-          return (app.deviceID, app.id)
-        }
-      }
-
-      return (nil, nil)
-    }
-
-    private func matches(_ query: String, in candidates: [String]) -> Bool {
-      candidates.contains {
-        $0.range(of: query, options: [.caseInsensitive, .diacriticInsensitive]) != nil
-      }
-    }
-
-    private func ordered(
-      _ comparison: ComparisonResult,
-      direction: SimulatorFilters.SortDirection
-    ) -> Bool {
-      switch direction {
-      case .ascending:
-        comparison == .orderedAscending
-      case .descending:
-        comparison == .orderedDescending
-      }
-    }
-
-    private func compare<T: Comparable>(_ first: T, _ second: T) -> ComparisonResult {
-      if first < second {
-        return .orderedAscending
-      }
-
-      if first > second {
-        return .orderedDescending
-      }
-
-      return .orderedSame
-    }
-
-    private func compatibleInstallTargetCount(for sourceDevice: SimulatorDevice?) -> Int {
-      guard let sourceDevice else {
-        return 0
-      }
-
-      return devices.filter { target in
-        target.id != sourceDevice.id
-          && target.isAvailable
-          && target.platform == sourceDevice.platform
-          && (target.state == .booted || target.state == .shutdown)
-      }.count
+      return SimulatorInventoryQuery(snapshot: snapshot, filters: filters)
     }
 
     private var devices: [SimulatorDevice] {
-      snapshot?.devices ?? []
+      inventoryQuery?.devices ?? []
     }
 
     private var runtimeByID: [String: SimulatorRuntime] {
-      Dictionary(uniqueKeysWithValues: (snapshot?.runtimes ?? []).map { ($0.id, $0) })
+      inventoryQuery?.runtimeByID ?? [:]
     }
 
     private var deviceTypeByID: [String: SimulatorDeviceType] {
-      Dictionary(uniqueKeysWithValues: (snapshot?.deviceTypes ?? []).map { ($0.id, $0) })
-    }
-
-    private var deviceByID: [String: SimulatorDevice] {
-      Dictionary(uniqueKeysWithValues: devices.map { ($0.id, $0) })
+      inventoryQuery?.deviceTypeByID ?? [:]
     }
 
     var selectedDevice: SimulatorDevice? {
-      guard let selectedDeviceID = deviceList.selectedDeviceID else {
-        return nil
-      }
-
-      return devices.first { $0.id == selectedDeviceID }
+      inventoryQuery?.device(id: deviceList.selectedDeviceID)
     }
 
     var selectedRuntime: SimulatorRuntime? {
-      guard let selectedDevice else {
-        return nil
-      }
-
-      return runtimeByID[selectedDevice.runtimeID]
+      inventoryQuery?.runtime(for: selectedDevice)
     }
 
     var selectedDeviceType: SimulatorDeviceType? {
-      guard let selectedDevice else {
-        return nil
-      }
-
-      return deviceTypeByID[selectedDevice.deviceTypeID]
+      inventoryQuery?.deviceType(for: selectedDevice)
     }
 
     var selectedPairSummary: DeviceDetailFeature.DevicePairSummary? {
-      guard let selectedDevice, let snapshot else {
-        return nil
-      }
-
-      let selectedDeviceID = selectedDevice.id
-      guard let pair = snapshot.pairs.first(where: {
-        $0.phoneDeviceID == selectedDeviceID || $0.watchDeviceID == selectedDeviceID
-      }),
-        let phoneDevice = deviceByID[pair.phoneDeviceID],
-        let watchDevice = deviceByID[pair.watchDeviceID]
-      else {
+      guard let summary = inventoryQuery?.pairSummary(for: selectedDevice) else {
         return nil
       }
 
       return DeviceDetailFeature.DevicePairSummary(
-        id: pair.id,
-        phoneDeviceID: phoneDevice.id,
-        phoneName: phoneDevice.name,
-        phoneUDID: phoneDevice.udid,
-        watchDeviceID: watchDevice.id,
-        watchName: watchDevice.name,
-        watchUDID: watchDevice.udid,
-        state: pair.state
+        id: summary.id,
+        phoneDeviceID: summary.phoneDeviceID,
+        phoneName: summary.phoneName,
+        phoneUDID: summary.phoneUDID,
+        watchDeviceID: summary.watchDeviceID,
+        watchName: summary.watchName,
+        watchUDID: summary.watchUDID,
+        state: summary.state
       )
     }
   }
