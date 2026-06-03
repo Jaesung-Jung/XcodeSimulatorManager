@@ -353,6 +353,11 @@ assert_max_lines \
   180 \
   "$PACKAGE_SOURCES/WorkspaceFeature/WorkspaceFeature.swift"
 
+assert_max_lines \
+  "MainWindowFeatureTests.swift는 root feature 테스트를 기능별 파일로 분리해 3500줄 이하로 유지합니다." \
+  3500 \
+  "$PACKAGE_TESTS/MainWindowFeatureTests/MainWindowFeatureTests.swift"
+
 assert_no_app_swift_sources_outside_app
 
 assert_path_present \
