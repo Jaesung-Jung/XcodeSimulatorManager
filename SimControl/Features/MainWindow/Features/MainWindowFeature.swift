@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import MainWindowWorkflows
 import SimControlClients
 import SimControlDomain
 import Foundation
@@ -38,11 +39,6 @@ struct MainWindowFeature {
         "App Group \(groupID) container"
       }
     }
-  }
-
-  private enum PathOperation: Equatable, Sendable {
-    case open
-    case copy
   }
 
   enum DeviceLifecycleSheet: Equatable, Identifiable {
@@ -1916,24 +1912,19 @@ struct MainWindowFeature {
     deviceID: String,
     path: (SimulatorDevice) -> URL?,
     label: String,
-    operation: PathOperation
+    operation: PathActionOperation
   ) -> Effect<Action> {
     guard let device = device(id: deviceID, in: state) else {
       return .none
     }
 
     let url = path(device)
-    return .run { [pathAction] send in
-      let result: CommandResult
-
-      switch operation {
-      case .open:
-        result = await pathAction.openInFinder(url, label)
-      case .copy:
-        result = await pathAction.copyPath(url, label)
-      }
-
-      await send(.pathActionResults([result]))
+    return .run { [coreSimulatorService, pathAction] send in
+      let workflow = PathActionWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        pathAction: pathAction
+      )
+      await send(.pathActionResults(await workflow.runDevicePathAction(url, label, operation)))
     }
   }
 
@@ -1948,9 +1939,12 @@ struct MainWindowFeature {
     }
 
     let value = value(device)
-    return .run { [pathAction] send in
-      let result = await pathAction.copy(value, label)
-      await send(.pathActionResults([result]))
+    return .run { [coreSimulatorService, pathAction] send in
+      let workflow = PathActionWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        pathAction: pathAction
+      )
+      await send(.pathActionResults(await workflow.copyValue(value, label)))
     }
   }
 
@@ -1965,9 +1959,12 @@ struct MainWindowFeature {
     }
 
     let value = value(context.app)
-    return .run { [pathAction] send in
-      let result = await pathAction.copy(value, label)
-      await send(.pathActionResults([result]))
+    return .run { [coreSimulatorService, pathAction] send in
+      let workflow = PathActionWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        pathAction: pathAction
+      )
+      await send(.pathActionResults(await workflow.copyValue(value, label)))
     }
   }
 
@@ -1975,7 +1972,7 @@ struct MainWindowFeature {
     _ state: inout State,
     appID: String,
     target: AppContainerPathTarget,
-    operation: PathOperation
+    operation: PathActionOperation
   ) -> Effect<Action> {
     guard let context = appCommandContext(appID: appID, in: state) else {
       return .none
@@ -1986,31 +1983,21 @@ struct MainWindowFeature {
     let fallbackURL = fallbackContainerURL(for: target, app: context.app)
     let label = target.label
     let simctlContainer = target.simctlContainer
+    let request = AppContainerPathActionRequest(
+      deviceID: deviceID,
+      bundleID: bundleID,
+      container: simctlContainer,
+      fallbackURL: fallbackURL,
+      label: label,
+      operation: operation
+    )
 
     return .run { [coreSimulatorService, pathAction] send in
-      var results: [CommandResult] = []
-      let getContainerResult = await coreSimulatorService.getAppContainer(
-        deviceID,
-        bundleID,
-        simctlContainer
+      let workflow = PathActionWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        pathAction: pathAction
       )
-      results.append(getContainerResult)
-
-      let resolvedURL = Self.containerURL(
-        from: getContainerResult,
-        target: target
-      ) ?? fallbackURL
-      let actionResult: CommandResult
-
-      switch operation {
-      case .open:
-        actionResult = await pathAction.openInFinder(resolvedURL, label)
-      case .copy:
-        actionResult = await pathAction.copyPath(resolvedURL, label)
-      }
-
-      results.append(actionResult)
-      await send(.pathActionResults(results))
+      await send(.pathActionResults(await workflow.runAppContainerPathAction(request)))
     }
   }
 
@@ -2026,27 +2013,6 @@ struct MainWindowFeature {
     case .appGroup(let groupID):
       app.appGroups.first { $0.groupID == groupID }?.path
     }
-  }
-
-  private static func containerURL(
-    from result: CommandResult,
-    target: AppContainerPathTarget
-  ) -> URL? {
-    guard result.succeeded else {
-      return nil
-    }
-
-    let path = result.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !path.isEmpty else {
-      return nil
-    }
-
-    let url = URL(fileURLWithPath: path)
-    if target == .bundle && url.pathExtension == "app" {
-      return url.deletingLastPathComponent()
-    }
-
-    return url
   }
 
   private func snapshotNeedsMenuBarRefresh(

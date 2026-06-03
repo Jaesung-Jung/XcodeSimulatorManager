@@ -11,7 +11,8 @@ let package = Package(
     .library(name: "SimControlDomain", targets: ["SimControlDomain"]),
     .library(name: "SimControlInfrastructure", targets: ["SimControlInfrastructure"]),
     .library(name: "SimControlClients", targets: ["SimControlClients"]),
-    .library(name: "SimControlClientsLive", targets: ["SimControlClientsLive"])
+    .library(name: "SimControlClientsLive", targets: ["SimControlClientsLive"]),
+    .library(name: "MainWindowWorkflows", targets: ["MainWindowWorkflows"])
   ],
   dependencies: [
     .package(
@@ -42,6 +43,13 @@ let package = Package(
         "SimControlInfrastructure"
       ]
     ),
+    .target(
+      name: "MainWindowWorkflows",
+      dependencies: [
+        "SimControlClients",
+        "SimControlDomain"
+      ]
+    ),
     .testTarget(
       name: "SimControlDomainTests",
       dependencies: ["SimControlDomain"]
@@ -49,6 +57,13 @@ let package = Package(
     .testTarget(
       name: "SimControlInfrastructureTests",
       dependencies: ["SimControlInfrastructure"]
+    ),
+    .testTarget(
+      name: "MainWindowWorkflowsTests",
+      dependencies: [
+        "MainWindowWorkflows",
+        "SimControlClients"
+      ]
     )
   ]
 )
