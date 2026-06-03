@@ -289,6 +289,11 @@ assert_max_lines \
   "$PACKAGE_SOURCES/DeviceDetailFeature/DeviceDetailView.swift"
 
 assert_max_lines \
+  "InspectorView.swift는 root view 조합만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/InspectorFeature/InspectorView.swift"
+
+assert_max_lines \
   "WorkspaceFeature.swift는 feature entry와 reducer 조합만 남겨 180줄 이하로 유지합니다." \
   180 \
   "$PACKAGE_SOURCES/WorkspaceFeature/WorkspaceFeature.swift"
