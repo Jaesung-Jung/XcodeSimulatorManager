@@ -1,24 +1,23 @@
-import ComposableArchitecture
-import SimControlInfrastructure
+import Dependencies
+import SimControlDomain
 
 /// A TCA dependency boundary for simulator inventory refreshes.
 public struct SimulatorRepositoryClient: Sendable {
-  public var refresh: @Sendable () async -> SimulatorRepository.RefreshResult
+  public var refresh: @Sendable () async -> SimulatorRefreshResult
 
   /// Creates a simulator repository client from an inventory refresh endpoint.
-  public init(refresh: @escaping @Sendable () async -> SimulatorRepository.RefreshResult) {
+  public init(refresh: @escaping @Sendable () async -> SimulatorRefreshResult) {
     self.refresh = refresh
   }
 }
 
-extension SimulatorRepositoryClient: DependencyKey {
-  public static var liveValue: SimulatorRepositoryClient {
-    let repository = SimulatorRepository()
-
-    return SimulatorRepositoryClient {
-      await repository.refresh()
-    }
-  }
+extension SimulatorRepositoryClient: TestDependencyKey {
+  public static let testValue = SimulatorRepositoryClient(
+    refresh: unimplemented(
+      "SimulatorRepositoryClient.refresh",
+      placeholder: placeholderRefreshResult("SimulatorRepositoryClient.refresh")
+    )
+  )
 }
 
 extension DependencyValues {

@@ -10,12 +10,13 @@ let package = Package(
   products: [
     .library(name: "SimControlDomain", targets: ["SimControlDomain"]),
     .library(name: "SimControlInfrastructure", targets: ["SimControlInfrastructure"]),
-    .library(name: "SimControlClients", targets: ["SimControlClients"])
+    .library(name: "SimControlClients", targets: ["SimControlClients"]),
+    .library(name: "SimControlClientsLive", targets: ["SimControlClientsLive"])
   ],
   dependencies: [
     .package(
-      url: "https://github.com/pointfreeco/swift-composable-architecture.git",
-      from: "1.25.5"
+      url: "https://github.com/pointfreeco/swift-dependencies",
+      from: "1.12.0"
     )
   ],
   targets: [
@@ -28,11 +29,17 @@ let package = Package(
       name: "SimControlClients",
       dependencies: [
         "SimControlDomain",
-        "SimControlInfrastructure",
         .product(
-          name: "ComposableArchitecture",
-          package: "swift-composable-architecture"
+          name: "Dependencies",
+          package: "swift-dependencies"
         )
+      ]
+    ),
+    .target(
+      name: "SimControlClientsLive",
+      dependencies: [
+        "SimControlClients",
+        "SimControlInfrastructure"
       ]
     ),
     .testTarget(

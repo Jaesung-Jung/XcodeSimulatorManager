@@ -1,7 +1,6 @@
 import Foundation
-import ComposableArchitecture
+import Dependencies
 import SimControlDomain
-import SimControlInfrastructure
 
 /// A TCA dependency boundary for Finder and pasteboard path actions.
 public struct PathActionClient: Sendable {
@@ -21,22 +20,21 @@ public struct PathActionClient: Sendable {
   }
 }
 
-extension PathActionClient: DependencyKey {
-  public static var liveValue: PathActionClient {
-    let service = PathActionService()
-
-    return PathActionClient(
-      openInFinder: { url, label in
-        await service.openInFinder(url, label: label)
-      },
-      copy: { value, label in
-        await service.copy(value, label: label)
-      },
-      copyPath: { url, label in
-        await service.copyPath(url, label: label)
-      }
+extension PathActionClient: TestDependencyKey {
+  public static let testValue = PathActionClient(
+    openInFinder: unimplemented(
+      "PathActionClient.openInFinder",
+      placeholder: placeholderCommandResult("PathActionClient.openInFinder")
+    ),
+    copy: unimplemented(
+      "PathActionClient.copy",
+      placeholder: placeholderCommandResult("PathActionClient.copy")
+    ),
+    copyPath: unimplemented(
+      "PathActionClient.copyPath",
+      placeholder: placeholderCommandResult("PathActionClient.copyPath")
     )
-  }
+  )
 }
 
 extension DependencyValues {

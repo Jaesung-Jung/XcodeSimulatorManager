@@ -1,7 +1,6 @@
 import ComposableArchitecture
 import SimControlClients
 import SimControlDomain
-import SimControlInfrastructure
 import Foundation
 import Testing
 
@@ -3083,7 +3082,7 @@ private struct MainWindowInstallAppCall: Equatable {
 private struct MainWindowGetAppContainerCall: Equatable {
   let deviceID: String
   let bundleID: String
-  let container: CoreSimulatorService.AppContainerKind
+  let container: SimulatorAppContainerKind
 }
 
 private struct MainWindowOpenPathCall: Equatable {
@@ -3291,7 +3290,7 @@ private actor MainWindowPathActionRecorder {
   func getAppContainer(
     deviceID: String,
     bundleID: String,
-    container: CoreSimulatorService.AppContainerKind
+    container: SimulatorAppContainerKind
   ) -> CommandResult {
     recordedGetContainerCalls.append(
       MainWindowGetAppContainerCall(

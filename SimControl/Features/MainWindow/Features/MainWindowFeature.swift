@@ -1,7 +1,6 @@
 import ComposableArchitecture
 import SimControlClients
 import SimControlDomain
-import SimControlInfrastructure
 import Foundation
 
 @Reducer
@@ -18,7 +17,7 @@ struct MainWindowFeature {
     case data
     case appGroup(String)
 
-    var simctlContainer: CoreSimulatorService.AppContainerKind {
+    var simctlContainer: SimulatorAppContainerKind {
       switch self {
       case .bundle:
         .app
@@ -423,7 +422,7 @@ struct MainWindowFeature {
     case task
     case menuBarPresented(at: Date)
     case refreshButtonTapped
-    case refreshResponse(SimulatorRepository.RefreshResult)
+    case refreshResponse(SimulatorRefreshResult)
     case createSimulatorButtonTapped
     case cloneSelectedSimulatorButtonTapped
     case pairDevicesButtonTapped
@@ -444,7 +443,7 @@ struct MainWindowFeature {
     case deviceCommandResponse(DeviceCommandState, CommandResult)
     case deviceCommandRefreshResponse(
       DeviceCommandState,
-      SimulatorRepository.RefreshResult,
+      SimulatorRefreshResult,
       preferredSelectedDeviceID: String?
     )
     case appCommandCommandsCompleted(
@@ -455,7 +454,7 @@ struct MainWindowFeature {
     )
     case appCommandRefreshResponse(
       AppCommandState,
-      SimulatorRepository.RefreshResult,
+      SimulatorRefreshResult,
       preferredSelectedDeviceID: String?,
       preferredSelectedAppID: String?
     )
@@ -466,7 +465,7 @@ struct MainWindowFeature {
     )
     case developerToolCommandRefreshResponse(
       DeviceCommandState,
-      SimulatorRepository.RefreshResult,
+      SimulatorRefreshResult,
       preferredSelectedDeviceID: String?
     )
     case sidebar(SidebarFeature.Action)
@@ -2310,7 +2309,7 @@ struct MainWindowFeature {
   }
 
   private func commandResults(
-    from result: SimulatorRepository.RefreshResult
+    from result: SimulatorRefreshResult
   ) -> [CommandResult] {
     var results = [result.xcodeCommandResult]
 

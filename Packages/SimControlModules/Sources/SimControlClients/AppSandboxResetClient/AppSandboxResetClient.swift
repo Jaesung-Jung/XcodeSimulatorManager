@@ -1,7 +1,6 @@
 import Foundation
-import ComposableArchitecture
+import Dependencies
 import SimControlDomain
-import SimControlInfrastructure
 
 /// A TCA dependency boundary for destructive app sandbox reset operations.
 public struct AppSandboxResetClient: Sendable {
@@ -13,14 +12,13 @@ public struct AppSandboxResetClient: Sendable {
   }
 }
 
-extension AppSandboxResetClient: DependencyKey {
-  public static var liveValue: AppSandboxResetClient {
-    let service = AppSandboxResetService()
-
-    return AppSandboxResetClient { dataContainer in
-      await service.resetSandbox(at: dataContainer)
-    }
-  }
+extension AppSandboxResetClient: TestDependencyKey {
+  public static let testValue = AppSandboxResetClient(
+    resetSandbox: unimplemented(
+      "AppSandboxResetClient.resetSandbox",
+      placeholder: placeholderCommandResult("AppSandboxResetClient.resetSandbox")
+    )
+  )
 }
 
 extension DependencyValues {

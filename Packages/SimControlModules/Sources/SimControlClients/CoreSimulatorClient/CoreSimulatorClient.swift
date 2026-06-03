@@ -1,7 +1,6 @@
 import Foundation
-import ComposableArchitecture
+import Dependencies
 import SimControlDomain
-import SimControlInfrastructure
 
 /// A TCA dependency boundary for CoreSimulator command operations.
 public struct CoreSimulatorClient: Sendable {
@@ -23,7 +22,7 @@ public struct CoreSimulatorClient: Sendable {
   public var getAppContainer: @Sendable (
     _ deviceID: String,
     _ bundleID: String,
-    _ container: CoreSimulatorService.AppContainerKind
+    _ container: SimulatorAppContainerKind
   ) async -> CommandResult
   public var openURL: @Sendable (_ deviceID: String, _ urlString: String) async -> CommandResult
   public var pushNotification: @Sendable (_ deviceID: String, _ bundleID: String?, _ payloadJSON: String) async -> CommandResult
@@ -53,7 +52,7 @@ public struct CoreSimulatorClient: Sendable {
     getAppContainer: @escaping @Sendable (
       _ deviceID: String,
       _ bundleID: String,
-      _ container: CoreSimulatorService.AppContainerKind
+      _ container: SimulatorAppContainerKind
     ) async -> CommandResult,
     openURL: @escaping @Sendable (_ deviceID: String, _ urlString: String) async -> CommandResult,
     pushNotification: @escaping @Sendable (_ deviceID: String, _ bundleID: String?, _ payloadJSON: String) async -> CommandResult,
@@ -89,102 +88,101 @@ public struct CoreSimulatorClient: Sendable {
   }
 }
 
-extension CoreSimulatorClient: DependencyKey {
-  public static var liveValue: CoreSimulatorClient {
-    let service = CoreSimulatorService()
-
-    return CoreSimulatorClient(
-      openSimulatorApp: {
-        await service.openSimulatorApp()
-      },
-      bootDevice: { id in
-        await service.bootDevice(id: id)
-      },
-      bootDeviceIfNeeded: { id in
-        await service.bootDeviceIfNeeded(id: id)
-      },
-      shutdownDevice: { id in
-        await service.shutdownDevice(id: id)
-      },
-      createDevice: { name, deviceTypeID, runtimeID in
-        await service.createDevice(
-          name: name,
-          deviceTypeID: deviceTypeID,
-          runtimeID: runtimeID
-        )
-      },
-      cloneDevice: { id, name in
-        await service.cloneDevice(id: id, name: name)
-      },
-      renameDevice: { id, name in
-        await service.renameDevice(id: id, name: name)
-      },
-      eraseDevice: { id in
-        await service.eraseDevice(id: id)
-      },
-      deleteDevice: { id in
-        await service.deleteDevice(id: id)
-      },
-      pairDevices: { watchDeviceID, phoneDeviceID in
-        await service.pairDevices(
-          watchDeviceID: watchDeviceID,
-          phoneDeviceID: phoneDeviceID
-        )
-      },
-      unpairDevice: { pairID in
-        await service.unpairDevice(pairID: pairID)
-      },
-      launchApp: { deviceID, bundleID in
-        await service.launchApp(deviceID: deviceID, bundleID: bundleID)
-      },
-      terminateApp: { deviceID, bundleID in
-        await service.terminateApp(deviceID: deviceID, bundleID: bundleID)
-      },
-      uninstallApp: { deviceID, bundleID in
-        await service.uninstallApp(deviceID: deviceID, bundleID: bundleID)
-      },
-      installApp: { deviceID, appBundlePath in
-        await service.installApp(deviceID: deviceID, appBundlePath: appBundlePath)
-      },
-      getAppContainer: { deviceID, bundleID, container in
-        await service.getAppContainer(
-          deviceID: deviceID,
-          bundleID: bundleID,
-          container: container
-        )
-      },
-      openURL: { deviceID, urlString in
-        await service.openURL(deviceID: deviceID, urlString: urlString)
-      },
-      pushNotification: { deviceID, bundleID, payloadJSON in
-        await service.pushNotification(
-          deviceID: deviceID,
-          bundleID: bundleID,
-          payloadJSON: payloadJSON
-        )
-      },
-      setPrivacyPermission: { deviceID, action, serviceName, bundleID in
-        await service.setPrivacyPermission(
-          deviceID: deviceID,
-          action: action,
-          service: serviceName,
-          bundleID: bundleID
-        )
-      },
-      setLocation: { deviceID, coordinate in
-        await service.setLocation(deviceID: deviceID, coordinate: coordinate)
-      },
-      clearLocation: { deviceID in
-        await service.clearLocation(deviceID: deviceID)
-      },
-      setStatusBarOverride: { deviceID, arguments in
-        await service.setStatusBarOverride(deviceID: deviceID, arguments: arguments)
-      },
-      clearStatusBarOverride: { deviceID in
-        await service.clearStatusBarOverride(deviceID: deviceID)
-      }
+extension CoreSimulatorClient: TestDependencyKey {
+  public static let testValue = CoreSimulatorClient(
+    openSimulatorApp: unimplemented(
+      "CoreSimulatorClient.openSimulatorApp",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.openSimulatorApp")
+    ),
+    bootDevice: unimplemented(
+      "CoreSimulatorClient.bootDevice",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.bootDevice")
+    ),
+    bootDeviceIfNeeded: unimplemented(
+      "CoreSimulatorClient.bootDeviceIfNeeded",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.bootDeviceIfNeeded")
+    ),
+    shutdownDevice: unimplemented(
+      "CoreSimulatorClient.shutdownDevice",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.shutdownDevice")
+    ),
+    createDevice: unimplemented(
+      "CoreSimulatorClient.createDevice",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.createDevice")
+    ),
+    cloneDevice: unimplemented(
+      "CoreSimulatorClient.cloneDevice",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.cloneDevice")
+    ),
+    renameDevice: unimplemented(
+      "CoreSimulatorClient.renameDevice",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.renameDevice")
+    ),
+    eraseDevice: unimplemented(
+      "CoreSimulatorClient.eraseDevice",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.eraseDevice")
+    ),
+    deleteDevice: unimplemented(
+      "CoreSimulatorClient.deleteDevice",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.deleteDevice")
+    ),
+    pairDevices: unimplemented(
+      "CoreSimulatorClient.pairDevices",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.pairDevices")
+    ),
+    unpairDevice: unimplemented(
+      "CoreSimulatorClient.unpairDevice",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.unpairDevice")
+    ),
+    launchApp: unimplemented(
+      "CoreSimulatorClient.launchApp",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.launchApp")
+    ),
+    terminateApp: unimplemented(
+      "CoreSimulatorClient.terminateApp",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.terminateApp")
+    ),
+    uninstallApp: unimplemented(
+      "CoreSimulatorClient.uninstallApp",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.uninstallApp")
+    ),
+    installApp: unimplemented(
+      "CoreSimulatorClient.installApp",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.installApp")
+    ),
+    getAppContainer: unimplemented(
+      "CoreSimulatorClient.getAppContainer",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.getAppContainer")
+    ),
+    openURL: unimplemented(
+      "CoreSimulatorClient.openURL",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.openURL")
+    ),
+    pushNotification: unimplemented(
+      "CoreSimulatorClient.pushNotification",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.pushNotification")
+    ),
+    setPrivacyPermission: unimplemented(
+      "CoreSimulatorClient.setPrivacyPermission",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.setPrivacyPermission")
+    ),
+    setLocation: unimplemented(
+      "CoreSimulatorClient.setLocation",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.setLocation")
+    ),
+    clearLocation: unimplemented(
+      "CoreSimulatorClient.clearLocation",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.clearLocation")
+    ),
+    setStatusBarOverride: unimplemented(
+      "CoreSimulatorClient.setStatusBarOverride",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.setStatusBarOverride")
+    ),
+    clearStatusBarOverride: unimplemented(
+      "CoreSimulatorClient.clearStatusBarOverride",
+      placeholder: placeholderCommandResult("CoreSimulatorClient.clearStatusBarOverride")
     )
-  }
+  )
 }
 
 extension DependencyValues {

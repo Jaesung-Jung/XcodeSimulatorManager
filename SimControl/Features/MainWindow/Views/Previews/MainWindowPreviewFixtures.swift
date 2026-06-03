@@ -1,7 +1,6 @@
 import Foundation
 import SimControlClients
 import SimControlDomain
-import SimControlInfrastructure
 
 #if DEBUG
 import ComposableArchitecture
@@ -339,8 +338,8 @@ enum MainWindowPreviewFixtures {
     ]
   )
 
-  static var refreshResult: SimulatorRepository.RefreshResult {
-    SimulatorRepository.RefreshResult(
+  static var refreshResult: SimulatorRefreshResult {
+    SimulatorRefreshResult(
       snapshot: snapshot,
       xcodeCommandResult: CommandResult(
         id: "preview-xcode",

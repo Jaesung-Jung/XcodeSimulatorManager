@@ -3,25 +3,6 @@ import SimControlDomain
 
 /// Wraps `xcrun`, `simctl`, and Simulator.app process boundaries.
 public struct CoreSimulatorService {
-  /// The `simctl get_app_container` container selector.
-  public enum AppContainerKind: Equatable, Hashable, Sendable {
-    case app
-    case data
-    case appGroup(String)
-
-    /// The argument passed to `simctl get_app_container`.
-    public var simctlArgument: String {
-      switch self {
-      case .app:
-        "app"
-      case .data:
-        "data"
-      case .appGroup(let groupID):
-        groupID
-      }
-    }
-  }
-
   /// The active developer directory lookup result returned by CoreSimulatorService.
   struct DeveloperPathResult: Equatable {
     /// The selected Xcode developer directory, when the command succeeded and returned a path.
@@ -356,7 +337,7 @@ public struct CoreSimulatorService {
   public func getAppContainer(
     deviceID: String,
     bundleID: String,
-    container: AppContainerKind
+    container: SimulatorAppContainerKind
   ) async -> CommandResult {
     await runCommand(
       "xcrun",

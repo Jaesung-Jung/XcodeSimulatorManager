@@ -1,7 +1,6 @@
 import Foundation
 import SimControlClients
 import SimControlDomain
-import SimControlInfrastructure
 
 @testable import SimControl
 
@@ -76,8 +75,8 @@ enum MainWindowTestFixtures {
     xcodeCommandResult: CommandResult = xcodeCommandResult,
     listCommandResult: CommandResult? = listCommandResult,
     diagnostic: String? = nil
-  ) -> SimulatorRepository.RefreshResult {
-    SimulatorRepository.RefreshResult(
+  ) -> SimulatorRefreshResult {
+    SimulatorRefreshResult(
       snapshot: snapshot,
       xcodeCommandResult: xcodeCommandResult,
       listCommandResult: listCommandResult,
@@ -186,14 +185,14 @@ enum MainWindowTestFixtures {
 }
 
 actor MainWindowRefreshRecorder {
-  private let result: SimulatorRepository.RefreshResult
+  private let result: SimulatorRefreshResult
   private var refreshCalls = 0
 
-  init(result: SimulatorRepository.RefreshResult) {
+  init(result: SimulatorRefreshResult) {
     self.result = result
   }
 
-  func refresh() -> SimulatorRepository.RefreshResult {
+  func refresh() -> SimulatorRefreshResult {
     refreshCalls += 1
     return result
   }
@@ -204,17 +203,17 @@ actor MainWindowRefreshRecorder {
 }
 
 actor MainWindowBlockingRefreshRecorder {
-  private let result: SimulatorRepository.RefreshResult
+  private let result: SimulatorRefreshResult
   private var refreshCalls = 0
   private var startedWaiters: [CheckedContinuation<Void, Never>] = []
   private var releaseContinuations: [CheckedContinuation<Void, Never>] = []
   private var refreshReleased = false
 
-  init(result: SimulatorRepository.RefreshResult) {
+  init(result: SimulatorRefreshResult) {
     self.result = result
   }
 
-  func refresh() async -> SimulatorRepository.RefreshResult {
+  func refresh() async -> SimulatorRefreshResult {
     refreshCalls += 1
     resumeStartedWaiters()
 

@@ -3,39 +3,6 @@ import SimControlDomain
 
 /// Builds domain snapshots from CoreSimulator service output.
 public actor SimulatorRepository {
-  /// The result of a simulator inventory refresh.
-  public struct RefreshResult: Equatable {
-    /// The rebuilt snapshot when refresh completed successfully.
-    public let snapshot: SimulatorSnapshot?
-
-    /// The command result produced while checking the active Xcode path.
-    public let xcodeCommandResult: CommandResult
-
-    /// The command result produced while loading `simctl list -j`, when that step ran.
-    public let listCommandResult: CommandResult?
-
-    /// Repository-level refresh failure context, when refresh could not build a snapshot.
-    public let diagnostic: String?
-
-    /// Indicates whether refresh produced a new snapshot.
-    public var succeeded: Bool {
-      snapshot != nil && diagnostic == nil
-    }
-
-    /// Creates a simulator repository refresh result.
-    public init(
-      snapshot: SimulatorSnapshot?,
-      xcodeCommandResult: CommandResult,
-      listCommandResult: CommandResult?,
-      diagnostic: String?
-    ) {
-      self.snapshot = snapshot
-      self.xcodeCommandResult = xcodeCommandResult
-      self.listCommandResult = listCommandResult
-      self.diagnostic = diagnostic
-    }
-  }
-
   typealias SelectedXcodePathProvider = () async -> CoreSimulatorService.DeveloperPathResult
   typealias SimctlListProvider = () async -> CoreSimulatorService.ListResult
   typealias InstalledAppsProvider = (SimulatorDevice) async -> AppContainerScanner.ScanResult
@@ -44,7 +11,7 @@ public actor SimulatorRepository {
   private let list: SimctlListProvider
   private let installedApps: InstalledAppsProvider
   private let now: () -> Date
-  private var refreshTask: Task<RefreshResult, Never>?
+  private var refreshTask: Task<SimulatorRefreshResult, Never>?
 
   /// Creates a simulator repository backed by concrete infrastructure services.
   public init(
@@ -81,7 +48,7 @@ public actor SimulatorRepository {
   }
 
   /// Refreshes simulator inventory and maps service-layer values into domain values.
-  public func refresh() async -> RefreshResult {
+  public func refresh() async -> SimulatorRefreshResult {
     if let refreshTask {
       return await refreshTask.value
     }
@@ -97,11 +64,11 @@ public actor SimulatorRepository {
     return result
   }
 
-  private func performRefresh() async -> RefreshResult {
+  private func performRefresh() async -> SimulatorRefreshResult {
     let xcodePathResult = await selectedXcodePath()
 
     guard xcodePathResult.succeeded else {
-      return RefreshResult(
+      return SimulatorRefreshResult(
         snapshot: nil,
         xcodeCommandResult: xcodePathResult.commandResult,
         listCommandResult: nil,
@@ -112,7 +79,7 @@ public actor SimulatorRepository {
     let listResult = await list()
 
     guard listResult.succeeded, let payload = listResult.payload else {
-      return RefreshResult(
+      return SimulatorRefreshResult(
         snapshot: nil,
         xcodeCommandResult: xcodePathResult.commandResult,
         listCommandResult: listResult.commandResult,
@@ -126,7 +93,7 @@ public actor SimulatorRepository {
       xcodeIsValid: xcodePathResult.succeeded
     )
 
-    return RefreshResult(
+    return SimulatorRefreshResult(
       snapshot: snapshot,
       xcodeCommandResult: xcodePathResult.commandResult,
       listCommandResult: listResult.commandResult,
