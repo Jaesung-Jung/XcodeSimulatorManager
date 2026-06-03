@@ -228,6 +228,11 @@ assert_max_lines \
   180 \
   "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+State.swift"
 
+assert_max_lines \
+  "MainWindowFeature+Helpers.swift는 공통 helper만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+Helpers.swift"
+
 assert_no_app_swift_sources_outside_app
 
 assert_path_present \
