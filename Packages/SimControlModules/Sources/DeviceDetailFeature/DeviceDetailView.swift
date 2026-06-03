@@ -7,8 +7,12 @@ import SimControlSharedUI
 import SimControlDomain
 import SwiftUI
 
-struct DeviceDetailView: View {
-  let store: StoreOf<DeviceDetailFeature>
+public struct DeviceDetailView: View {
+  private let store: StoreOf<DeviceDetailFeature>
+
+  public init(store: StoreOf<DeviceDetailFeature>) {
+    self.store = store
+  }
 
   private var appMetricValue: String {
     switch store.installedApps.availability {
@@ -19,7 +23,7 @@ struct DeviceDetailView: View {
     }
   }
 
-  var body: some View {
+  public var body: some View {
     if let device = store.device {
       ScrollView {
         VStack(alignment: .leading, spacing: 18) {
@@ -574,7 +578,7 @@ extension DeviceDetailView {
 #Preview {
   DeviceDetailView(
     store: Store(
-      initialState: MainWindowFeature.State.preview.workspace.deviceDetail
+      initialState: DeviceDetailFeature.State()
     ) {
       DeviceDetailFeature()
     }

@@ -6,31 +6,53 @@ import SimControlDomain
 
 @Reducer
 public struct DeviceDetailFeature {
+  public init() {}
+
   public struct DevicePairSummary: Equatable, Identifiable {
     public let id: String
-    let phoneDeviceID: String
-    let phoneName: String
-    let phoneUDID: String
-    let watchDeviceID: String
-    let watchName: String
-    let watchUDID: String
-    let state: DevicePair.State
+    public let phoneDeviceID: String
+    public let phoneName: String
+    public let phoneUDID: String
+    public let watchDeviceID: String
+    public let watchName: String
+    public let watchUDID: String
+    public let state: DevicePair.State
+
+    public init(
+      id: String,
+      phoneDeviceID: String,
+      phoneName: String,
+      phoneUDID: String,
+      watchDeviceID: String,
+      watchName: String,
+      watchUDID: String,
+      state: DevicePair.State
+    ) {
+      self.id = id
+      self.phoneDeviceID = phoneDeviceID
+      self.phoneName = phoneName
+      self.phoneUDID = phoneUDID
+      self.watchDeviceID = watchDeviceID
+      self.watchName = watchName
+      self.watchUDID = watchUDID
+      self.state = state
+    }
   }
 
   @ObservableState
   public struct State: Equatable {
-    var device: SimulatorDevice?
-    var runtime: SimulatorRuntime?
-    var deviceType: SimulatorDeviceType?
-    var pairSummary: DevicePairSummary?
-    var installedApps: InstalledAppsFeature.State
-    var commandResults: [CommandResult]
-    var deviceCommandState: DeviceCommandState?
-    var appCommandState: AppCommandState?
-    var isOpeningSimulatorApp: Bool
-    var developerTools: DeveloperToolsFeature.State
+    public var device: SimulatorDevice?
+    public var runtime: SimulatorRuntime?
+    public var deviceType: SimulatorDeviceType?
+    public var pairSummary: DevicePairSummary?
+    public var installedApps: InstalledAppsFeature.State
+    public var commandResults: [CommandResult]
+    public var deviceCommandState: DeviceCommandState?
+    public var appCommandState: AppCommandState?
+    public var isOpeningSimulatorApp: Bool
+    public var developerTools: DeveloperToolsFeature.State
 
-    init(
+    public init(
       device: SimulatorDevice? = nil,
       runtime: SimulatorRuntime? = nil,
       deviceType: SimulatorDeviceType? = nil,
@@ -66,7 +88,7 @@ public struct DeviceDetailFeature {
       self.developerTools = developerTools
     }
 
-    var selectedApp: InstalledApp? {
+    public var selectedApp: InstalledApp? {
       guard let selectedAppID = installedApps.selectedAppID else {
         return nil
       }

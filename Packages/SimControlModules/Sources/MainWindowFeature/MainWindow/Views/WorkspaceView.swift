@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import DeviceDetailFeature
 import DeviceListFeature
 import MainWindowFeatureSupport
 import SimControlSharedUI
