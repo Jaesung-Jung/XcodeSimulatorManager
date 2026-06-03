@@ -201,6 +201,11 @@ assert_max_lines \
   "$PACKAGE_SOURCES/AppContainerScanningService/AppContainerScanner.swift"
 
 assert_max_lines \
+  "CoreSimulatorService.swift는 public contract와 dependency wiring만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/CoreSimulatorService/CoreSimulatorService.swift"
+
+assert_max_lines \
   "SimulatorRepository.swift는 actor contract와 refresh entry만 남겨 180줄 이하로 유지합니다." \
   180 \
   "$PACKAGE_SOURCES/SimulatorRepositoryService/SimulatorRepository.swift"
