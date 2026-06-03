@@ -3,10 +3,20 @@ import MainWindowDisplaySupport
 import SimControlDomain
 import SwiftUI
 
-struct Sidebar: View {
-  let store: StoreOf<SidebarFeature>
-  let filters: SimulatorFilters
-  let onScopeSelected: (SimulatorFilters.SidebarScope) -> Void
+public struct Sidebar: View {
+  private let store: StoreOf<SidebarFeature>
+  private let filters: SimulatorFilters
+  private let onScopeSelected: (SimulatorFilters.SidebarScope) -> Void
+
+  public init(
+    store: StoreOf<SidebarFeature>,
+    filters: SimulatorFilters,
+    onScopeSelected: @escaping (SimulatorFilters.SidebarScope) -> Void
+  ) {
+    self.store = store
+    self.filters = filters
+    self.onScopeSelected = onScopeSelected
+  }
 
   private var platformCounts: [(title: String, systemImage: String, count: Int)] {
     guard let devices = store.snapshot?.devices else {
@@ -93,7 +103,7 @@ struct Sidebar: View {
     )
   }
 
-  var body: some View {
+  public var body: some View {
     List(selection: sidebarScopeSelection) {
       Section("Inventory") {
         BarItem(
@@ -228,10 +238,10 @@ private extension SimulatorDevice.State {
 
 #Preview {
   Sidebar(
-    store: Store(initialState: MainWindowFeature.State.preview.sidebar) {
+    store: Store(initialState: SidebarFeature.State()) {
       SidebarFeature()
     },
-    filters: MainWindowFeature.State.preview.workspace.filters,
+    filters: SimulatorFilters(),
     onScopeSelected: { _ in }
   )
   .frame(width: 240, height: 720)

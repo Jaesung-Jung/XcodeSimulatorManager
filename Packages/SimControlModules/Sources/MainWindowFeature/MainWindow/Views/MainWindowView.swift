@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import DeviceListFeature
 import InspectorFeature
+import SidebarFeature
 import SimControlDomain
 import SwiftUI
 

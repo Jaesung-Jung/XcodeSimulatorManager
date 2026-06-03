@@ -4,12 +4,14 @@ import SimControlDomain
 
 @Reducer
 public struct SidebarFeature {
+  public init() {}
+
   @ObservableState
   public struct State: Equatable {
-    var snapshot: SimulatorSnapshot?
-    var refreshState: InventoryRefreshState
+    public var snapshot: SimulatorSnapshot?
+    public var refreshState: InventoryRefreshState
 
-    init(
+    public init(
       snapshot: SimulatorSnapshot? = nil,
       refreshState: InventoryRefreshState = .idle
     ) {

@@ -4,6 +4,7 @@ import DeviceDetailFeature
 import MainWindowFeatureSupport
 import SimControlClients
 import SimControlDomain
+import SidebarFeature
 import Foundation
 import Testing
 

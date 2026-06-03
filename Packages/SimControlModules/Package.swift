@@ -21,6 +21,7 @@ let package = Package(
     .library(name: "DeveloperToolsFeature", targets: ["DeveloperToolsFeature"]),
     .library(name: "DeviceDetailFeature", targets: ["DeviceDetailFeature"]),
     .library(name: "InspectorFeature", targets: ["InspectorFeature"]),
+    .library(name: "SidebarFeature", targets: ["SidebarFeature"]),
     .library(name: "MainWindowFeature", targets: ["MainWindowFeature"]),
     .library(name: "SettingsFeature", targets: ["SettingsFeature"])
   ],
@@ -152,6 +153,18 @@ let package = Package(
       ]
     ),
     .target(
+      name: "SidebarFeature",
+      dependencies: [
+        "MainWindowDisplaySupport",
+        "MainWindowFeatureSupport",
+        "SimControlDomain",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .target(
       name: "MainWindowFeature",
       dependencies: [
         "DeveloperToolsFeature",
@@ -159,6 +172,7 @@ let package = Package(
         "DeviceListFeature",
         "InspectorFeature",
         "InstalledAppsFeature",
+        "SidebarFeature",
         "MainWindowDisplaySupport",
         "MainWindowFeatureSupport",
         "MainWindowWorkflows",
@@ -211,6 +225,7 @@ let package = Package(
         "DeviceListFeature",
         "InspectorFeature",
         "InstalledAppsFeature",
+        "SidebarFeature",
         "MainWindowFeature",
         "MainWindowFeatureSupport",
         "SimControlClients",
@@ -291,6 +306,17 @@ let package = Package(
       dependencies: [
         "InspectorFeature",
         "SimControlDomain",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .testTarget(
+      name: "SidebarFeatureTests",
+      dependencies: [
+        "MainWindowFeatureSupport",
+        "SidebarFeature",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"

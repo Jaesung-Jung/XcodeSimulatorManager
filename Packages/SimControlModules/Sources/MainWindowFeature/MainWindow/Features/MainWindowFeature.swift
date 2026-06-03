@@ -5,6 +5,7 @@ import DeviceListFeature
 import InspectorFeature
 import MainWindowFeatureSupport
 import MainWindowWorkflows
+import SidebarFeature
 import SimControlClients
 import SimControlDomain
 import Foundation
