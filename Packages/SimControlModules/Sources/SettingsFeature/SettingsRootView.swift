@@ -65,11 +65,7 @@ public struct SettingsRootView: View {
 #if DEBUG
 
 #Preview {
-  SettingsRootView(
-    store: Store(initialState: SettingsFeature.State()) {
-      SettingsFeature()
-    }
-  )
+  SettingsRootView(store: .settingsRootPreview)
 }
 
 #endif

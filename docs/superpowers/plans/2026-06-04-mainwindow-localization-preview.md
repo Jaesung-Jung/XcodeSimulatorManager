@@ -100,18 +100,20 @@ git diff --check
 - 수정 또는 생성: `Packages/SimControlModules/Sources/*Feature/**/Previews/` 아래 preview fixture 파일
 - 필요한 경우 수정: package resource fixture
 
-- [ ] **Step 1: 기존 preview와 fixture 점검**
+- [x] **Step 1: 기존 preview와 fixture 점검**
 
 현재 `#Preview` 블록과 preview fixture 파일을 목록화합니다.
 
-- [ ] **Step 2: Settings child feature preview 추가**
+- [x] **Step 2: Settings child feature preview 추가**
 
 각 Settings child feature가 대표 상태로 초기화된 store를 사용해 렌더링되도록 focused preview를 추가합니다.
 
-- [ ] **Step 3: MainWindowFeature preview harness 추가 또는 강화**
+- [x] **Step 3: MainWindowFeature preview harness 추가 또는 강화**
 
 Preview 코드는 feature-owned preview 파일에 두고, live dependency를 사용하지 않는 fixture 기반 store를 구성합니다.
 
-- [ ] **Step 4: preview 컴파일 검증**
+- [x] **Step 4: preview 컴파일 검증**
 
 Package test와 Xcode build/test를 `scripts/verify-modularization.sh`로 실행해 preview 관련 코드가 컴파일되는지 확인합니다.
+
+확인 결과: Settings/MainWindow 관련 package test 94개가 preview 파일 컴파일을 포함해 통과했습니다.
