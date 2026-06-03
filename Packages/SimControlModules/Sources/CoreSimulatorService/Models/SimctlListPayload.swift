@@ -1,8 +1,8 @@
-struct SimctlListPayload: Decodable, Equatable {
-  let runtimes: [SimctlRuntime]
-  let deviceTypes: [SimctlDeviceType]
-  let devicesByRuntimeID: [String: [SimctlDevice]]
-  let pairsByID: [String: SimctlPair]
+public struct SimctlListPayload: Decodable, Equatable {
+  public let runtimes: [SimctlRuntime]
+  public let deviceTypes: [SimctlDeviceType]
+  public let devicesByRuntimeID: [String: [SimctlDevice]]
+  public let pairsByID: [String: SimctlPair]
 
   private enum CodingKeys: String, CodingKey {
     case runtimes
@@ -11,7 +11,7 @@ struct SimctlListPayload: Decodable, Equatable {
     case pairs
   }
 
-  init(from decoder: Decoder) throws {
+  public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
     runtimes = try container.decodeIfPresent([SimctlRuntime].self, forKey: .runtimes) ?? []

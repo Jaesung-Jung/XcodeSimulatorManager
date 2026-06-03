@@ -1,7 +1,7 @@
 import Foundation
 import SimControlDomain
 import Testing
-@testable import SimControlInfrastructure
+@testable import CoreSimulatorService
 
 @Suite
 struct CoreSimulatorServiceTests {

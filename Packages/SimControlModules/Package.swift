@@ -10,6 +10,7 @@ let package = Package(
   products: [
     .library(name: "SimControlDomain", targets: ["SimControlDomain"]),
     .library(name: "CommandExecutionService", targets: ["CommandExecutionService"]),
+    .library(name: "CoreSimulatorService", targets: ["CoreSimulatorService"]),
     .library(name: "SimControlInfrastructure", targets: ["SimControlInfrastructure"]),
     .library(name: "SimControlClients", targets: ["SimControlClients"]),
     .library(name: "SimControlClientsLive", targets: ["SimControlClientsLive"]),
@@ -57,9 +58,17 @@ let package = Package(
       dependencies: ["SimControlDomain"]
     ),
     .target(
+      name: "CoreSimulatorService",
+      dependencies: [
+        "CommandExecutionService",
+        "SimControlDomain"
+      ]
+    ),
+    .target(
       name: "SimControlInfrastructure",
       dependencies: [
         "CommandExecutionService",
+        "CoreSimulatorService",
         "SimControlDomain"
       ]
     ),
@@ -259,6 +268,13 @@ let package = Package(
       name: "CommandExecutionServiceTests",
       dependencies: [
         "CommandExecutionService",
+        "SimControlDomain"
+      ]
+    ),
+    .testTarget(
+      name: "CoreSimulatorServiceTests",
+      dependencies: [
+        "CoreSimulatorService",
         "SimControlDomain"
       ]
     ),

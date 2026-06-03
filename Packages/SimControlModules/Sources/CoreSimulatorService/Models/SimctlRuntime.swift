@@ -1,11 +1,11 @@
-struct SimctlRuntime: Decodable, Equatable {
-  let identifier: String?
-  let name: String?
-  let version: String?
-  let buildVersion: String?
-  let platform: String?
-  let isAvailable: Bool?
-  let supportedDeviceTypes: [SimctlSupportedDeviceType]
+public struct SimctlRuntime: Decodable, Equatable {
+  public let identifier: String?
+  public let name: String?
+  public let version: String?
+  public let buildVersion: String?
+  public let platform: String?
+  public let isAvailable: Bool?
+  public let supportedDeviceTypes: [SimctlSupportedDeviceType]
 
   private enum CodingKeys: String, CodingKey {
     case identifier
@@ -17,7 +17,7 @@ struct SimctlRuntime: Decodable, Equatable {
     case supportedDeviceTypes
   }
 
-  init(from decoder: Decoder) throws {
+  public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 
     identifier = try container.decodeIfPresent(String.self, forKey: .identifier)

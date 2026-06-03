@@ -5,35 +5,55 @@ import SimControlDomain
 /// Wraps `xcrun`, `simctl`, and Simulator.app process boundaries.
 public struct CoreSimulatorService {
   /// The active developer directory lookup result returned by CoreSimulatorService.
-  struct DeveloperPathResult: Equatable {
+  public struct DeveloperPathResult: Equatable {
     /// The selected Xcode developer directory, when the command succeeded and returned a path.
-    let developerPath: URL?
+    public let developerPath: URL?
 
     /// The command result produced by `xcode-select -p`.
-    let commandResult: CommandResult
+    public let commandResult: CommandResult
 
     /// Additional service-level context, such as an empty stdout or command failure.
-    let diagnostic: String?
+    public let diagnostic: String?
+
+    public init(
+      developerPath: URL?,
+      commandResult: CommandResult,
+      diagnostic: String?
+    ) {
+      self.developerPath = developerPath
+      self.commandResult = commandResult
+      self.diagnostic = diagnostic
+    }
 
     /// Indicates whether the command produced a usable developer path.
-    var succeeded: Bool {
+    public var succeeded: Bool {
       commandResult.succeeded && developerPath != nil && diagnostic == nil
     }
   }
 
   /// The decoded `simctl list -j` result returned by CoreSimulatorService.
-  struct ListResult: Equatable {
+  public struct ListResult: Equatable {
     /// The decoded raw simctl payload, when command execution and JSON decoding both succeeded.
-    let payload: SimctlListPayload?
+    public let payload: SimctlListPayload?
 
     /// The command result produced by `xcrun simctl list -j`.
-    let commandResult: CommandResult
+    public let commandResult: CommandResult
 
     /// Additional service-level context, such as a command failure or JSON decode failure.
-    let diagnostic: String?
+    public let diagnostic: String?
+
+    public init(
+      payload: SimctlListPayload?,
+      commandResult: CommandResult,
+      diagnostic: String?
+    ) {
+      self.payload = payload
+      self.commandResult = commandResult
+      self.diagnostic = diagnostic
+    }
 
     /// Indicates whether the command produced a decoded simctl payload.
-    var succeeded: Bool {
+    public var succeeded: Bool {
       commandResult.succeeded && payload != nil && diagnostic == nil
     }
   }
@@ -112,7 +132,7 @@ public struct CoreSimulatorService {
   }
 
   /// Returns the active Xcode developer path reported by `xcode-select -p`.
-  func selectedXcodePath() async -> DeveloperPathResult {
+  public func selectedXcodePath() async -> DeveloperPathResult {
     let commandResult = await runCommand(
       "xcode-select",
       ["-p"],
@@ -144,7 +164,7 @@ public struct CoreSimulatorService {
   }
 
   /// Runs `simctl list -j` and decodes the raw service-layer payload.
-  func list() async -> ListResult {
+  public func list() async -> ListResult {
     let commandResult = await runCommand(
       "xcrun",
       ["simctl", "list", "-j"],

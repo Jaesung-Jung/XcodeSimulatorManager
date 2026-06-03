@@ -1,1 +1,2 @@
 @_exported import CommandExecutionService
+@_exported import CoreSimulatorService
