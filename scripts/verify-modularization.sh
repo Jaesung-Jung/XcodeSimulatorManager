@@ -294,6 +294,11 @@ assert_max_lines \
   "$PACKAGE_SOURCES/MainWindowWorkflows/DeveloperToolWorkflowClient.swift"
 
 assert_max_lines \
+  "DeviceLifecycleWorkflowClient.swift는 public model/endpoint contract와 live assembly만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/MainWindowWorkflows/DeviceLifecycleWorkflowClient.swift"
+
+assert_max_lines \
   "DeveloperToolsFeature.swift는 Action과 reducer 조합만 남겨 180줄 이하로 유지합니다." \
   180 \
   "$PACKAGE_SOURCES/DeveloperToolsFeature/DeveloperToolsFeature.swift"

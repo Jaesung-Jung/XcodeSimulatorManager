@@ -1,24 +1,6 @@
 import SimControlClients
 import SimControlDomain
 
-/// The command and refresh outputs produced by a device lifecycle workflow.
-public struct DeviceLifecycleWorkflowResult: Equatable {
-  public let commandResult: CommandResult
-  public let refreshResult: SimulatorRefreshResult
-  public let preferredSelectedDeviceID: SimulatorDevice.ID?
-
-  /// Creates a device lifecycle workflow result.
-  public init(
-    commandResult: CommandResult,
-    refreshResult: SimulatorRefreshResult,
-    preferredSelectedDeviceID: SimulatorDevice.ID?
-  ) {
-    self.commandResult = commandResult
-    self.refreshResult = refreshResult
-    self.preferredSelectedDeviceID = preferredSelectedDeviceID
-  }
-}
-
 /// Runs device lifecycle command sequences outside the reducer.
 public struct DeviceLifecycleWorkflowClient: Sendable {
   public var bootDevice: @Sendable (_ deviceID: SimulatorDevice.ID) async -> DeviceLifecycleWorkflowResult
@@ -162,30 +144,4 @@ public extension DeviceLifecycleWorkflowClient {
       }
     )
   }
-}
-
-private func runAndRefresh(
-  simulatorRepository: SimulatorRepositoryClient,
-  preferredSelectedDeviceID: ((CommandResult) -> SimulatorDevice.ID?)?,
-  run: @escaping @Sendable () async -> CommandResult
-) async -> DeviceLifecycleWorkflowResult {
-  let commandResult = await run()
-  let refreshResult = await simulatorRepository.refresh()
-
-  return DeviceLifecycleWorkflowResult(
-    commandResult: commandResult,
-    refreshResult: refreshResult,
-    preferredSelectedDeviceID: preferredSelectedDeviceID?(commandResult)
-  )
-}
-
-private func preferredDeviceID(from result: CommandResult) -> SimulatorDevice.ID? {
-  guard result.succeeded else {
-    return nil
-  }
-
-  return result.stdout
-    .split(whereSeparator: \.isNewline)
-    .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-    .first { !$0.isEmpty }
 }
