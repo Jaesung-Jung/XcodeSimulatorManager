@@ -369,6 +369,11 @@ assert_max_lines \
   "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+DeveloperTools.swift"
 
 assert_max_lines \
+  "MainWindowFeature+DeviceLifecycleCreation.swift는 create-device command만 남겨 90줄 이하로 유지합니다." \
+  90 \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+DeviceLifecycleCreation.swift"
+
+assert_max_lines \
   "MainWindowFeatureTests.swift는 root feature 테스트를 기능별 파일로 분리해 220줄 이하로 유지합니다." \
   220 \
   "$PACKAGE_TESTS/MainWindowFeatureTests/MainWindowFeatureTests.swift"
