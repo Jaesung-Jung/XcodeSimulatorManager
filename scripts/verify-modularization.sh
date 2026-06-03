@@ -6,6 +6,36 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGE_SOURCES="$ROOT/Packages/SimControlModules/Sources"
 PACKAGE_TESTS="$ROOT/Packages/SimControlModules/Tests"
 
+SERVICE_SOURCES=(
+  "$PACKAGE_SOURCES/CommandExecutionService"
+  "$PACKAGE_SOURCES/CoreSimulatorService"
+  "$PACKAGE_SOURCES/AppContainerScanningService"
+  "$PACKAGE_SOURCES/AppSandboxResetService"
+  "$PACKAGE_SOURCES/PathActionService"
+  "$PACKAGE_SOURCES/SimulatorRepositoryService"
+)
+
+PURE_SERVICE_SOURCES=(
+  "$PACKAGE_SOURCES/CommandExecutionService"
+  "$PACKAGE_SOURCES/CoreSimulatorService"
+  "$PACKAGE_SOURCES/AppContainerScanningService"
+  "$PACKAGE_SOURCES/AppSandboxResetService"
+  "$PACKAGE_SOURCES/SimulatorRepositoryService"
+)
+
+FEATURE_SOURCES=(
+  "$PACKAGE_SOURCES/DeviceListFeature"
+  "$PACKAGE_SOURCES/InstalledAppsFeature"
+  "$PACKAGE_SOURCES/DeveloperToolsFeature"
+  "$PACKAGE_SOURCES/DeviceDetailFeature"
+  "$PACKAGE_SOURCES/InspectorFeature"
+  "$PACKAGE_SOURCES/SidebarFeature"
+  "$PACKAGE_SOURCES/WorkspaceFeature"
+  "$PACKAGE_SOURCES/MenuBarFeature"
+  "$PACKAGE_SOURCES/MainWindowFeature"
+  "$PACKAGE_SOURCES/SettingsFeature"
+)
+
 assert_no_match() {
   local description="$1"
   local pattern="$2"
@@ -43,12 +73,22 @@ echo "==> 모듈 경계 검사"
 
 assert_no_match \
   "SimControlDomain은 UI, TCA, dependency, 상위 모듈을 import하면 안 됩니다." \
-  '^import (SwiftUI|AppKit|ComposableArchitecture|Dependencies|SimControlClients|SimControlInfrastructure|MainWindowWorkflows|MainWindowFeature)\b' \
+  '^import (SwiftUI|AppKit|ComposableArchitecture|Dependencies|SimControlClients|SimControlInfrastructure|MainWindowWorkflows|.*Feature)\b' \
   "$PACKAGE_SOURCES/SimControlDomain"
 
 assert_no_match \
+  "순수 service target은 UI/AppKit, TCA, dependency, 상위 모듈을 import하면 안 됩니다." \
+  '^import (SwiftUI|AppKit|ComposableArchitecture|Dependencies|SimControlClients|SimControlClientsLive|MainWindowWorkflows|SimControlInfrastructure|.*Feature)\b' \
+  "${PURE_SERVICE_SOURCES[@]}"
+
+assert_no_match \
+  "service target은 feature/client/workflow/infrastructure umbrella layer를 import하면 안 됩니다." \
+  '^import (SwiftUI|ComposableArchitecture|Dependencies|SimControlClients|SimControlClientsLive|MainWindowWorkflows|SimControlInfrastructure|.*Feature)\b' \
+  "${SERVICE_SOURCES[@]}"
+
+assert_no_match \
   "SimControlInfrastructure는 UI feature, TCA, dependency client layer를 import하면 안 됩니다." \
-  '^import (SwiftUI|ComposableArchitecture|Dependencies|SimControlClients|SimControlClientsLive|MainWindowWorkflows|MainWindowFeature)\b' \
+  '^import (SwiftUI|ComposableArchitecture|Dependencies|SimControlClients|SimControlClientsLive|MainWindowWorkflows|.*Feature)\b' \
   "$PACKAGE_SOURCES/SimControlInfrastructure"
 
 assert_no_match \
@@ -67,16 +107,16 @@ assert_no_match \
   "$PACKAGE_SOURCES/MainWindowWorkflows"
 
 assert_no_match \
-  "MainWindowFeature는 concrete infrastructure나 live client를 직접 import하면 안 됩니다." \
+  "feature target은 concrete infrastructure나 live client를 직접 import하면 안 됩니다." \
   '^import (SimControlInfrastructure|SimControlClientsLive)\b' \
-  "$PACKAGE_SOURCES/MainWindowFeature"
+  "${FEATURE_SOURCES[@]}"
 
 assert_no_match \
   "feature/workflow/client interface layer에서 concrete service를 직접 생성하면 안 됩니다." \
-  '(CoreSimulatorService|AppContainerScanner|AppSandboxResetService|PathActionService|SimulatorRepository)\(' \
+  '(CommandExecutor|CoreSimulatorService|AppContainerScanner|AppSandboxResetService|PathActionService|SimulatorRepository)\(' \
   "$PACKAGE_SOURCES/SimControlClients" \
   "$PACKAGE_SOURCES/MainWindowWorkflows" \
-  "$PACKAGE_SOURCES/MainWindowFeature"
+  "${FEATURE_SOURCES[@]}"
 
 assert_no_match \
   "Swift source는 150자를 넘는 줄을 만들지 않습니다." \
