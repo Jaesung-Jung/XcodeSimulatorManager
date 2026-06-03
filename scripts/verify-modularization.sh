@@ -283,6 +283,11 @@ assert_max_lines \
   180 \
   "$PACKAGE_SOURCES/DeviceDetailFeature/DeviceDetailView.swift"
 
+assert_max_lines \
+  "WorkspaceFeature.swift는 feature entry와 reducer 조합만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/WorkspaceFeature/WorkspaceFeature.swift"
+
 assert_no_app_swift_sources_outside_app
 
 assert_path_present \
