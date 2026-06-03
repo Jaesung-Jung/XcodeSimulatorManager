@@ -280,7 +280,16 @@ let package = Package(
         )
       ]
     ),
-    .target(name: "SettingsFeature"),
+    .target(
+      name: "SettingsFeature",
+      dependencies: [
+        "SimControlClients",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
     .testTarget(
       name: "SimControlDomainTests",
       dependencies: ["SimControlDomain"]
@@ -362,7 +371,14 @@ let package = Package(
     ),
     .testTarget(
       name: "SettingsFeatureTests",
-      dependencies: ["SettingsFeature"]
+      dependencies: [
+        "SettingsFeature",
+        "SimControlClients",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
     ),
     .testTarget(
       name: "SimControlSharedUITests",

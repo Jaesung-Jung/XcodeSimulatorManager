@@ -112,6 +112,11 @@ assert_no_match \
   "${FEATURE_SOURCES[@]}"
 
 assert_no_match \
+  "SettingsFeature는 app/main/menu feature나 live/infrastructure layer를 import하면 안 됩니다." \
+  '^import (SimControlInfrastructure|SimControlClientsLive|MainWindowFeature|MenuBarFeature)\b' \
+  "$PACKAGE_SOURCES/SettingsFeature"
+
+assert_no_match \
   "MenuBarFeature는 MainWindowFeature를 직접 import하면 안 됩니다." \
   '^import MainWindowFeature\b' \
   "$PACKAGE_SOURCES/MenuBarFeature"

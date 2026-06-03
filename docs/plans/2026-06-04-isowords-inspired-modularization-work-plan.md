@@ -24,7 +24,9 @@
 - `MainWindowFeature` target으로 main window reducer/view 이동.
 - `MenuBarFeature` target으로 menu bar extra UI 이동.
 - `MenuBarFeature.State/Action/Reducer`를 도입해 `MainWindowFeature` 직접 import 제거.
-- `SettingsFeature` target으로 settings scene view 이동.
+- `SettingsFeature` target으로 settings scene reducer/state/view 이동.
+- `SimControlClients.UserSettingsClient`와 `SimControlClientsLive.UserSettingsClient+Live` 도입.
+- `AppContainer`에서 `settingsStore`를 생성하고 `UserDefaults` 기반 live 설정 저장 주입.
 - 각 feature/service/support target의 smoke/behavior test를 package test target으로 이동.
 - app target은 `AppContainer`, scene 선언, app delegate, asset 중심으로 축소.
 - 책임 없는 app target placeholder였던 `Services/`, `State/`, old feature/source directory 제거.

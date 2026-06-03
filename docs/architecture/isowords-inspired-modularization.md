@@ -87,6 +87,8 @@ flowchart TB
   MenuBarFeature --> Support
   MenuBarFeature --> Domain
 
+  SettingsFeature --> Clients
+
   WorkspaceFeature --> LeafFeatures
   SidebarFeature --> Support
   LeafFeatures --> Support
@@ -191,6 +193,7 @@ feature와 workflow가 사용하는 dependency interface를 소유한다.
 - `SimulatorRepositoryClient`
 - `PathActionClient`
 - `AppSandboxResetClient`
+- `UserSettingsClient`
 
 규칙:
 
@@ -209,6 +212,7 @@ dependency client를 concrete service에 연결하는 live adapter를 소유한�
 - `SimulatorRepositoryClient+Live.swift`
 - `PathActionClient+Live.swift`
 - `AppSandboxResetClient+Live.swift`
+- `UserSettingsClient+Live.swift`
 
 규칙:
 
@@ -271,9 +275,11 @@ feature 간 공유되지만 domain은 아닌 타입과 표시 helper를 소유�
 
 - `MainWindowFeature`: main window reducer, view, sheet/confirmation, workflow 호출.
 - `MenuBarFeature`: menu bar extra UI, menu bar state projection, menu-specific action.
-- `SettingsFeature`: settings scene SwiftUI view.
+- `SettingsFeature`: settings scene reducer, state, SwiftUI view.
 
 `MenuBarFeature`는 `MainWindowFeature`를 import하지 않는다. `MainWindowFeature`가 `WorkspaceFeature.State`에서 `MenuBarFeature.State`를 파생하고, `MenuBarFeature.Action`을 기존 refresh, open simulator, workspace selection workflow로 해석한다.
+
+`SettingsFeature`는 `SimControlClients.UserSettingsClient`만 사용한다. 사용자 설정의 live 저장 방식은 `SimControlClientsLive`가 `UserDefaults` adapter로 제공하고, 앱 target의 `AppContainer`가 `settingsStore`에 주입한다. 따라서 Settings scene은 독립적인 TCA feature로 테스트할 수 있고, concrete 저장 구현은 feature target 밖에 머문다.
 
 ## isowords에서 가져온 원칙
 
@@ -296,6 +302,7 @@ feature 간 공유되지만 domain은 아닌 타입과 표시 helper를 소유�
 - `SimControlClientsLive`는 feature/workflow layer를 import하지 않는다.
 - `MainWindowWorkflows`는 live 구현, concrete infrastructure, UI/TCA layer를 import하지 않는다.
 - feature target은 `SimControlInfrastructure`, `SimControlClientsLive`를 직접 import하지 않는다.
+- `SettingsFeature`는 `MainWindowFeature`, `MenuBarFeature`, live/infrastructure layer를 직접 import하지 않는다.
 - `MenuBarFeature`는 `MainWindowFeature`를 직접 import하지 않는다.
 - feature/workflow/client interface layer에서는 concrete service를 직접 생성하지 않는다.
 

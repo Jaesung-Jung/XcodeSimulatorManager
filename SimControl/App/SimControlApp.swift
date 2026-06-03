@@ -26,7 +26,7 @@ struct SimControlApp: App {
     }
 
     Settings {
-      SettingsRootView()
+      SettingsRootView(store: appContainer.settingsStore)
     }
   }
 }

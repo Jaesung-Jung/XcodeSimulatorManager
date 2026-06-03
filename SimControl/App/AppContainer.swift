@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import MainWindowFeature
+import SettingsFeature
 import SimControlClients
 import SimControlClientsLive
 import SimControlInfrastructure
@@ -13,6 +14,7 @@ final class AppContainer {
   let pathActionService: PathActionService
   let simulatorRepository: SimulatorRepository
   let mainWindowStore: StoreOf<MainWindowFeature>
+  let settingsStore: StoreOf<SettingsFeature>
 
   init() {
     let commandExecutor = CommandExecutor()
@@ -38,6 +40,11 @@ final class AppContainer {
       $0.coreSimulatorService = .live(service: coreSimulatorService)
       $0.appSandboxReset = .live(service: appSandboxResetService)
       $0.pathAction = .live(service: pathActionService)
+    }
+    settingsStore = Store(initialState: SettingsFeature.State()) {
+      SettingsFeature()
+    } withDependencies: {
+      $0.userSettings = .live()
     }
   }
 }
