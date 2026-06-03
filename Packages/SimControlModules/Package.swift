@@ -16,6 +16,7 @@ let package = Package(
     .library(name: "MainWindowFeatureSupport", targets: ["MainWindowFeatureSupport"]),
     .library(name: "MainWindowDisplaySupport", targets: ["MainWindowDisplaySupport"]),
     .library(name: "SimControlSharedUI", targets: ["SimControlSharedUI"]),
+    .library(name: "DeviceListFeature", targets: ["DeviceListFeature"]),
     .library(name: "MainWindowFeature", targets: ["MainWindowFeature"]),
     .library(name: "SettingsFeature", targets: ["SettingsFeature"])
   ],
@@ -82,8 +83,22 @@ let package = Package(
     ),
     .target(name: "SimControlSharedUI"),
     .target(
+      name: "DeviceListFeature",
+      dependencies: [
+        "MainWindowDisplaySupport",
+        "MainWindowFeatureSupport",
+        "SimControlDomain",
+        "SimControlSharedUI",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .target(
       name: "MainWindowFeature",
       dependencies: [
+        "DeviceListFeature",
         "MainWindowDisplaySupport",
         "MainWindowFeatureSupport",
         "MainWindowWorkflows",
@@ -131,6 +146,7 @@ let package = Package(
     .testTarget(
       name: "MainWindowFeatureTests",
       dependencies: [
+        "DeviceListFeature",
         "MainWindowFeature",
         "MainWindowFeatureSupport",
         "SimControlClients",
@@ -158,6 +174,17 @@ let package = Package(
       dependencies: [
         "MainWindowDisplaySupport",
         "SimControlDomain"
+      ]
+    ),
+    .testTarget(
+      name: "DeviceListFeatureTests",
+      dependencies: [
+        "DeviceListFeature",
+        "SimControlDomain",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
       ]
     )
   ]

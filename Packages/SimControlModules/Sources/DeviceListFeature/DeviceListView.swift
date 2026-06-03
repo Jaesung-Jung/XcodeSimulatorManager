@@ -1,11 +1,16 @@
 import ComposableArchitecture
 import MainWindowDisplaySupport
+import MainWindowFeatureSupport
 import SimControlSharedUI
 import SimControlDomain
 import SwiftUI
 
-struct DeviceListView: View {
-  let store: StoreOf<DeviceListFeature>
+public struct DeviceListView: View {
+  private let store: StoreOf<DeviceListFeature>
+
+  public init(store: StoreOf<DeviceListFeature>) {
+    self.store = store
+  }
 
   private var deviceSort: Binding<SimulatorFilters.DeviceSort> {
     Binding(
@@ -21,7 +26,7 @@ struct DeviceListView: View {
     )
   }
 
-  var body: some View {
+  public var body: some View {
     VStack(spacing: 0) {
       HStack(spacing: 8) {
         Text("Devices")
@@ -220,7 +225,7 @@ extension DeviceListView {
 #Preview {
   DeviceListView(
     store: Store(
-      initialState: MainWindowFeature.State.preview.workspace.deviceList
+      initialState: DeviceListFeature.State()
     ) {
       DeviceListFeature()
     }

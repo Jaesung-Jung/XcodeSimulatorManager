@@ -4,18 +4,20 @@ import SimControlDomain
 
 @Reducer
 public struct DeviceListFeature {
+  public init() {}
+
   @ObservableState
   public struct State: Equatable {
-    var devices: [SimulatorDevice]
-    var runtimeByID: [String: SimulatorRuntime]
-    var deviceTypeByID: [String: SimulatorDeviceType]
-    var installedAppsByDeviceID: [String: [InstalledApp]]
-    var installedAppsAvailability: InstalledAppsAvailability
-    var selectedDeviceID: String?
-    var filters: SimulatorFilters
-    var totalDeviceCount: Int
+    public var devices: [SimulatorDevice]
+    public var runtimeByID: [String: SimulatorRuntime]
+    public var deviceTypeByID: [String: SimulatorDeviceType]
+    public var installedAppsByDeviceID: [String: [InstalledApp]]
+    public var installedAppsAvailability: InstalledAppsAvailability
+    public var selectedDeviceID: String?
+    public var filters: SimulatorFilters
+    public var totalDeviceCount: Int
 
-    init(
+    public init(
       devices: [SimulatorDevice] = [],
       runtimeByID: [String: SimulatorRuntime] = [:],
       deviceTypeByID: [String: SimulatorDeviceType] = [:],
