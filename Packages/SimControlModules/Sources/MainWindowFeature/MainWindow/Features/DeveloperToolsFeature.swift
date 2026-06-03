@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import SimControlDomain
+import MainWindowFeatureSupport
 import Foundation
 
 @Reducer

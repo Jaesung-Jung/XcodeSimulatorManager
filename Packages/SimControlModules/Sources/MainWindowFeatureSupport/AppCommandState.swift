@@ -1,10 +1,10 @@
 public struct AppCommandState: Equatable {
-  let command: AppCommand
-  let sourceDeviceID: String
-  let appID: String
-  let targetDeviceID: String?
+  public let command: AppCommand
+  public let sourceDeviceID: String
+  public let appID: String
+  public let targetDeviceID: String?
 
-  init(
+  public init(
     command: AppCommand,
     sourceDeviceID: String,
     appID: String,

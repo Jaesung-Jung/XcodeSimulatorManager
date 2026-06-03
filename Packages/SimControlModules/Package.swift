@@ -13,6 +13,7 @@ let package = Package(
     .library(name: "SimControlClients", targets: ["SimControlClients"]),
     .library(name: "SimControlClientsLive", targets: ["SimControlClientsLive"]),
     .library(name: "MainWindowWorkflows", targets: ["MainWindowWorkflows"]),
+    .library(name: "MainWindowFeatureSupport", targets: ["MainWindowFeatureSupport"]),
     .library(name: "SimControlSharedUI", targets: ["SimControlSharedUI"]),
     .library(name: "MainWindowFeature", targets: ["MainWindowFeature"]),
     .library(name: "SettingsFeature", targets: ["SettingsFeature"])
@@ -73,10 +74,12 @@ let package = Package(
         "SimControlDomain"
       ]
     ),
+    .target(name: "MainWindowFeatureSupport"),
     .target(name: "SimControlSharedUI"),
     .target(
       name: "MainWindowFeature",
       dependencies: [
+        "MainWindowFeatureSupport",
         "MainWindowWorkflows",
         "SimControlClients",
         "SimControlSharedUI",
@@ -123,6 +126,7 @@ let package = Package(
       name: "MainWindowFeatureTests",
       dependencies: [
         "MainWindowFeature",
+        "MainWindowFeatureSupport",
         "SimControlClients",
         "SimControlDomain",
         .product(
@@ -138,6 +142,10 @@ let package = Package(
     .testTarget(
       name: "SimControlSharedUITests",
       dependencies: ["SimControlSharedUI"]
+    ),
+    .testTarget(
+      name: "MainWindowFeatureSupportTests",
+      dependencies: ["MainWindowFeatureSupport"]
     )
   ]
 )

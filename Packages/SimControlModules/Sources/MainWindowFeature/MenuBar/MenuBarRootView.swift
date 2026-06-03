@@ -1,6 +1,7 @@
 import AppKit
-import SimControlDomain
 import ComposableArchitecture
+import MainWindowFeatureSupport
+import SimControlDomain
 import SwiftUI
 
 @MainActor
