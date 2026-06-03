@@ -2,51 +2,6 @@ import Foundation
 import SimControlClients
 import SimControlDomain
 
-/// The command and refresh outputs produced by an installed app workflow.
-public struct InstalledAppWorkflowResult: Equatable {
-  public let commandResults: [CommandResult]
-  public let refreshResult: SimulatorRefreshResult
-  public let preferredSelectedDeviceID: SimulatorDevice.ID?
-  public let preferredSelectedAppID: InstalledApp.ID?
-
-  /// Creates an installed app workflow result.
-  public init(
-    commandResults: [CommandResult],
-    refreshResult: SimulatorRefreshResult,
-    preferredSelectedDeviceID: SimulatorDevice.ID?,
-    preferredSelectedAppID: InstalledApp.ID?
-  ) {
-    self.commandResults = commandResults
-    self.refreshResult = refreshResult
-    self.preferredSelectedDeviceID = preferredSelectedDeviceID
-    self.preferredSelectedAppID = preferredSelectedAppID
-  }
-}
-
-/// The input needed to install a known app bundle on another simulator.
-public struct InstallAppOnSimulatorWorkflowRequest: Equatable, Sendable {
-  public let targetDeviceID: SimulatorDevice.ID
-  public let targetDeviceState: SimulatorDevice.State
-  public let bundleID: String
-  public let appBundlePath: URL
-  public let launchAfterInstall: Bool
-
-  /// Creates an install-on-simulator workflow request.
-  public init(
-    targetDeviceID: SimulatorDevice.ID,
-    targetDeviceState: SimulatorDevice.State,
-    bundleID: String,
-    appBundlePath: URL,
-    launchAfterInstall: Bool
-  ) {
-    self.targetDeviceID = targetDeviceID
-    self.targetDeviceState = targetDeviceState
-    self.bundleID = bundleID
-    self.appBundlePath = appBundlePath
-    self.launchAfterInstall = launchAfterInstall
-  }
-}
-
 /// Runs installed app command sequences outside the reducer.
 public struct InstalledAppWorkflowClient: Sendable {
   public var launchApp: @Sendable (
@@ -118,62 +73,40 @@ public extension InstalledAppWorkflowClient {
   ) -> Self {
     Self(
       launchApp: { deviceID, appID, bundleID, deviceState in
-        var commandResults: [CommandResult] = []
-
-        if deviceState == .shutdown {
-          let bootResult = await coreSimulatorService.bootDeviceIfNeeded(deviceID)
-          commandResults.append(bootResult)
-
-          guard bootResult.succeeded else {
-            return await refreshAppCommandResult(
-              commandResults: commandResults,
-              simulatorRepository: simulatorRepository,
-              preferredSelectedDeviceID: deviceID,
-              preferredSelectedAppID: appID
-            )
-          }
-        }
-
-        commandResults.append(
-          await coreSimulatorService.launchApp(deviceID, bundleID)
-        )
-        return await refreshAppCommandResult(
-          commandResults: commandResults,
-          simulatorRepository: simulatorRepository,
-          preferredSelectedDeviceID: deviceID,
-          preferredSelectedAppID: appID
+        await runLaunchAppWorkflow(
+          deviceID: deviceID,
+          appID: appID,
+          bundleID: bundleID,
+          deviceState: deviceState,
+          coreSimulatorService: coreSimulatorService,
+          simulatorRepository: simulatorRepository
         )
       },
       terminateApp: { deviceID, appID, bundleID in
-        await refreshAppCommandResult(
-          commandResults: [
-            await coreSimulatorService.terminateApp(deviceID, bundleID)
-          ],
-          simulatorRepository: simulatorRepository,
-          preferredSelectedDeviceID: deviceID,
-          preferredSelectedAppID: appID
+        await runTerminateAppWorkflow(
+          deviceID: deviceID,
+          appID: appID,
+          bundleID: bundleID,
+          coreSimulatorService: coreSimulatorService,
+          simulatorRepository: simulatorRepository
         )
       },
       uninstallApp: { deviceID, appID, bundleID in
-        let uninstallResult = await coreSimulatorService.uninstallApp(
-          deviceID,
-          bundleID
-        )
-        return await refreshAppCommandResult(
-          commandResults: [uninstallResult],
-          simulatorRepository: simulatorRepository,
-          preferredSelectedDeviceID: deviceID,
-          preferredSelectedAppID: uninstallResult.succeeded ? nil : appID
+        await runUninstallAppWorkflow(
+          deviceID: deviceID,
+          appID: appID,
+          bundleID: bundleID,
+          coreSimulatorService: coreSimulatorService,
+          simulatorRepository: simulatorRepository
         )
       },
       resetSandbox: { deviceID, appID, dataContainer in
-        await refreshAppCommandResult(
-          commandResults: [
-            await appSandboxReset.resetSandbox(dataContainer)
-          ],
-          simulatorRepository: simulatorRepository,
-          preferredSelectedDeviceID: deviceID,
-          preferredSelectedAppID: appID
+        await runResetSandboxWorkflow(
+          deviceID: deviceID,
+          appID: appID,
+          dataContainer: dataContainer,
+          appSandboxReset: appSandboxReset,
+          simulatorRepository: simulatorRepository
         )
       },
       installAppOnSimulator: { request in
@@ -185,71 +118,4 @@ public extension InstalledAppWorkflowClient {
       }
     )
   }
-}
-
-private func runInstallAppOnSimulator(
-  _ request: InstallAppOnSimulatorWorkflowRequest,
-  coreSimulatorService: CoreSimulatorClient,
-  simulatorRepository: SimulatorRepositoryClient
-) async -> InstalledAppWorkflowResult {
-  var commandResults: [CommandResult] = []
-  var installed = false
-
-  if request.targetDeviceState == .shutdown {
-    let bootResult = await coreSimulatorService.bootDeviceIfNeeded(
-      request.targetDeviceID
-    )
-    commandResults.append(bootResult)
-
-    guard bootResult.succeeded else {
-      return await refreshAppCommandResult(
-        commandResults: commandResults,
-        simulatorRepository: simulatorRepository,
-        preferredSelectedDeviceID: nil,
-        preferredSelectedAppID: nil
-      )
-    }
-  }
-
-  let installResult = await coreSimulatorService.installApp(
-    request.targetDeviceID,
-    request.appBundlePath
-  )
-  commandResults.append(installResult)
-  installed = installResult.succeeded
-
-  if installed && request.launchAfterInstall {
-    commandResults.append(
-      await coreSimulatorService.launchApp(
-        request.targetDeviceID,
-        request.bundleID
-      )
-    )
-  }
-
-  let preferredSelectedDeviceID = installed ? request.targetDeviceID : nil
-  let preferredSelectedAppID = installed
-    ? "\(request.targetDeviceID):\(request.bundleID)"
-    : nil
-
-  return await refreshAppCommandResult(
-    commandResults: commandResults,
-    simulatorRepository: simulatorRepository,
-    preferredSelectedDeviceID: preferredSelectedDeviceID,
-    preferredSelectedAppID: preferredSelectedAppID
-  )
-}
-
-private func refreshAppCommandResult(
-  commandResults: [CommandResult],
-  simulatorRepository: SimulatorRepositoryClient,
-  preferredSelectedDeviceID: SimulatorDevice.ID?,
-  preferredSelectedAppID: InstalledApp.ID?
-) async -> InstalledAppWorkflowResult {
-  InstalledAppWorkflowResult(
-    commandResults: commandResults,
-    refreshResult: await simulatorRepository.refresh(),
-    preferredSelectedDeviceID: preferredSelectedDeviceID,
-    preferredSelectedAppID: preferredSelectedAppID
-  )
 }
