@@ -8,11 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		4B2825E42FA18B7D0006787D /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2825E32FA18B7D0006787D /* ComposableArchitecture */; };
-		4B2826102FA4B0000006787D /* SimControlDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2826122FA4B0000006787D /* SimControlDomain */; };
 		4B2826202FA4C0000006787D /* SimControlInfrastructure in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2826212FA4C0000006787D /* SimControlInfrastructure */; };
 		4B2826222FA4C1000006787D /* SimControlClients in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2826232FA4C1000006787D /* SimControlClients */; };
 		4B2826242FA4C2000006787D /* SimControlClientsLive in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2826252FA4C2000006787D /* SimControlClientsLive */; };
 		4B2826292FA4C4000006787D /* MainWindowFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2826282FA4C4000006787D /* MainWindowFeature */; };
+		4B28262B2FA4C5000006787D /* SettingsFeature in Frameworks */ = {isa = PBXBuildFile; productRef = 4B28262A2FA4C5000006787D /* SettingsFeature */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,11 +49,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B2825E42FA18B7D0006787D /* ComposableArchitecture in Frameworks */,
-				4B2826102FA4B0000006787D /* SimControlDomain in Frameworks */,
 				4B2826202FA4C0000006787D /* SimControlInfrastructure in Frameworks */,
 				4B2826222FA4C1000006787D /* SimControlClients in Frameworks */,
 				4B2826242FA4C2000006787D /* SimControlClientsLive in Frameworks */,
 				4B2826292FA4C4000006787D /* MainWindowFeature in Frameworks */,
+				4B28262B2FA4C5000006787D /* SettingsFeature in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -106,11 +106,11 @@
 			name = SimControl;
 			packageProductDependencies = (
 				4B2825E32FA18B7D0006787D /* ComposableArchitecture */,
-				4B2826122FA4B0000006787D /* SimControlDomain */,
 				4B2826212FA4C0000006787D /* SimControlInfrastructure */,
 				4B2826232FA4C1000006787D /* SimControlClients */,
 				4B2826252FA4C2000006787D /* SimControlClientsLive */,
 				4B2826282FA4C4000006787D /* MainWindowFeature */,
+				4B28262A2FA4C5000006787D /* SettingsFeature */,
 			);
 			productName = SimControl;
 			productReference = 4B2820622FA0BF520006787D /* SimControl.app */;
@@ -497,11 +497,6 @@
 			package = 4B2825E22FA18B7D0006787D /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
 			productName = ComposableArchitecture;
 		};
-		4B2826122FA4B0000006787D /* SimControlDomain */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4B2826112FA4B0000006787D /* XCLocalSwiftPackageReference "Packages/SimControlModules" */;
-			productName = SimControlDomain;
-		};
 		4B2826212FA4C0000006787D /* SimControlInfrastructure */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4B2826112FA4B0000006787D /* XCLocalSwiftPackageReference "Packages/SimControlModules" */;
@@ -521,6 +516,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4B2826112FA4B0000006787D /* XCLocalSwiftPackageReference "Packages/SimControlModules" */;
 			productName = MainWindowFeature;
+		};
+		4B28262A2FA4C5000006787D /* SettingsFeature */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B2826112FA4B0000006787D /* XCLocalSwiftPackageReference "Packages/SimControlModules" */;
+			productName = SettingsFeature;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

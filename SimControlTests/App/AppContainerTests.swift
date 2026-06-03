@@ -4,15 +4,11 @@ import Testing
 @MainActor
 @Suite
 struct AppContainerTests {
-  @Test func holdsStableStoreInstances() {
+  @Test func holdsStableMainWindowStoreInstance() {
     let container = AppContainer()
 
-    let settingsStore = container.settingsStore
-    let actionLogStore = container.actionLogStore
     let mainWindowStore = container.mainWindowStore
 
-    #expect(container.settingsStore === settingsStore)
-    #expect(container.actionLogStore === actionLogStore)
     #expect(container.mainWindowStore === mainWindowStore)
   }
 

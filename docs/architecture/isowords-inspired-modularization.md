@@ -8,11 +8,12 @@ SimControl의 아키텍처 개선과 Swift Package 기반 모듈화를 함께 �
 
 ## 현재 구현 요약
 
-2026-06-04 기준 1차 모듈화는 `Packages/SimControlModules` local package로 적용한다. app target은 `AppContainer`, scene 선언, 설정 화면, 앱 수준 상태만 남기고 main window feature와 핵심 도메인/인프라 코드는 package target으로 이동했다.
+2026-06-04 기준 1차 모듈화는 `Packages/SimControlModules` local package로 적용한다. app target은 `AppContainer`, scene 선언, app delegate, asset만 남기고 main window, settings, 핵심 도메인/인프라 코드는 package target으로 이동했다.
 
 ```mermaid
 flowchart LR
   App["SimControl App Target"] --> MainWindowFeature["MainWindowFeature"]
+  App --> SettingsFeature["SettingsFeature"]
   App --> Clients["SimControlClients"]
   App --> ClientsLive["SimControlClientsLive"]
   App --> Infrastructure["SimControlInfrastructure"]
@@ -27,7 +28,7 @@ flowchart LR
   Clients --> Domain
 ```
 
-현재 package product는 다음 6개다.
+현재 package product는 다음 7개다.
 
 - `SimControlDomain`: 순수 모델, inventory query, selection rule.
 - `SimControlInfrastructure`: `simctl`, process, file/app container scan, Finder/clipboard action 구현.
@@ -35,8 +36,9 @@ flowchart LR
 - `SimControlClientsLive`: concrete service instance를 dependency client로 감싸는 live factory.
 - `MainWindowWorkflows`: refresh, device lifecycle, app command, developer tool, path action workflow.
 - `MainWindowFeature`: main window reducer, child feature, SwiftUI view, menu bar view, shared UI.
+- `SettingsFeature`: settings scene SwiftUI view.
 
-`MenuBarFeature`, `SettingsFeature`, `SimControlSharedUI`의 독립 target 분리는 2차 작업으로 남긴다. 현재 menu bar와 shared UI는 main window 상태와 강하게 붙어 있으므로 `MainWindowFeature` 안에 둔 상태가 더 안전하다.
+`MenuBarFeature`, `SimControlSharedUI`의 독립 target 분리는 2차 작업으로 남긴다. 현재 menu bar와 shared UI는 main window 상태와 강하게 붙어 있으므로 `MainWindowFeature` 안에 둔 상태가 더 안전하다.
 
 ## isowords에서 가져올 원칙
 
@@ -289,11 +291,13 @@ Packages/
       SimControlClientsLive/
       MainWindowWorkflows/
       MainWindowFeature/
+      SettingsFeature/
     Tests/
       SimControlDomainTests/
       SimControlInfrastructureTests/
       MainWindowWorkflowsTests/
       MainWindowFeatureTests/
+      SettingsFeatureTests/
 ```
 
 이유:

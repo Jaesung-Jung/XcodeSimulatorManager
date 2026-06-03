@@ -1,4 +1,5 @@
 import MainWindowFeature
+import SettingsFeature
 import SwiftUI
 
 @main

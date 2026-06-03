@@ -17,6 +17,28 @@ assert_no_match() {
   fi
 }
 
+assert_no_app_swift_sources_outside_app() {
+  local unexpected
+  unexpected="$(find "$ROOT/SimControl" -type f -name '*.swift' ! -path "$ROOT/SimControl/App/*" | sort)"
+
+  if [[ -n "$unexpected" ]]; then
+    echo "$unexpected" >&2
+    echo "error: SimControl app target에는 App/ 밖의 Swift source를 남기지 않습니다." >&2
+    exit 1
+  fi
+}
+
+assert_path_absent() {
+  local description="$1"
+  local path="$2"
+
+  if [[ -e "$path" ]]; then
+    find "$path" -maxdepth 3 -print | sort >&2
+    echo "error: ${description}" >&2
+    exit 1
+  fi
+}
+
 echo "==> 모듈 경계 검사"
 
 assert_no_match \
@@ -63,6 +85,15 @@ assert_no_match \
   "$PACKAGE_TESTS" \
   "$ROOT/SimControl" \
   "$ROOT/SimControlTests"
+
+assert_no_app_swift_sources_outside_app
+
+assert_path_absent "app target에는 예전 Domain 디렉터리를 남기지 않습니다." "$ROOT/SimControl/Domain"
+assert_path_absent "app target에는 예전 Features 디렉터리를 남기지 않습니다." "$ROOT/SimControl/Features"
+assert_path_absent "app target에는 예전 Repositories 디렉터리를 남기지 않습니다." "$ROOT/SimControl/Repositories"
+assert_path_absent "app target에는 예전 Services 디렉터리를 남기지 않습니다." "$ROOT/SimControl/Services"
+assert_path_absent "app target에는 예전 SharedUI 디렉터리를 남기지 않습니다." "$ROOT/SimControl/SharedUI"
+assert_path_absent "app target에는 예전 State 디렉터리를 남기지 않습니다." "$ROOT/SimControl/State"
 
 echo "==> Swift package 테스트"
 swift test --package-path "$ROOT/Packages/SimControlModules"

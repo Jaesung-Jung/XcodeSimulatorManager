@@ -13,7 +13,8 @@ let package = Package(
     .library(name: "SimControlClients", targets: ["SimControlClients"]),
     .library(name: "SimControlClientsLive", targets: ["SimControlClientsLive"]),
     .library(name: "MainWindowWorkflows", targets: ["MainWindowWorkflows"]),
-    .library(name: "MainWindowFeature", targets: ["MainWindowFeature"])
+    .library(name: "MainWindowFeature", targets: ["MainWindowFeature"]),
+    .library(name: "SettingsFeature", targets: ["SettingsFeature"])
   ],
   dependencies: [
     .package(
@@ -99,6 +100,7 @@ let package = Package(
         )
       ]
     ),
+    .target(name: "SettingsFeature"),
     .testTarget(
       name: "SimControlDomainTests",
       dependencies: ["SimControlDomain"]
@@ -125,6 +127,10 @@ let package = Package(
           package: "swift-composable-architecture"
         )
       ]
+    ),
+    .testTarget(
+      name: "SettingsFeatureTests",
+      dependencies: ["SettingsFeature"]
     )
   ]
 )

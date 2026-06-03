@@ -18,11 +18,13 @@
 - `SimControlDomain`, `SimControlInfrastructure`, `SimControlClients`, `SimControlClientsLive` target 구성.
 - `MainWindowWorkflows` target으로 command orchestration 분리.
 - `MainWindowFeature` target으로 main window reducer/view/menu bar/shared UI 이동.
+- `SettingsFeature` target으로 settings scene view 이동.
 - `MainWindowFeatureTests`를 package test target으로 이동.
-- app target은 `AppContainer`, scene 선언, settings UI, app-level 상태와 asset 중심으로 축소.
+- app target은 `AppContainer`, scene 선언, app delegate, asset 중심으로 축소.
+- 책임 없는 app target placeholder였던 `Services/`와 `State/` 제거.
 - 반복 검증 스크립트 `scripts/verify-modularization.sh` 추가.
 
-남은 후속 작업은 `SettingsFeature`, `MenuBarFeature`, `SimControlSharedUI`의 독립 target 분리와 root package 전환 여부 결정이다. root package 전환은 현재 local package 구조가 안정된 뒤 선택한다.
+남은 후속 작업은 `MenuBarFeature`, `SimControlSharedUI`의 독립 target 분리와 root package 전환 여부 결정이다. root package 전환은 현재 local package 구조가 안정된 뒤 선택한다.
 
 ## 전체 작업 순서
 
@@ -412,8 +414,8 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 - 이동: `SimControl/SharedUI/**`
 - 생성 target: `MenuBarFeature`
 - 이동: `SimControl/Features/MenuBar/**`
-- 생성 target: `SettingsFeature`
-- 이동: `SimControl/Features/Settings/**`
+- 완료: `SettingsFeature`
+- 완료: `SimControl/Features/Settings/**` -> `Packages/SimControlModules/Sources/SettingsFeature/`
 
 **의존성:**
 
@@ -431,8 +433,6 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 
 `SettingsFeature` depends on:
 
-- `SimControlClients`
-- `SimControlSharedUI`
 - `SwiftUI`
 
 **검증:**

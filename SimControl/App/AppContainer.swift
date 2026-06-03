@@ -12,8 +12,6 @@ final class AppContainer {
   let appSandboxResetService: AppSandboxResetService
   let pathActionService: PathActionService
   let simulatorRepository: SimulatorRepository
-  let settingsStore: SettingsStore
-  let actionLogStore: ActionLogStore
   let mainWindowStore: StoreOf<MainWindowFeature>
 
   init() {
@@ -33,8 +31,6 @@ final class AppContainer {
     self.appSandboxResetService = appSandboxResetService
     self.pathActionService = pathActionService
     self.simulatorRepository = simulatorRepository
-    settingsStore = SettingsStore()
-    actionLogStore = ActionLogStore()
     mainWindowStore = Store(initialState: MainWindowFeature.State.initial) {
       MainWindowFeature()
     } withDependencies: {
