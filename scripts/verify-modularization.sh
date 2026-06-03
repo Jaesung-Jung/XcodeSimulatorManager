@@ -220,6 +220,11 @@ assert_max_lines \
   180 \
   "$PACKAGE_SOURCES/CommandExecutionService/CommandExecutor.swift"
 
+assert_max_lines \
+  "CoreSimulatorClient.swift는 public endpoint contract와 initializer만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/SimControlClients/CoreSimulatorClient/CoreSimulatorClient.swift"
+
 assert_no_match \
   "Swift source는 150자를 넘는 줄을 만들지 않습니다." \
   '.{151,}' \
