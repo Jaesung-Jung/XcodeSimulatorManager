@@ -1098,13 +1098,17 @@ struct MainWindowFeature {
     state.workspace.setDeviceCommandState(deviceCommandState)
 
     return .run { [coreSimulatorService, simulatorRepository] send in
-      let commandResult: CommandResult
+      let workflow = DeviceLifecycleWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        simulatorRepository: simulatorRepository
+      )
+      let result: DeviceLifecycleWorkflowResult
 
       switch deviceCommandState.command {
       case .boot:
-        commandResult = await coreSimulatorService.bootDevice(deviceID)
+        result = await workflow.bootDevice(deviceID)
       case .shutdown:
-        commandResult = await coreSimulatorService.shutdownDevice(deviceID)
+        result = await workflow.shutdownDevice(deviceID)
       case .create,
            .clone,
            .rename,
@@ -1122,13 +1126,12 @@ struct MainWindowFeature {
         return
       }
 
-      await send(.deviceCommandResponse(deviceCommandState, commandResult))
-      let refreshResult = await simulatorRepository.refresh()
+      await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
       await send(
         .deviceCommandRefreshResponse(
           deviceCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: nil
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID
         )
       )
     }
@@ -1157,19 +1160,22 @@ struct MainWindowFeature {
     state.workspace.setDeviceCommandState(deviceCommandState)
 
     return .run { [coreSimulatorService, simulatorRepository] send in
-      let commandResult = await coreSimulatorService.createDevice(
+      let workflow = DeviceLifecycleWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.createDevice(
         name,
         deviceType.id,
         runtime.id
       )
-      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+      await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .deviceCommandRefreshResponse(
           deviceCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: Self.preferredDeviceID(from: commandResult)
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID
         )
       )
     }
@@ -1194,18 +1200,21 @@ struct MainWindowFeature {
     state.workspace.setDeviceCommandState(deviceCommandState)
 
     return .run { [coreSimulatorService, simulatorRepository] send in
-      let commandResult = await coreSimulatorService.cloneDevice(
+      let workflow = DeviceLifecycleWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.cloneDevice(
         formState.sourceDeviceID,
         name
       )
-      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+      await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .deviceCommandRefreshResponse(
           deviceCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: Self.preferredDeviceID(from: commandResult)
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID
         )
       )
     }
@@ -1231,18 +1240,21 @@ struct MainWindowFeature {
     state.workspace.setDeviceCommandState(deviceCommandState)
 
     return .run { [coreSimulatorService, simulatorRepository] send in
-      let commandResult = await coreSimulatorService.renameDevice(
+      let workflow = DeviceLifecycleWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.renameDevice(
         formState.deviceID,
         name
       )
-      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+      await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .deviceCommandRefreshResponse(
           deviceCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: nil
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID
         )
       )
     }
@@ -1268,15 +1280,18 @@ struct MainWindowFeature {
     state.workspace.setDeviceCommandState(deviceCommandState)
 
     return .run { [coreSimulatorService, simulatorRepository] send in
-      let commandResult = await coreSimulatorService.eraseDevice(confirmationState.deviceID)
-      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+      let workflow = DeviceLifecycleWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.eraseDevice(confirmationState.deviceID)
+      await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .deviceCommandRefreshResponse(
           deviceCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: nil
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID
         )
       )
     }
@@ -1301,15 +1316,18 @@ struct MainWindowFeature {
     state.workspace.setDeviceCommandState(deviceCommandState)
 
     return .run { [coreSimulatorService, simulatorRepository] send in
-      let commandResult = await coreSimulatorService.deleteDevice(confirmationState.deviceID)
-      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+      let workflow = DeviceLifecycleWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.deleteDevice(confirmationState.deviceID)
+      await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .deviceCommandRefreshResponse(
           deviceCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: nil
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID
         )
       )
     }
@@ -1331,18 +1349,21 @@ struct MainWindowFeature {
     state.workspace.setDeviceCommandState(deviceCommandState)
 
     return .run { [coreSimulatorService, simulatorRepository] send in
-      let commandResult = await coreSimulatorService.pairDevices(
+      let workflow = DeviceLifecycleWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.pairDevices(
         formState.watchDeviceID,
         formState.phoneDeviceID
       )
-      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+      await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .deviceCommandRefreshResponse(
           deviceCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: nil
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID
         )
       )
     }
@@ -1363,15 +1384,18 @@ struct MainWindowFeature {
     state.workspace.setDeviceCommandState(deviceCommandState)
 
     return .run { [coreSimulatorService, simulatorRepository] send in
-      let commandResult = await coreSimulatorService.unpairDevice(confirmationState.pairID)
-      await send(.deviceCommandResponse(deviceCommandState, commandResult))
+      let workflow = DeviceLifecycleWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.unpairDevice(confirmationState.pairID)
+      await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .deviceCommandRefreshResponse(
           deviceCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: nil
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID
         )
       )
     }
@@ -2269,17 +2293,6 @@ struct MainWindowFeature {
       locale: Locale(identifier: "en_US_POSIX"),
       value
     )
-  }
-
-  private static func preferredDeviceID(from result: CommandResult) -> String? {
-    guard result.succeeded else {
-      return nil
-    }
-
-    return result.stdout
-      .split(whereSeparator: \.isNewline)
-      .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-      .first { !$0.isEmpty }
   }
 
   private func commandResults(
