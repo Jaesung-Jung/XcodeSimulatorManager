@@ -10,6 +10,20 @@
 
 ---
 
+## 현재 구현 상태
+
+2026-06-04 기준 1차 작업은 다음 범위까지 완료했다.
+
+- `Packages/SimControlModules` local package 생성.
+- `SimControlDomain`, `SimControlInfrastructure`, `SimControlClients`, `SimControlClientsLive` target 구성.
+- `MainWindowWorkflows` target으로 command orchestration 분리.
+- `MainWindowFeature` target으로 main window reducer/view/menu bar/shared UI 이동.
+- `MainWindowFeatureTests`를 package test target으로 이동.
+- app target은 `AppContainer`, scene 선언, settings UI, app-level 상태와 asset 중심으로 축소.
+- 반복 검증 스크립트 `scripts/verify-modularization.sh` 추가.
+
+남은 후속 작업은 `SettingsFeature`, `MenuBarFeature`, `SimControlSharedUI`의 독립 target 분리와 root package 전환 여부 결정이다. root package 전환은 현재 local package 구조가 안정된 뒤 선택한다.
+
 ## 전체 작업 순서
 
 1. Package skeleton 생성.
@@ -376,7 +390,7 @@ swift test --package-path Packages/SimControlModules
 
 - `SimControlDomain`
 - `SimControlClients`
-- `SimControlSharedUI`
+- `MainWindowWorkflows`
 - `ComposableArchitecture`
 
 필요 시:
@@ -435,7 +449,8 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 - 수정: `SimControl/App/SimControlApp.swift`
 - 수정: `SimControl/App/AppContainer.swift`
 - 유지: `SimControl/App/AppDelegate.swift`
-- 유지: `SimControl/App/AppSceneID.swift`
+- 삭제: `SimControl/App/AppSceneID.swift`
+- 유지: `Packages/SimControlModules/Sources/MainWindowFeature/MainWindowSceneID.swift`
 - 유지: `SimControl/Assets.xcassets/**`
 
 **목표:**
@@ -518,8 +533,9 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 
 ## 완료 기준
 
+- `scripts/verify-modularization.sh`가 통과한다.
 - `swift test --package-path Packages/SimControlModules`가 통과한다.
-- `xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'platform=macOS'`가 통과한다.
+- `xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'platform=macOS,arch=arm64,name=My Mac' -parallel-testing-enabled NO`가 통과한다.
 - `SimControlDomain`과 `SimControlInfrastructure`가 SwiftUI/TCA를 import하지 않는다.
 - concrete service 생성은 app composition root 또는 live target에만 있다.
 - `MainWindowFeature.swift`의 workflow-heavy action handling이 workflow client와 child feature로 분산된다.

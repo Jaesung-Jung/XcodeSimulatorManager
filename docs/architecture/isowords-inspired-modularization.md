@@ -6,6 +6,38 @@
 
 SimControl의 아키텍처 개선과 Swift Package 기반 모듈화를 함께 진행한다. 레퍼런스는 Point-Free의 `pointfreeco/isowords`이며, 그대로 복제하지 않고 SimControl의 규모와 현재 코드 상태에 맞게 축약 적용한다.
 
+## 현재 구현 요약
+
+2026-06-04 기준 1차 모듈화는 `Packages/SimControlModules` local package로 적용한다. app target은 `AppContainer`, scene 선언, 설정 화면, 앱 수준 상태만 남기고 main window feature와 핵심 도메인/인프라 코드는 package target으로 이동했다.
+
+```mermaid
+flowchart LR
+  App["SimControl App Target"] --> MainWindowFeature["MainWindowFeature"]
+  App --> Clients["SimControlClients"]
+  App --> ClientsLive["SimControlClientsLive"]
+  App --> Infrastructure["SimControlInfrastructure"]
+  MainWindowFeature --> Workflows["MainWindowWorkflows"]
+  MainWindowFeature --> Clients
+  MainWindowFeature --> Domain["SimControlDomain"]
+  Workflows --> Clients
+  Workflows --> Domain
+  ClientsLive --> Clients
+  ClientsLive --> Infrastructure
+  Infrastructure --> Domain
+  Clients --> Domain
+```
+
+현재 package product는 다음 6개다.
+
+- `SimControlDomain`: 순수 모델, inventory query, selection rule.
+- `SimControlInfrastructure`: `simctl`, process, file/app container scan, Finder/clipboard action 구현.
+- `SimControlClients`: TCA dependency client interface와 test/preview 기본값.
+- `SimControlClientsLive`: concrete service instance를 dependency client로 감싸는 live factory.
+- `MainWindowWorkflows`: refresh, device lifecycle, app command, developer tool, path action workflow.
+- `MainWindowFeature`: main window reducer, child feature, SwiftUI view, menu bar view, shared UI.
+
+`MenuBarFeature`, `SettingsFeature`, `SimControlSharedUI`의 독립 target 분리는 2차 작업으로 남긴다. 현재 menu bar와 shared UI는 main window 상태와 강하게 붙어 있으므로 `MainWindowFeature` 안에 둔 상태가 더 안전하다.
+
 ## isowords에서 가져올 원칙
 
 `isowords`는 TCA 개발팀이 만든 프로젝트답게 매우 강한 Swift Package 모듈화를 사용한다. 관찰한 핵심은 다음과 같다.
@@ -238,7 +270,6 @@ settings scene UI와 설정 state/client를 소유한다.
 - `SimControlApp`
 - `AppDelegate`
 - `AppContainer`
-- `AppSceneID`
 - assets
 - app-level localization resource
 - live dependency wiring
@@ -256,17 +287,13 @@ Packages/
       SimControlInfrastructure/
       SimControlClients/
       SimControlClientsLive/
-      SimControlSharedUI/
+      MainWindowWorkflows/
       MainWindowFeature/
-      MenuBarFeature/
-      SettingsFeature/
     Tests/
       SimControlDomainTests/
       SimControlInfrastructureTests/
-      SimControlClientsTests/
+      MainWindowWorkflowsTests/
       MainWindowFeatureTests/
-      MenuBarFeatureTests/
-      SettingsFeatureTests/
 ```
 
 이유:
@@ -373,6 +400,10 @@ SimControlDomain -> ComposableArchitecture
 SimControlInfrastructure -> ComposableArchitecture
 SimControlInfrastructure -> SwiftUI
 SimControlClients -> SimControlInfrastructure
+MainWindowWorkflows -> SimControlInfrastructure
+MainWindowWorkflows -> SimControlClientsLive
+MainWindowFeature -> SimControlInfrastructure
+MainWindowFeature -> SimControlClientsLive
 SimControlSharedUI -> MainWindowFeature
 MenuBarFeature -> MainWindowFeature
 SettingsFeature -> MainWindowFeature
@@ -383,8 +414,14 @@ SettingsFeature -> MainWindowFeature
 패키지 도입 후 기본 검증:
 
 ```bash
+scripts/verify-modularization.sh
+```
+
+개별 검증:
+
+```bash
 swift test --package-path Packages/SimControlModules
-xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'platform=macOS'
+xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'platform=macOS,arch=arm64,name=My Mac' -parallel-testing-enabled NO
 ```
 
 의존성 방향 검증:
@@ -393,6 +430,7 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 rg "import SwiftUI|import ComposableArchitecture" Packages/SimControlModules/Sources/SimControlDomain
 rg "import SwiftUI|import ComposableArchitecture" Packages/SimControlModules/Sources/SimControlInfrastructure
 rg "import SimControlInfrastructure" Packages/SimControlModules/Sources/SimControlClients
+rg "import SimControlInfrastructure|import SimControlClientsLive" Packages/SimControlModules/Sources/MainWindowFeature Packages/SimControlModules/Sources/MainWindowWorkflows
 ```
 
 위 명령들은 결과가 없어야 한다.
