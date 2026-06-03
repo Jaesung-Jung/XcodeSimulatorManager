@@ -224,6 +224,62 @@ assert_no_files_matching \
   "$PACKAGE_SOURCES/WorkspaceFeature" \
   "WorkspaceFeature+*.swift"
 
+assert_no_files_matching \
+  "MainWindowFeature state 조각은 파일별 extension으로 나누지 않고 MainWindowFeature+State.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features" \
+  "MainWindowFeature+State[A-Z]*.swift"
+
+assert_no_files_matching \
+  "MainWindowFeature developer tool command 조각은 MainWindowFeature+DeveloperTools.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features" \
+  "MainWindowFeature+DeveloperTool[A-Z]*.swift"
+
+assert_no_files_matching \
+  "MainWindowFeature device lifecycle command 조각은 MainWindowFeature+DeviceLifecycle.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features" \
+  "MainWindowFeature+DeviceLifecycle[A-Z]*.swift"
+
+assert_no_files_matching \
+  "MainWindowFeature installed app command 조각은 MainWindowFeature+InstalledApps.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features" \
+  "MainWindowFeature+InstalledApps[A-Z]*.swift"
+
+assert_path_absent \
+  "MainWindowFeature installed app helper는 MainWindowFeature+InstalledApps.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+InstalledAppHelpers.swift"
+
+assert_path_absent \
+  "MainWindowFeature generic helper 조각은 별도 파일로 분리하지 않습니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+Helpers.swift"
+
+assert_path_absent \
+  "MainWindowFeature의 command response 조각은 MainWindowFeature+CommandResponseRouting.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+AppCommandResponseRouting.swift"
+
+assert_path_absent \
+  "MainWindowFeature의 command response 조각은 MainWindowFeature+CommandResponseRouting.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+DeviceCommandResponseRouting.swift"
+
+assert_path_absent \
+  "MainWindowFeature의 command response 조각은 MainWindowFeature+CommandResponseRouting.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+PathCommandResponseRouting.swift"
+
+assert_path_absent \
+  "MainWindowFeature workspace routing 조각은 MainWindowFeature+WorkspaceRouting.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+WorkspaceDeveloperToolRouting.swift"
+
+assert_path_absent \
+  "MainWindowFeature workspace routing 조각은 MainWindowFeature+WorkspaceRouting.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+WorkspaceDeviceRouting.swift"
+
+assert_path_absent \
+  "MainWindowFeature workspace routing 조각은 MainWindowFeature+WorkspaceRouting.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+WorkspaceInstalledAppRouting.swift"
+
+assert_path_absent \
+  "MainWindowFeature workspace routing 조각은 MainWindowFeature+WorkspaceRouting.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+WorkspacePathRouting.swift"
+
 assert_path_absent \
   "MainWindowFeature에는 sheet/form view 전용 CreateDevice 디렉터리를 남기지 않습니다." \
   "$PACKAGE_SOURCES/MainWindowFeature/CreateDevice"

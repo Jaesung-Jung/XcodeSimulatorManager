@@ -55,3 +55,11 @@ extension MainWindowFeature {
     let app: InstalledApp
   }
 }
+
+// MARK: - MainWindowFeature Input Helpers
+extension MainWindowFeature {
+  func nonEmpty(_ value: String) -> String? {
+    let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    return trimmedValue.isEmpty ? nil : trimmedValue
+  }
+}
