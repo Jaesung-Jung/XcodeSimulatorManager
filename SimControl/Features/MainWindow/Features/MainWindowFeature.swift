@@ -1683,8 +1683,8 @@ struct MainWindowFeature {
     return runDeveloperToolCommand(
       &state,
       command: .openURL
-    ) { coreSimulatorService, deviceID in
-      await coreSimulatorService.openURL(deviceID, urlString)
+    ) { workflow, deviceID, deviceState in
+      await workflow.openURL(deviceID, deviceState, urlString)
     }
   }
 
@@ -1700,9 +1700,10 @@ struct MainWindowFeature {
     return runDeveloperToolCommand(
       &state,
       command: .pushNotification
-    ) { coreSimulatorService, deviceID in
-      await coreSimulatorService.pushNotification(
+    ) { workflow, deviceID, deviceState in
+      await workflow.pushNotification(
         deviceID,
+        deviceState,
         bundleID,
         payloadJSON
       )
@@ -1722,9 +1723,10 @@ struct MainWindowFeature {
     return runDeveloperToolCommand(
       &state,
       command: .privacyPermission
-    ) { coreSimulatorService, deviceID in
-      await coreSimulatorService.setPrivacyPermission(
+    ) { workflow, deviceID, deviceState in
+      await workflow.setPrivacyPermission(
         deviceID,
+        deviceState,
         action,
         service,
         bundleID
@@ -1747,8 +1749,8 @@ struct MainWindowFeature {
     return runDeveloperToolCommand(
       &state,
       command: .setLocation
-    ) { coreSimulatorService, deviceID in
-      await coreSimulatorService.setLocation(deviceID, coordinatePair)
+    ) { workflow, deviceID, deviceState in
+      await workflow.setLocation(deviceID, deviceState, coordinatePair)
     }
   }
 
@@ -1761,8 +1763,8 @@ struct MainWindowFeature {
     return runDeveloperToolCommand(
       &state,
       command: .clearLocation
-    ) { coreSimulatorService, deviceID in
-      await coreSimulatorService.clearLocation(deviceID)
+    ) { workflow, deviceID, deviceState in
+      await workflow.clearLocation(deviceID, deviceState)
     }
   }
 
@@ -1777,8 +1779,8 @@ struct MainWindowFeature {
     return runBootedDeveloperToolCommand(
       &state,
       command: .statusBarOverride
-    ) { coreSimulatorService, deviceID in
-      await coreSimulatorService.setStatusBarOverride(deviceID, arguments)
+    ) { workflow, deviceID in
+      await workflow.setStatusBarOverride(deviceID, arguments)
     }
   }
 
@@ -1791,15 +1793,19 @@ struct MainWindowFeature {
     return runBootedDeveloperToolCommand(
       &state,
       command: .clearStatusBarOverride
-    ) { coreSimulatorService, deviceID in
-      await coreSimulatorService.clearStatusBarOverride(deviceID)
+    ) { workflow, deviceID in
+      await workflow.clearStatusBarOverride(deviceID)
     }
   }
 
   private func runDeveloperToolCommand(
     _ state: inout State,
     command: DeviceCommand,
-    run: @escaping @Sendable (CoreSimulatorClient, String) async -> CommandResult
+    run: @escaping @Sendable (
+      DeveloperToolWorkflowClient,
+      SimulatorDevice.ID,
+      SimulatorDevice.State
+    ) async -> DeveloperToolWorkflowResult
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
           state.workspace.appCommandState == nil,
@@ -1811,52 +1817,28 @@ struct MainWindowFeature {
     }
 
     let deviceCommandState = DeviceCommandState(command: command, deviceID: device.id)
-    let shouldBoot = device.state == .shutdown
     state.workspace.setDeviceCommandState(deviceCommandState)
 
     return .run { [coreSimulatorService, simulatorRepository] send in
-      var commandResults: [CommandResult] = []
-
-      if shouldBoot {
-        let bootResult = await coreSimulatorService.bootDeviceIfNeeded(device.id)
-        commandResults.append(bootResult)
-
-        guard bootResult.succeeded else {
-          await send(
-            .developerToolCommandResults(
-              deviceCommandState,
-              commandResults,
-              refreshAfterward: true
-            )
-          )
-          let refreshResult = await simulatorRepository.refresh()
-          await send(
-            .developerToolCommandRefreshResponse(
-              deviceCommandState,
-              refreshResult,
-              preferredSelectedDeviceID: device.id
-            )
-          )
-          return
-        }
-      }
-
-      commandResults.append(await run(coreSimulatorService, device.id))
+      let workflow = DeveloperToolWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await run(workflow, device.id, device.state)
       await send(
         .developerToolCommandResults(
           deviceCommandState,
-          commandResults,
-          refreshAfterward: shouldBoot
+          result.commandResults,
+          refreshAfterward: result.refreshResult != nil
         )
       )
 
-      if shouldBoot {
-        let refreshResult = await simulatorRepository.refresh()
+      if let refreshResult = result.refreshResult {
         await send(
           .developerToolCommandRefreshResponse(
             deviceCommandState,
             refreshResult,
-            preferredSelectedDeviceID: device.id
+            preferredSelectedDeviceID: result.preferredSelectedDeviceID
           )
         )
       }
@@ -1866,7 +1848,10 @@ struct MainWindowFeature {
   private func runBootedDeveloperToolCommand(
     _ state: inout State,
     command: DeviceCommand,
-    run: @escaping @Sendable (CoreSimulatorClient, String) async -> CommandResult
+    run: @escaping @Sendable (
+      DeveloperToolWorkflowClient,
+      SimulatorDevice.ID
+    ) async -> DeveloperToolWorkflowResult
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == nil,
           state.workspace.appCommandState == nil,
@@ -1880,15 +1865,29 @@ struct MainWindowFeature {
     let deviceCommandState = DeviceCommandState(command: command, deviceID: device.id)
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService] send in
-      let commandResult = await run(coreSimulatorService, device.id)
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      let workflow = DeveloperToolWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await run(workflow, device.id)
       await send(
         .developerToolCommandResults(
           deviceCommandState,
-          [commandResult],
-          refreshAfterward: false
+          result.commandResults,
+          refreshAfterward: result.refreshResult != nil
         )
       )
+
+      if let refreshResult = result.refreshResult {
+        await send(
+          .developerToolCommandRefreshResponse(
+            deviceCommandState,
+            refreshResult,
+            preferredSelectedDeviceID: result.preferredSelectedDeviceID
+          )
+        )
+      }
     }
   }
 
