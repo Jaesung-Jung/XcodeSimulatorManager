@@ -1,79 +1,142 @@
 ---
 name: swift-testing
-description: 'Expert guidance for Swift Testing: test structure, #expect/#require macros, traits and tags, parameterized tests, test plans, parallel execution, async waiting patterns, and XCTest migration. Use when writing new Swift tests, modernizing XCTest suites, debugging flaky tests, or improving test quality and maintainability in Apple-platform or Swift server projects.'
+description: Use when writing tests with Swift Testing (@Test, #expect, #require), migrating from XCTest, implementing async tests, or parameterizing tests.
 ---
 
-# Swift Testing
+# Swift Testing Framework
+
+Modern testing with Swift Testing framework. No XCTest.
 
 ## Overview
 
-Use this skill to write, review, migrate, and debug Swift tests with modern Swift Testing APIs. Prioritize readable tests, robust parallel execution, clear diagnostics, and incremental migration from XCTest where needed.
-
-## Agent behavior contract (follow these rules)
-
-1. Prefer Swift Testing for Swift unit and integration tests, but keep XCTest for UI automation (`XCUIApplication`), performance metrics (`XCTMetric`), and Objective-C-only test code.
-2. Treat `#expect` as the default assertion and use `#require` when subsequent lines depend on a prerequisite value.
-3. Default to parallel-safe guidance. If tests are not isolated, first propose fixing shared state before applying `.serialized`.
-4. Prefer traits for behavior and metadata (`.enabled`, `.disabled`, `.timeLimit`, `.bug`, tags) over naming conventions or ad-hoc comments.
-5. Recommend parameterized tests when multiple tests share logic and differ only in input values.
-6. Use `@available` on test functions for OS-gated behavior instead of runtime `#available` checks inside test bodies; never annotate suite types with `@available`.
-7. Keep migration advice incremental: convert assertions first, then organize suites, then introduce parameterization/traits.
-8. Only import `Testing` in test targets, never in app/library/binary targets.
-
-## First 60 seconds (triage template)
-
-- Clarify the goal: new tests, migration, flaky failures, performance, CI filtering, or async waiting.
-- Collect minimal facts:
-  - Xcode/Swift version and platform targets
-  - Whether tests currently use XCTest, Swift Testing, or both
-  - Whether failures are deterministic or flaky
-  - Whether tests access shared resources (database, files, network, global state)
-- Branch quickly:
-  - repetitive tests -> parameterized tests
-  - noisy or flaky failures -> known issue handling and test isolation
-  - migration questions -> XCTest mapping and coexistence strategy
-  - async callback complexity -> continuation/await patterns
-
-## Routing map (read the right reference fast)
-
-- Test building blocks and suite organization -> `references/fundamentals.md`
-- `#expect`, `#require`, and throw expectations -> `references/expectations.md`
-- Traits, tags, and Xcode test-plan filtering -> `references/traits-and-tags.md`
-- Parameterized test design and combinatorics -> `references/parameterized-testing.md`
-- Default parallel execution, `.serialized`, isolation strategy -> `references/parallelization-and-isolation.md`
-- Test speed, determinism, and flakiness prevention -> `references/performance-and-best-practices.md`
-- Async waiting and callback bridging -> `references/async-testing-and-waiting.md`
-- XCTest coexistence and migration workflow -> `references/migration-from-xctest.md`
-- Test navigator/report workflows and diagnostics -> `references/xcode-workflows.md`
-- Index and quick navigation -> `references/_index.md`
-
-## Common pitfalls -> next best move
-
-- Repetitive `testFooCaseA/testFooCaseB/...` methods -> replace with one parameterized `@Test(arguments:)`.
-- Failing optional preconditions hidden in later assertions -> `try #require(...)` then assert on unwrapped value.
-- Flaky integration tests on shared database -> isolate dependencies or in-memory repositories; use `.serialized` only as a transition step.
-- Disabled tests that silently rot -> prefer `withKnownIssue` for temporary known failures to preserve signal.
-- Unclear failure values for complex types -> conform type to `CustomTestStringConvertible` for focused test diagnostics.
-- Test-plan include/exclude by names -> use tags and tag-based filters instead.
-
-## Verification checklist
-
-- Confirm each test has a single clear behavior and expressive display name when needed.
-- Confirm prerequisites use `#require` where failure should stop the test.
-- Confirm repeated logic is parameterized instead of duplicated.
-- Confirm tests are parallel-safe or intentionally serialized with rationale.
-- Confirm async code is awaited and callback APIs are bridged safely.
-- Confirm migration keeps unsupported XCTest-only scenarios on XCTest.
+Swift Testing replaces XCTest with a modern macro-based approach that's more concise, has better async support, and runs tests in parallel by default. The core principle: if you learned XCTest, unlearn it—Swift Testing works differently.
 
 ## References
 
-- `references/_index.md`
-- `references/fundamentals.md`
-- `references/expectations.md`
-- `references/traits-and-tags.md`
-- `references/parameterized-testing.md`
-- `references/parallelization-and-isolation.md`
-- `references/performance-and-best-practices.md`
-- `references/async-testing-and-waiting.md`
-- `references/migration-from-xctest.md`
-- `references/xcode-workflows.md`
+- [Apple Documentation](https://developer.apple.com/documentation/testing)
+- [Migration Guide](https://steipete.me/posts/2025/migrating-700-tests-to-swift-testing)
+
+## Core Concepts
+
+### Assertions
+
+| Macro | Use Case |
+|-------|----------|
+| `#expect(expression)` | Soft check — continues on failure. Use for most assertions. |
+| `#require(expression)` | Hard check — stops test on failure. Use for preconditions only. |
+
+### Optional Unwrapping
+
+```swift
+let user = try #require(await fetchUser(id: "123"))
+#expect(user.id == "123")
+```
+
+## Test Structure
+
+```swift
+import Testing
+@testable import YourModule
+
+@Suite
+struct FeatureTests {
+    let sut: FeatureType
+    
+    init() throws {
+        sut = FeatureType()
+    }
+    
+    @Test("Description of behavior")
+    func testBehavior() {
+        #expect(sut.someProperty == expected)
+    }
+}
+```
+
+## Assertion Conversions
+
+| XCTest | Swift Testing |
+|--------|---------------|
+| `XCTAssert(expr)` | `#expect(expr)` |
+| `XCTAssertEqual(a, b)` | `#expect(a == b)` |
+| `XCTAssertNil(a)` | `#expect(a == nil)` |
+| `XCTAssertNotNil(a)` | `#expect(a != nil)` |
+| `try XCTUnwrap(a)` | `try #require(a)` |
+| `XCTAssertThrowsError` | `#expect(throws: ErrorType.self) { }` |
+| `XCTAssertNoThrow` | `#expect(throws: Never.self) { }` |
+
+## Error Testing
+
+```swift
+#expect(throws: (any Error).self) { try riskyOperation() }
+#expect(throws: NetworkError.self) { try fetch() }
+#expect(throws: NetworkError.timeout) { try fetch() }
+#expect(throws: Never.self) { try safeOperation() }
+```
+
+## Parameterized Tests
+
+```swift
+@Test("Validates inputs", arguments: zip(
+    ["a", "b", "c"],
+    [1, 2, 3]
+))
+func testInputs(input: String, expected: Int) {
+    #expect(process(input) == expected)
+}
+```
+
+**Warning:** Multiple collections WITHOUT zip creates Cartesian product.
+
+## Async Testing
+
+```swift
+@Test func testAsync() async throws {
+    let result = try await fetchData()
+    #expect(!result.isEmpty)
+}
+```
+
+### Confirmations
+
+```swift
+@Test func testCallback() async {
+    await confirmation("callback received") { confirm in
+        let sut = SomeType { confirm() }
+        sut.triggerCallback()
+    }
+}
+```
+
+## Tags
+
+```swift
+extension Tag {
+    @Tag static var fast: Self
+    @Tag static var networking: Self
+}
+
+@Test(.tags(.fast, .networking))
+func testNetworkCall() { }
+```
+
+## Common Pitfalls
+
+1. **Overusing `#require`** — Use `#expect` for most checks
+2. **Forgetting state isolation** — Each test gets a NEW instance
+3. **Accidental Cartesian product** — Always use `zip` for paired inputs
+4. **Not using `.serialized`** — Apply for thread-unsafe legacy tests
+
+## Common Mistakes
+
+1. **Overusing `#require`** — `#require` is for preconditions only. Using it for normal assertions means the test stops at first failure instead of reporting all failures. Use `#expect` for assertions, `#require` only when subsequent assertions depend on the value.
+
+2. **Cartesian product bugs** — `@Test(arguments: [a, b], [c, d])` creates 4 combinations, not 2. Always use `zip` to pair arguments correctly: `arguments: zip([a, b], [c, d])`.
+
+3. **Forgetting state isolation** — Swift Testing creates a new test instance per test method. BUT shared state between tests (static variables, singletons) still leak. Use dependency injection or clean up singletons between tests.
+
+4. **Parallel test conflicts** — Swift Testing runs tests in parallel by default. Tests touching shared files, databases, or singletons will interfere. Use `.serialized` or isolation strategies.
+
+5. **Not using `async` naturally** — Wrapping async operations in `Task { }` defeats the purpose. Use `async/await` directly in test function signature: `@Test func testAsync() async throws { }`.
+
+6. **Confirmation misuse** — `confirmation` is for verifying callbacks were called. Using it for assertions is wrong. Use `#expect` for assertions, `confirmation` for callback counts.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Swift Style Guide"
+  short_description: "Review Swift naming and style"
+  default_prompt: "Use $swift-style for a style-focused cleanup or review of this Swift code after the main implementation approach is settled."

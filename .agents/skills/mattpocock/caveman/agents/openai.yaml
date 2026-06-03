@@ -1,6 +1,0 @@
-interface:
-  display_name: "caveman"
-  short_description: "Use ultra-compressed technical replies."
-  icon_small: "./assets/matt.jpg"
-  icon_large: "./assets/matt.jpg"
-  default_prompt: "Use $caveman to switch into terse, high-signal technical communication."
