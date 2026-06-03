@@ -204,8 +204,8 @@ assert_no_match \
   "$ROOT/SimControlTests"
 
 assert_max_lines \
-  "MainWindowFeature.swift는 상태, 액션, 본문 조합을 분리해 700줄 이하로 유지합니다." \
-  700 \
+  "MainWindowFeature.swift는 root action 선언과 reducer 조합만 남겨 250줄 이하로 유지합니다." \
+  250 \
   "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature.swift"
 
 assert_no_app_swift_sources_outside_app
