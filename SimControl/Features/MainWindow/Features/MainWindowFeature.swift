@@ -1056,8 +1056,12 @@ struct MainWindowFeature {
     state.sidebar.refreshState = .refreshing
     state.workspace.setRefreshState(.refreshing)
 
-    return .run { [simulatorRepository] send in
-      await send(.refreshResponse(await simulatorRepository.refresh()))
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      let workflow = InventoryWorkflowClient.live(
+        simulatorRepository: simulatorRepository,
+        coreSimulatorService: coreSimulatorService
+      )
+      await send(.refreshResponse(await workflow.refresh()))
     }
   }
 
@@ -1068,8 +1072,12 @@ struct MainWindowFeature {
 
     state.workspace.setOpeningSimulatorApp(true)
 
-    return .run { [coreSimulatorService] send in
-      let commandResult = await coreSimulatorService.openSimulatorApp()
+    return .run { [coreSimulatorService, simulatorRepository] send in
+      let workflow = InventoryWorkflowClient.live(
+        simulatorRepository: simulatorRepository,
+        coreSimulatorService: coreSimulatorService
+      )
+      let commandResult = await workflow.openSimulatorApp()
       await send(.openSimulatorAppResponse(commandResult))
     }
   }
