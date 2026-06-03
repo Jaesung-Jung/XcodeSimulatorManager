@@ -3,7 +3,7 @@ import SimControlDomain
 import Darwin
 
 /// Runs external commands and captures their complete result.
-struct CommandExecutor {
+public struct CommandExecutor {
   private static let fallbackExecutableSearchDirectories = [
     "/usr/bin",
     "/bin",
@@ -11,8 +11,11 @@ struct CommandExecutor {
     "/sbin"
   ]
 
+  /// Creates a command executor.
+  public init() {}
+
   /// Executes a command asynchronously and returns a non-throwing result value.
-  func execute(
+  public func execute(
     executable: String,
     arguments: [String] = [],
     timeout: TimeInterval? = nil

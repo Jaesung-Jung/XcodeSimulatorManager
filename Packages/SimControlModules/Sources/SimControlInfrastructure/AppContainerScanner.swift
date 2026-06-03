@@ -2,7 +2,7 @@ import Foundation
 import SimControlDomain
 
 /// Reads CoreSimulator app container folders and builds installed app entries.
-struct AppContainerScanner {
+public struct AppContainerScanner {
   struct ScanResult: Equatable {
     let apps: [InstalledApp]
     let warnings: [SimulatorWarning]
@@ -30,7 +30,8 @@ struct AppContainerScanner {
   private let fileManager: FileManager
   private let hidesSystemApps: Bool
 
-  init(
+  /// Creates an app container scanner.
+  public init(
     fileManager: FileManager = .default,
     hidesSystemApps: Bool = false
   ) {

@@ -3,7 +3,7 @@ import SimControlDomain
 import Foundation
 
 /// Performs user-visible filesystem path actions such as opening Finder and copying paths.
-struct PathActionService {
+public struct PathActionService {
   private let fileExists: (URL) -> Bool
   private let isReadable: (URL) -> Bool
   private let openURL: @MainActor (URL) -> Bool
@@ -11,7 +11,8 @@ struct PathActionService {
   private let now: () -> Date
   private let makeID: () -> String
 
-  init(
+  /// Creates a path action service.
+  public init(
     fileManager: FileManager = .default,
     fileExists: ((URL) -> Bool)? = nil,
     isReadable: ((URL) -> Bool)? = nil,
@@ -38,7 +39,8 @@ struct PathActionService {
     self.makeID = makeID
   }
 
-  func openInFinder(_ url: URL?, label: String) async -> CommandResult {
+  /// Opens a filesystem URL in Finder.
+  public func openInFinder(_ url: URL?, label: String) async -> CommandResult {
     let startedAt = now()
     let arguments = ["open-finder", url?.path ?? label]
 
@@ -92,7 +94,8 @@ struct PathActionService {
     )
   }
 
-  func copy(_ value: String?, label: String) async -> CommandResult {
+  /// Copies a string value to the pasteboard.
+  public func copy(_ value: String?, label: String) async -> CommandResult {
     let startedAt = now()
     let arguments = ["copy", value ?? label]
 
@@ -126,7 +129,8 @@ struct PathActionService {
     )
   }
 
-  func copyPath(_ url: URL?, label: String) async -> CommandResult {
+  /// Copies a filesystem URL path to the pasteboard.
+  public func copyPath(_ url: URL?, label: String) async -> CommandResult {
     await copy(url?.path, label: "\(label) path")
   }
 

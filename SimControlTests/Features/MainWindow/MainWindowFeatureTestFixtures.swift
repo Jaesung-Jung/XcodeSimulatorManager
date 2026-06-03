@@ -1,5 +1,6 @@
 import Foundation
 import SimControlDomain
+import SimControlInfrastructure
 
 @testable import SimControl
 

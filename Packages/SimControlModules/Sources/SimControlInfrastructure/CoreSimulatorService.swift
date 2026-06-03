@@ -2,13 +2,15 @@ import Foundation
 import SimControlDomain
 
 /// Wraps `xcrun`, `simctl`, and Simulator.app process boundaries.
-struct CoreSimulatorService {
-  enum AppContainerKind: Equatable, Hashable, Sendable {
+public struct CoreSimulatorService {
+  /// The `simctl get_app_container` container selector.
+  public enum AppContainerKind: Equatable, Hashable, Sendable {
     case app
     case data
     case appGroup(String)
 
-    var simctlArgument: String {
+    /// The argument passed to `simctl get_app_container`.
+    public var simctlArgument: String {
       switch self {
       case .app:
         "app"
@@ -56,10 +58,10 @@ struct CoreSimulatorService {
 
   typealias CommandRunner = (_ executable: String, _ arguments: [String], _ timeout: TimeInterval?) async -> CommandResult
 
-  private static let defaultSelectedXcodePathTimeout: TimeInterval = 10
-  private static let defaultListTimeout: TimeInterval = 30
-  private static let defaultOpenSimulatorAppTimeout: TimeInterval = 10
-  private static let defaultDeviceCommandTimeout: TimeInterval = 60
+  @usableFromInline static let defaultSelectedXcodePathTimeout: TimeInterval = 10
+  @usableFromInline static let defaultListTimeout: TimeInterval = 30
+  @usableFromInline static let defaultOpenSimulatorAppTimeout: TimeInterval = 10
+  @usableFromInline static let defaultDeviceCommandTimeout: TimeInterval = 60
 
   private let runCommand: CommandRunner
   private let makePushPayloadURL: () -> URL
@@ -72,7 +74,8 @@ struct CoreSimulatorService {
   private let openSimulatorAppTimeout: TimeInterval?
   private let deviceCommandTimeout: TimeInterval?
 
-  init(
+  /// Creates a CoreSimulator service backed by a command executor.
+  public init(
     commandExecutor: CommandExecutor = CommandExecutor(),
     selectedXcodePathTimeout: TimeInterval? = Self.defaultSelectedXcodePathTimeout,
     listTimeout: TimeInterval? = Self.defaultListTimeout,
@@ -195,7 +198,8 @@ struct CoreSimulatorService {
   }
 
   /// Opens Simulator.app without mutating UI state.
-  func openSimulatorApp() async -> CommandResult {
+  /// Opens Simulator.app.
+  public func openSimulatorApp() async -> CommandResult {
     await runCommand(
       "open",
       ["-a", "Simulator"],
@@ -204,7 +208,8 @@ struct CoreSimulatorService {
   }
 
   /// Boots the simulator device identified by CoreSimulator UDID.
-  func bootDevice(id: String) async -> CommandResult {
+  /// Boots a simulator device.
+  public func bootDevice(id: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "boot", id],
@@ -213,7 +218,8 @@ struct CoreSimulatorService {
   }
 
   /// Boots the simulator if needed and waits until it finishes booting.
-  func bootDeviceIfNeeded(id: String) async -> CommandResult {
+  /// Boots a simulator device and waits for boot completion.
+  public func bootDeviceIfNeeded(id: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "bootstatus", id, "-b"],
@@ -222,7 +228,8 @@ struct CoreSimulatorService {
   }
 
   /// Shuts down the simulator device identified by CoreSimulator UDID.
-  func shutdownDevice(id: String) async -> CommandResult {
+  /// Shuts down a simulator device.
+  public func shutdownDevice(id: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "shutdown", id],
@@ -231,7 +238,8 @@ struct CoreSimulatorService {
   }
 
   /// Creates a simulator device with the provided device type and runtime identifiers.
-  func createDevice(
+  /// Creates a simulator device.
+  public func createDevice(
     name: String,
     deviceTypeID: String,
     runtimeID: String
@@ -244,7 +252,8 @@ struct CoreSimulatorService {
   }
 
   /// Clones an existing simulator device under a new display name.
-  func cloneDevice(id: String, name: String) async -> CommandResult {
+  /// Clones a simulator device.
+  public func cloneDevice(id: String, name: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "clone", id, name],
@@ -253,7 +262,8 @@ struct CoreSimulatorService {
   }
 
   /// Renames an existing simulator device.
-  func renameDevice(id: String, name: String) async -> CommandResult {
+  /// Renames a simulator device.
+  public func renameDevice(id: String, name: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "rename", id, name],
@@ -262,7 +272,8 @@ struct CoreSimulatorService {
   }
 
   /// Erases the contents and settings of a simulator device.
-  func eraseDevice(id: String) async -> CommandResult {
+  /// Erases a simulator device.
+  public func eraseDevice(id: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "erase", id],
@@ -271,7 +282,8 @@ struct CoreSimulatorService {
   }
 
   /// Deletes a simulator device.
-  func deleteDevice(id: String) async -> CommandResult {
+  /// Deletes a simulator device.
+  public func deleteDevice(id: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "delete", id],
@@ -280,7 +292,8 @@ struct CoreSimulatorService {
   }
 
   /// Creates a watch and phone simulator pair.
-  func pairDevices(watchDeviceID: String, phoneDeviceID: String) async -> CommandResult {
+  /// Pairs a watch simulator with a phone simulator.
+  public func pairDevices(watchDeviceID: String, phoneDeviceID: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "pair", watchDeviceID, phoneDeviceID],
@@ -289,7 +302,8 @@ struct CoreSimulatorService {
   }
 
   /// Removes an existing watch and phone simulator pair.
-  func unpairDevice(pairID: String) async -> CommandResult {
+  /// Removes a simulator pair.
+  public func unpairDevice(pairID: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "unpair", pairID],
@@ -298,7 +312,8 @@ struct CoreSimulatorService {
   }
 
   /// Launches an installed app on a simulator device.
-  func launchApp(deviceID: String, bundleID: String) async -> CommandResult {
+  /// Launches an installed app on a simulator device.
+  public func launchApp(deviceID: String, bundleID: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "launch", deviceID, bundleID],
@@ -307,7 +322,8 @@ struct CoreSimulatorService {
   }
 
   /// Terminates an installed app on a simulator device.
-  func terminateApp(deviceID: String, bundleID: String) async -> CommandResult {
+  /// Terminates an installed app on a simulator device.
+  public func terminateApp(deviceID: String, bundleID: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "terminate", deviceID, bundleID],
@@ -316,7 +332,8 @@ struct CoreSimulatorService {
   }
 
   /// Uninstalls an app from a simulator device.
-  func uninstallApp(deviceID: String, bundleID: String) async -> CommandResult {
+  /// Uninstalls an app from a simulator device.
+  public func uninstallApp(deviceID: String, bundleID: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "uninstall", deviceID, bundleID],
@@ -325,7 +342,8 @@ struct CoreSimulatorService {
   }
 
   /// Installs an app bundle on a simulator device.
-  func installApp(deviceID: String, appBundlePath: URL) async -> CommandResult {
+  /// Installs an app bundle on a simulator device.
+  public func installApp(deviceID: String, appBundlePath: URL) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "install", deviceID, appBundlePath.path],
@@ -334,7 +352,8 @@ struct CoreSimulatorService {
   }
 
   /// Prints the path of an installed app container.
-  func getAppContainer(
+  /// Resolves an app container path through `simctl`.
+  public func getAppContainer(
     deviceID: String,
     bundleID: String,
     container: AppContainerKind
@@ -353,7 +372,8 @@ struct CoreSimulatorService {
   }
 
   /// Opens a URL on a simulator device.
-  func openURL(deviceID: String, urlString: String) async -> CommandResult {
+  /// Opens a URL in a simulator device.
+  public func openURL(deviceID: String, urlString: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "openurl", deviceID, urlString],
@@ -362,7 +382,8 @@ struct CoreSimulatorService {
   }
 
   /// Sends a simulated push notification payload to a simulator app.
-  func pushNotification(
+  /// Sends a push notification payload to a simulator device.
+  public func pushNotification(
     deviceID: String,
     bundleID: String?,
     payloadJSON: String
@@ -401,7 +422,8 @@ struct CoreSimulatorService {
   }
 
   /// Grants, revokes, or resets a simulator privacy permission.
-  func setPrivacyPermission(
+  /// Sets a simulator privacy permission.
+  public func setPrivacyPermission(
     deviceID: String,
     action: String,
     service: String,
@@ -421,7 +443,8 @@ struct CoreSimulatorService {
   }
 
   /// Sets a fixed simulator location.
-  func setLocation(deviceID: String, coordinate: String) async -> CommandResult {
+  /// Sets the simulator location.
+  public func setLocation(deviceID: String, coordinate: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "location", deviceID, "set", coordinate],
@@ -430,7 +453,8 @@ struct CoreSimulatorService {
   }
 
   /// Clears any simulated location from a simulator device.
-  func clearLocation(deviceID: String) async -> CommandResult {
+  /// Clears the simulator location override.
+  public func clearLocation(deviceID: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "location", deviceID, "clear"],
@@ -439,7 +463,8 @@ struct CoreSimulatorService {
   }
 
   /// Applies simulator status bar override arguments.
-  func setStatusBarOverride(deviceID: String, arguments overrideArguments: [String]) async -> CommandResult {
+  /// Sets simulator status bar override arguments.
+  public func setStatusBarOverride(deviceID: String, arguments overrideArguments: [String]) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "status_bar", deviceID, "override"] + overrideArguments,
@@ -448,7 +473,8 @@ struct CoreSimulatorService {
   }
 
   /// Clears all simulator status bar overrides.
-  func clearStatusBarOverride(deviceID: String) async -> CommandResult {
+  /// Clears simulator status bar overrides.
+  public func clearStatusBarOverride(deviceID: String) async -> CommandResult {
     await runCommand(
       "xcrun",
       ["simctl", "status_bar", deviceID, "clear"],
@@ -486,16 +512,16 @@ struct CoreSimulatorService {
     )
   }
 
-  private static func defaultPushPayloadURL() -> URL {
+  @usableFromInline static func defaultPushPayloadURL() -> URL {
     FileManager.default.temporaryDirectory
       .appendingPathComponent("SimControl-PushPayload-\(UUID().uuidString).json")
   }
 
-  private static func defaultWritePushPayload(_ payloadJSON: String, to url: URL) throws {
+  @usableFromInline static func defaultWritePushPayload(_ payloadJSON: String, to url: URL) throws {
     try payloadJSON.write(to: url, atomically: true, encoding: .utf8)
   }
 
-  private static func defaultRemovePushPayload(_ url: URL) {
+  @usableFromInline static func defaultRemovePushPayload(_ url: URL) {
     try? FileManager.default.removeItem(at: url)
   }
 }

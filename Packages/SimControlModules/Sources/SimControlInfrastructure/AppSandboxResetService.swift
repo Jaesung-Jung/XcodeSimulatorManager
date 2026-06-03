@@ -2,12 +2,13 @@ import Foundation
 import SimControlDomain
 
 /// Clears an installed app's data container without deleting the container root.
-struct AppSandboxResetService {
+public struct AppSandboxResetService {
   private let fileManager: FileManager
   private let now: () -> Date
   private let makeID: () -> String
 
-  init(
+  /// Creates an app sandbox reset service.
+  public init(
     fileManager: FileManager = .default,
     now: @escaping () -> Date = Date.init,
     makeID: @escaping () -> String = { UUID().uuidString }
@@ -17,7 +18,8 @@ struct AppSandboxResetService {
     self.makeID = makeID
   }
 
-  func resetSandbox(at dataContainer: URL) async -> CommandResult {
+  /// Removes the contents of an app data container.
+  public func resetSandbox(at dataContainer: URL) async -> CommandResult {
     let startedAt = now()
     let arguments = ["reset-sandbox", dataContainer.path]
     var isDirectory: ObjCBool = false

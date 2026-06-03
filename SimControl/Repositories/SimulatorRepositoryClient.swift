@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlInfrastructure
 
 struct SimulatorRepositoryClient: Sendable {
   var refresh: @Sendable () async -> SimulatorRepository.RefreshResult

@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlInfrastructure
 
 @MainActor
 final class AppContainer {

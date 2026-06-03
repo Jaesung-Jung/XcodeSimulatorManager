@@ -1,5 +1,6 @@
 import Foundation
 import SimControlDomain
+import SimControlInfrastructure
 
 #if DEBUG
 import ComposableArchitecture

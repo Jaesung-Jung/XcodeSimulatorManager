@@ -2,24 +2,37 @@ import Foundation
 import SimControlDomain
 
 /// Builds domain snapshots from CoreSimulator service output.
-actor SimulatorRepository {
+public actor SimulatorRepository {
   /// The result of a simulator inventory refresh.
-  struct RefreshResult: Equatable {
+  public struct RefreshResult: Equatable {
     /// The rebuilt snapshot when refresh completed successfully.
-    let snapshot: SimulatorSnapshot?
+    public let snapshot: SimulatorSnapshot?
 
     /// The command result produced while checking the active Xcode path.
-    let xcodeCommandResult: CommandResult
+    public let xcodeCommandResult: CommandResult
 
     /// The command result produced while loading `simctl list -j`, when that step ran.
-    let listCommandResult: CommandResult?
+    public let listCommandResult: CommandResult?
 
     /// Repository-level refresh failure context, when refresh could not build a snapshot.
-    let diagnostic: String?
+    public let diagnostic: String?
 
     /// Indicates whether refresh produced a new snapshot.
-    var succeeded: Bool {
+    public var succeeded: Bool {
       snapshot != nil && diagnostic == nil
+    }
+
+    /// Creates a simulator repository refresh result.
+    public init(
+      snapshot: SimulatorSnapshot?,
+      xcodeCommandResult: CommandResult,
+      listCommandResult: CommandResult?,
+      diagnostic: String?
+    ) {
+      self.snapshot = snapshot
+      self.xcodeCommandResult = xcodeCommandResult
+      self.listCommandResult = listCommandResult
+      self.diagnostic = diagnostic
     }
   }
 
@@ -33,7 +46,8 @@ actor SimulatorRepository {
   private let now: () -> Date
   private var refreshTask: Task<RefreshResult, Never>?
 
-  init(
+  /// Creates a simulator repository backed by concrete infrastructure services.
+  public init(
     coreSimulatorService: CoreSimulatorService = CoreSimulatorService(),
     appContainerScanner: AppContainerScanner = AppContainerScanner(),
     now: @escaping () -> Date = Date.init
@@ -67,7 +81,7 @@ actor SimulatorRepository {
   }
 
   /// Refreshes simulator inventory and maps service-layer values into domain values.
-  func refresh() async -> RefreshResult {
+  public func refresh() async -> RefreshResult {
     if let refreshTask {
       return await refreshTask.value
     }
