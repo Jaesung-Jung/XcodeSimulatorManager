@@ -218,6 +218,11 @@ assert_max_lines \
   180 \
   "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+DeviceLifecycle.swift"
 
+assert_max_lines \
+  "MainWindowFeature+InstalledApps.swift는 기본 app command만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+InstalledApps.swift"
+
 assert_no_app_swift_sources_outside_app
 
 assert_path_present \
