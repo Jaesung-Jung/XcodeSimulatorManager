@@ -5,6 +5,7 @@ import DeviceListFeature
 import InspectorFeature
 import MainWindowFeatureSupport
 import MainWindowWorkflows
+import MenuBarFeature
 import SidebarFeature
 import SimControlClients
 import SimControlDomain
@@ -226,6 +227,11 @@ public struct MainWindowFeature {
       Self()
     }
 
+    public var menuBar: MenuBarFeature.State {
+      get { MenuBarFeature.State(workspace: workspace) }
+      set {}
+    }
+
     var canCreateDevice: Bool {
       workspace.deviceCommandState == nil
         && workspace.appCommandState == nil
@@ -429,7 +435,7 @@ public struct MainWindowFeature {
 
   public enum Action: Equatable {
     case task
-    case menuBarPresented(at: Date)
+    case menuBar(MenuBarFeature.Action)
     case refreshButtonTapped
     case refreshResponse(SimulatorRefreshResult)
     case createSimulatorButtonTapped
@@ -491,8 +497,23 @@ public struct MainWindowFeature {
 
         return refresh(&state)
 
-      case .menuBarPresented(let date):
+      case .menuBar(.presented(let date)):
         return autoRefreshFromMenuBar(&state, at: date)
+
+      case .menuBar(.refreshButtonTapped):
+        return refresh(&state)
+
+      case .menuBar(.openSimulatorAppButtonTapped):
+        return openSimulatorApp(&state)
+
+      case .menuBar(.deviceSelected(let deviceID)):
+        state.workspace.selectDevice(id: deviceID)
+        return .none
+
+      case .menuBar(.appSelected(let deviceID, let appID)):
+        state.workspace.selectDevice(id: deviceID)
+        state.workspace.selectApp(id: appID)
+        return .none
 
       case .refreshButtonTapped:
         return refresh(&state)
@@ -1043,6 +1064,9 @@ public struct MainWindowFeature {
     }
     Scope(state: \.workspace, action: \.workspace) {
       WorkspaceFeature()
+    }
+    Scope(state: \.menuBar, action: \.menuBar) {
+      MenuBarFeature()
     }
   }
 

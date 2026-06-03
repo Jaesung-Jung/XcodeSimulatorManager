@@ -112,6 +112,11 @@ assert_no_match \
   "${FEATURE_SOURCES[@]}"
 
 assert_no_match \
+  "MenuBarFeature는 MainWindowFeature를 직접 import하면 안 됩니다." \
+  '^import MainWindowFeature\b' \
+  "$PACKAGE_SOURCES/MenuBarFeature"
+
+assert_no_match \
   "feature/workflow/client interface layer에서 concrete service를 직접 생성하면 안 됩니다." \
   '(CommandExecutor|CoreSimulatorService|AppContainerScanner|AppSandboxResetService|PathActionService|SimulatorRepository)\(' \
   "$PACKAGE_SOURCES/SimControlClients" \

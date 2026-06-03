@@ -1,4 +1,4 @@
-/// Scene identifiers owned by the main window feature module.
+/// Scene identifiers shared by app-level scene adapters.
 public enum MainWindowSceneID {
   public static let mainWindow = "main-window"
 }

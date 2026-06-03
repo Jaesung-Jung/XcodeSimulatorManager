@@ -236,6 +236,7 @@ let package = Package(
         "DeviceListFeature",
         "InspectorFeature",
         "InstalledAppsFeature",
+        "MenuBarFeature",
         "SidebarFeature",
         "WorkspaceFeature",
         "MainWindowDisplaySupport",
@@ -269,11 +270,7 @@ let package = Package(
     .target(
       name: "MenuBarFeature",
       dependencies: [
-        "DeviceDetailFeature",
-        "DeviceListFeature",
-        "InstalledAppsFeature",
         "MainWindowDisplaySupport",
-        "MainWindowFeature",
         "MainWindowFeatureSupport",
         "SimControlDomain",
         "WorkspaceFeature",

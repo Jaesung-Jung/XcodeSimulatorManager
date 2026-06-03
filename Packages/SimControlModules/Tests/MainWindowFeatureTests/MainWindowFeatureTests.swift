@@ -2,6 +2,7 @@ import ComposableArchitecture
 import DeveloperToolsFeature
 import DeviceDetailFeature
 import MainWindowFeatureSupport
+import MenuBarFeature
 import SimControlClients
 import SimControlDomain
 import SidebarFeature
@@ -229,7 +230,7 @@ struct MainWindowFeatureTests {
       }
     }
 
-    await store.send(.menuBarPresented(at: now)) {
+    await store.send(.menuBar(.presented(at: now))) {
       $0.lastMenuBarAutoRefreshAttemptAt = now
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
@@ -265,7 +266,7 @@ struct MainWindowFeatureTests {
       }
     }
 
-    await store.send(.menuBarPresented(at: now))
+    await store.send(.menuBar(.presented(at: now)))
 
     #expect(await recorder.refreshCallCount() == 0)
   }
@@ -293,7 +294,7 @@ struct MainWindowFeatureTests {
       }
     }
 
-    await store.send(.menuBarPresented(at: now)) {
+    await store.send(.menuBar(.presented(at: now))) {
       $0.lastMenuBarAutoRefreshAttemptAt = now
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
@@ -328,7 +329,7 @@ struct MainWindowFeatureTests {
       }
     }
 
-    await store.send(.menuBarPresented(at: now)) {
+    await store.send(.menuBar(.presented(at: now))) {
       $0.lastMenuBarAutoRefreshAttemptAt = now
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
@@ -343,9 +344,59 @@ struct MainWindowFeatureTests {
       )
     }
 
-    await store.send(.menuBarPresented(at: now.addingTimeInterval(30)))
+    await store.send(.menuBar(.presented(at: now.addingTimeInterval(30))))
 
     #expect(await recorder.refreshCallCount() == 1)
+  }
+
+  @Test
+  func menuBarDeviceSelectionUpdatesWorkspaceSelection() async {
+    let snapshot = MainWindowTestFixtures.makeSnapshot(
+      devices: [
+        MainWindowTestFixtures.device,
+        MainWindowTestFixtures.secondDevice
+      ]
+    )
+
+    let store = TestStore(
+      initialState: MainWindowFeature.State(snapshot: snapshot)
+    ) {
+      MainWindowFeature()
+    }
+
+    await store.send(.menuBar(.deviceSelected(MainWindowTestFixtures.secondDevice.id))) {
+      $0.workspace.selectDevice(id: MainWindowTestFixtures.secondDevice.id)
+    }
+  }
+
+  @Test
+  func menuBarAppSelectionUpdatesWorkspaceDeviceAndAppSelection() async {
+    let snapshot = MainWindowTestFixtures.makeSnapshot(
+      installedAppsByDeviceID: [
+        MainWindowTestFixtures.device.id: [MainWindowTestFixtures.app]
+      ]
+    )
+
+    let store = TestStore(
+      initialState: MainWindowFeature.State(
+        snapshot: snapshot,
+        installedAppsAvailability: .loaded
+      )
+    ) {
+      MainWindowFeature()
+    }
+
+    await store.send(
+      .menuBar(
+        .appSelected(
+          deviceID: MainWindowTestFixtures.device.id,
+          appID: MainWindowTestFixtures.app.id
+        )
+      )
+    ) {
+      $0.workspace.selectDevice(id: MainWindowTestFixtures.device.id)
+      $0.workspace.selectApp(id: MainWindowTestFixtures.app.id)
+    }
   }
 
   @Test

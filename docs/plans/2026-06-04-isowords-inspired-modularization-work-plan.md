@@ -23,6 +23,7 @@
 - `DeviceListFeature`, `InstalledAppsFeature`, `DeveloperToolsFeature`, `DeviceDetailFeature`, `InspectorFeature`, `SidebarFeature`, `WorkspaceFeature` target 분리.
 - `MainWindowFeature` target으로 main window reducer/view 이동.
 - `MenuBarFeature` target으로 menu bar extra UI 이동.
+- `MenuBarFeature.State/Action/Reducer`를 도입해 `MainWindowFeature` 직접 import 제거.
 - `SettingsFeature` target으로 settings scene view 이동.
 - 각 feature/service/support target의 smoke/behavior test를 package test target으로 이동.
 - app target은 `AppContainer`, scene 선언, app delegate, asset 중심으로 축소.
@@ -30,7 +31,7 @@
 - 반복 검증 스크립트 `scripts/verify-modularization.sh` 추가.
 - service/feature/client/workflow 경계 검사를 `scripts/verify-modularization.sh`에 추가.
 
-남은 후속 작업은 선택 사항이다. `MenuBarFeature`가 독립 상태를 가져야 할 만큼 커지면 `MainWindowFeature` 의존성을 줄이고, 필요할 때 feature별 preview harness와 root package 전환 여부를 검토한다.
+남은 후속 작업은 선택 사항이다. 필요할 때 feature별 preview harness, resource/localization 소유권, root package 전환 여부를 검토한다.
 
 ## 전체 작업 순서
 
@@ -451,6 +452,7 @@ swift test --package-path Packages/SimControlModules
 - `SimControlDomain`
 - `SimControlClients`
 - `MainWindowWorkflows`
+- `MenuBarFeature`
 - `ComposableArchitecture`
 
 필요 시:
@@ -485,12 +487,12 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 `MenuBarFeature` depends on:
 
 - `SimControlDomain`
-- `MainWindowFeature`
 - `WorkspaceFeature`
-- child feature targets
+- `MainWindowFeatureSupport`
+- `MainWindowDisplaySupport`
 - `ComposableArchitecture`
 
-현재 menu bar는 별도 reducer가 아니라 `StoreOf<MainWindowFeature>`를 렌더링하는 scene adapter다. 따라서 `MainWindowFeature` 의존성은 현 단계의 의도된 타협이며, menu bar 전용 상태가 필요해질 때 분리한다.
+현재 menu bar는 `MenuBarFeature.State`와 `MenuBarFeature.Action`을 소유한다. `MainWindowFeature`가 `WorkspaceFeature.State`에서 menu bar state를 파생하고, menu bar action을 기존 refresh/open/selection 흐름으로 해석한다.
 
 `SettingsFeature` depends on:
 

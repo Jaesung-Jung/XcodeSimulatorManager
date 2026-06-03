@@ -1,26 +1,24 @@
 import AppKit
 import ComposableArchitecture
-import MainWindowFeature
 import MainWindowFeatureSupport
 import SimControlDomain
 import SwiftUI
-import WorkspaceFeature
 
 @MainActor
 public struct MenuBarRootView: View {
   @Environment(\.openWindow) private var openWindow
 
-  let store: StoreOf<MainWindowFeature>
+  let store: StoreOf<MenuBarFeature>
 
-  public init(store: StoreOf<MainWindowFeature>) {
+  public init(store: StoreOf<MenuBarFeature>) {
     self.store = store
   }
 
   public var body: some View {
     Group {
       StatusSection(
-        snapshot: store.workspace.snapshot,
-        refreshState: store.workspace.refreshState
+        snapshot: store.snapshot,
+        refreshState: store.refreshState
       )
 
       Divider()
@@ -38,7 +36,7 @@ public struct MenuBarRootView: View {
       )
     }
     .task {
-      await store.send(.menuBarPresented(at: Date())).finish()
+      await store.send(.presented(at: Date())).finish()
     }
   }
 
@@ -115,8 +113,8 @@ extension MenuBarRootView {
 
 #Preview {
   MenuBarRootView(
-    store: Store(initialState: MainWindowFeature.State.initial) {
-      MainWindowFeature()
+    store: Store(initialState: MenuBarFeature.State()) {
+      MenuBarFeature()
     }
   )
 }

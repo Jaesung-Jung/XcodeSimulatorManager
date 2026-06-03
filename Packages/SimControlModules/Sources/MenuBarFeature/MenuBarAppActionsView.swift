@@ -1,17 +1,14 @@
 import AppKit
 import ComposableArchitecture
-import MainWindowFeature
-import MainWindowFeatureSupport
 import SwiftUI
-import WorkspaceFeature
 
 @MainActor
 struct MenuBarAppActionsView: View {
-  let store: StoreOf<MainWindowFeature>
+  let store: StoreOf<MenuBarFeature>
   let openMainWindow: () -> Void
 
   private var isRefreshing: Bool {
-    store.workspace.refreshState == .refreshing
+    store.refreshState == .refreshing
   }
 
   private var refreshTitle: String {
@@ -60,8 +57,8 @@ struct MenuBarAppActionsView: View {
 
 #Preview {
   MenuBarAppActionsView(
-    store: Store(initialState: MainWindowFeature.State.initial) {
-      MainWindowFeature()
+    store: Store(initialState: MenuBarFeature.State()) {
+      MenuBarFeature()
     },
     openMainWindow: {}
   )

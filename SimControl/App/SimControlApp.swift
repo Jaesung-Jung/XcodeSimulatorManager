@@ -1,4 +1,6 @@
+import ComposableArchitecture
 import MainWindowFeature
+import MainWindowFeatureSupport
 import MenuBarFeature
 import SettingsFeature
 import SwiftUI
@@ -15,7 +17,12 @@ struct SimControlApp: App {
     }
 
     MenuBarExtra("SimControl", systemImage: "iphone.gen1") {
-      MenuBarRootView(store: appContainer.mainWindowStore)
+      MenuBarRootView(
+        store: appContainer.mainWindowStore.scope(
+          state: \.menuBar,
+          action: \.menuBar
+        )
+      )
     }
 
     Settings {

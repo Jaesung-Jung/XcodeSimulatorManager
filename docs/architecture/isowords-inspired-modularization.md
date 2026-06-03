@@ -79,12 +79,13 @@ flowchart TB
   MainWindowFeature --> WorkspaceFeature
   MainWindowFeature --> SidebarFeature
   MainWindowFeature --> LeafFeatures["DeviceList / InstalledApps\nDeveloperTools / DeviceDetail / Inspector"]
+  MainWindowFeature --> MenuBarFeature
   MainWindowFeature --> Support["FeatureSupport / DisplaySupport / SharedUI"]
   MainWindowFeature --> Domain["SimControlDomain"]
 
-  MenuBarFeature --> MainWindowFeature
   MenuBarFeature --> WorkspaceFeature
-  MenuBarFeature --> LeafFeatures
+  MenuBarFeature --> Support
+  MenuBarFeature --> Domain
 
   WorkspaceFeature --> LeafFeatures
   SidebarFeature --> Support
@@ -269,10 +270,10 @@ feature 간 공유되지만 domain은 아닌 타입과 표시 helper를 소유�
 앱 scene 단위의 feature를 소유한다.
 
 - `MainWindowFeature`: main window reducer, view, sheet/confirmation, workflow 호출.
-- `MenuBarFeature`: menu bar extra UI. 현재는 동일한 `StoreOf<MainWindowFeature>`를 보여주는 adapter 역할이므로 `MainWindowFeature`에 의존한다.
+- `MenuBarFeature`: menu bar extra UI, menu bar state projection, menu-specific action.
 - `SettingsFeature`: settings scene SwiftUI view.
 
-`MenuBarFeature -> MainWindowFeature` 의존성은 현재 의도된 타협이다. menu bar가 별도 상태/액션을 가져야 할 만큼 커지면 `MenuBarState`와 `MenuBarAction`을 분리해 이 의존성을 줄인다.
+`MenuBarFeature`는 `MainWindowFeature`를 import하지 않는다. `MainWindowFeature`가 `WorkspaceFeature.State`에서 `MenuBarFeature.State`를 파생하고, `MenuBarFeature.Action`을 기존 refresh, open simulator, workspace selection workflow로 해석한다.
 
 ## isowords에서 가져온 원칙
 
@@ -295,6 +296,7 @@ feature 간 공유되지만 domain은 아닌 타입과 표시 helper를 소유�
 - `SimControlClientsLive`는 feature/workflow layer를 import하지 않는다.
 - `MainWindowWorkflows`는 live 구현, concrete infrastructure, UI/TCA layer를 import하지 않는다.
 - feature target은 `SimControlInfrastructure`, `SimControlClientsLive`를 직접 import하지 않는다.
+- `MenuBarFeature`는 `MainWindowFeature`를 직접 import하지 않는다.
 - feature/workflow/client interface layer에서는 concrete service를 직접 생성하지 않는다.
 
 ## 검증 명령
@@ -316,7 +318,7 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 
 현재 구조는 local package 방식으로 안정화되어 있다. 후속으로 고려할 수 있는 선택지는 다음 정도다.
 
-- `MenuBarFeature`가 독립 상태를 갖게 될 때 `MainWindowFeature` 의존성 제거.
+- `MenuBarFeature`에 독립 workflow가 필요해질 때 menu bar 전용 client 도입.
 - feature별 preview app 또는 preview harness 추가.
 - resource/localization을 feature target 소유로 이동.
 - repository layout을 isowords처럼 root `Package.swift` 중심으로 승격할지 결정.

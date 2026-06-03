@@ -1,20 +1,15 @@
 import ComposableArchitecture
-import DeviceDetailFeature
-import DeviceListFeature
-import InstalledAppsFeature
 import MainWindowDisplaySupport
-import MainWindowFeature
 import SimControlDomain
 import SwiftUI
-import WorkspaceFeature
 
 @MainActor
 struct MenuBarDeviceSection: View {
-  let store: StoreOf<MainWindowFeature>
+  let store: StoreOf<MenuBarFeature>
   let openMainWindow: () -> Void
 
   private var snapshot: SimulatorSnapshot? {
-    store.workspace.snapshot
+    store.snapshot
   }
 
   private var devices: [SimulatorDevice] {
@@ -22,7 +17,7 @@ struct MenuBarDeviceSection: View {
   }
 
   private var filters: SimulatorFilters {
-    store.workspace.filters
+    store.filters
   }
 
   private var runtimeByID: [String: SimulatorRuntime] {
@@ -108,13 +103,12 @@ struct MenuBarDeviceSection: View {
   }
 
   private func selectDevice(_ device: SimulatorDevice) {
-    store.send(.workspace(.deviceList(.selectionChanged(device.id))))
+    store.send(.deviceSelected(device.id))
     openMainWindow()
   }
 
   private func selectApp(_ app: InstalledApp) {
-    store.send(.workspace(.deviceList(.selectionChanged(app.deviceID))))
-    store.send(.workspace(.deviceDetail(.installedApps(.selectionChanged(app.id)))))
+    store.send(.appSelected(deviceID: app.deviceID, appID: app.id))
     openMainWindow()
   }
 
@@ -164,8 +158,8 @@ extension MenuBarDeviceSection {
 
 #Preview {
   MenuBarDeviceSection(
-    store: Store(initialState: MainWindowFeature.State.initial) {
-      MainWindowFeature()
+    store: Store(initialState: MenuBarFeature.State()) {
+      MenuBarFeature()
     },
     openMainWindow: {}
   )
