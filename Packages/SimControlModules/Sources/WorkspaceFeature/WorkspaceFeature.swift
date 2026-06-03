@@ -9,21 +9,23 @@ import SimControlDomain
 
 @Reducer
 public struct WorkspaceFeature {
+  public init() {}
+
   @ObservableState
   public struct State: Equatable {
-    var snapshot: SimulatorSnapshot?
-    var refreshState: InventoryRefreshState
-    var filters: SimulatorFilters
-    var deviceList: DeviceListFeature.State
-    var deviceDetail: DeviceDetailFeature.State
-    var inspector: InspectorFeature.State
-    var commandResults: [CommandResult]
-    var installedAppsAvailability: InstalledAppsAvailability
-    var deviceCommandState: DeviceCommandState?
-    var appCommandState: AppCommandState?
-    var isOpeningSimulatorApp: Bool
+    public var snapshot: SimulatorSnapshot?
+    public var refreshState: InventoryRefreshState
+    public var filters: SimulatorFilters
+    public var deviceList: DeviceListFeature.State
+    public var deviceDetail: DeviceDetailFeature.State
+    public var inspector: InspectorFeature.State
+    public var commandResults: [CommandResult]
+    public var installedAppsAvailability: InstalledAppsAvailability
+    public var deviceCommandState: DeviceCommandState?
+    public var appCommandState: AppCommandState?
+    public var isOpeningSimulatorApp: Bool
 
-    init(
+    public init(
       snapshot: SimulatorSnapshot? = nil,
       refreshState: InventoryRefreshState = .idle,
       selectedDeviceID: String? = nil,
@@ -50,11 +52,11 @@ public struct WorkspaceFeature {
       rebuildDetail(selectedAppID: selectedAppID)
     }
 
-    mutating func setRefreshState(_ refreshState: InventoryRefreshState) {
+    public mutating func setRefreshState(_ refreshState: InventoryRefreshState) {
       self.refreshState = refreshState
     }
 
-    mutating func applyRefreshFailure(
+    public mutating func applyRefreshFailure(
       _ refreshState: InventoryRefreshState,
       commandResults: [CommandResult]
     ) {
@@ -63,7 +65,7 @@ public struct WorkspaceFeature {
       deviceDetail.commandResults = commandResults
     }
 
-    mutating func applySnapshot(
+    public mutating func applySnapshot(
       _ snapshot: SimulatorSnapshot,
       refreshState: InventoryRefreshState,
       commandResults: [CommandResult],
@@ -90,7 +92,7 @@ public struct WorkspaceFeature {
       rebuildDetail(selectedAppID: selection?.appID)
     }
 
-    mutating func selectDevice(id: String?) {
+    public mutating func selectDevice(id: String?) {
       guard deviceList.selectedDeviceID != id else {
         return
       }
@@ -106,7 +108,7 @@ public struct WorkspaceFeature {
       rebuildDetail(selectedAppID: nil)
     }
 
-    mutating func selectApp(id: String?) {
+    public mutating func selectApp(id: String?) {
       if let id {
         guard deviceDetail.installedApps.apps.contains(where: { $0.id == id }) else {
           return
@@ -118,7 +120,7 @@ public struct WorkspaceFeature {
       rebuildDetail(selectedAppID: id)
     }
 
-    mutating func setSearchQuery(_ query: String) {
+    public mutating func setSearchQuery(_ query: String) {
       filters.searchQuery = query
       let searchTarget = inventoryQuery?.exactSearchTarget()
       rebuildAfterFilterChange(
@@ -127,54 +129,54 @@ public struct WorkspaceFeature {
       )
     }
 
-    mutating func setSidebarScope(_ scope: SimulatorFilters.SidebarScope) {
+    public mutating func setSidebarScope(_ scope: SimulatorFilters.SidebarScope) {
       filters.sidebarScope = scope
       rebuildAfterFilterChange()
     }
 
-    mutating func setDeviceSort(_ sort: SimulatorFilters.DeviceSort) {
+    public mutating func setDeviceSort(_ sort: SimulatorFilters.DeviceSort) {
       filters.deviceSort = sort
       rebuildAfterFilterChange()
     }
 
-    mutating func setDeviceSortDirection(_ direction: SimulatorFilters.SortDirection) {
+    public mutating func setDeviceSortDirection(_ direction: SimulatorFilters.SortDirection) {
       filters.deviceSortDirection = direction
       rebuildAfterFilterChange()
     }
 
-    mutating func setAppSystemFilter(_ filter: SimulatorFilters.AppSystemFilter) {
+    public mutating func setAppSystemFilter(_ filter: SimulatorFilters.AppSystemFilter) {
       filters.appSystemFilter = filter
       rebuildAfterFilterChange()
     }
 
-    mutating func setAppGroupFilter(_ filter: SimulatorFilters.PresenceFilter) {
+    public mutating func setAppGroupFilter(_ filter: SimulatorFilters.PresenceFilter) {
       filters.appGroupFilter = filter
       rebuildAfterFilterChange()
     }
 
-    mutating func setAppDatabaseFilter(_ filter: SimulatorFilters.PresenceFilter) {
+    public mutating func setAppDatabaseFilter(_ filter: SimulatorFilters.PresenceFilter) {
       filters.appDatabaseFilter = filter
       rebuildAfterFilterChange()
     }
 
-    mutating func setAppSort(_ sort: SimulatorFilters.AppSort) {
+    public mutating func setAppSort(_ sort: SimulatorFilters.AppSort) {
       filters.appSort = sort
       rebuildAfterFilterChange()
     }
 
-    mutating func setAppSortDirection(_ direction: SimulatorFilters.SortDirection) {
+    public mutating func setAppSortDirection(_ direction: SimulatorFilters.SortDirection) {
       filters.appSortDirection = direction
       rebuildAfterFilterChange()
     }
 
-    mutating func clearAppFilters() {
+    public mutating func clearAppFilters() {
       filters.appSystemFilter = .user
       filters.appGroupFilter = .all
       filters.appDatabaseFilter = .all
       rebuildAfterFilterChange()
     }
 
-    mutating func togglePinnedDevice(id: String) {
+    public mutating func togglePinnedDevice(id: String) {
       if filters.pinnedDeviceIDs.contains(id) {
         filters.pinnedDeviceIDs.remove(id)
       } else {
@@ -184,7 +186,7 @@ public struct WorkspaceFeature {
       rebuildAfterFilterChange(preferredSelectedDeviceID: id)
     }
 
-    mutating func togglePinnedApp(id: String) {
+    public mutating func togglePinnedApp(id: String) {
       if filters.pinnedAppIDs.contains(id) {
         filters.pinnedAppIDs.remove(id)
       } else {
@@ -194,26 +196,26 @@ public struct WorkspaceFeature {
       rebuildAfterFilterChange(preferredSelectedAppID: id)
     }
 
-    mutating func appendCommandResult(_ result: CommandResult) {
+    public mutating func appendCommandResult(_ result: CommandResult) {
       commandResults.append(result)
       deviceDetail.commandResults = commandResults
     }
 
-    mutating func setDeviceCommandState(_ deviceCommandState: DeviceCommandState?) {
+    public mutating func setDeviceCommandState(_ deviceCommandState: DeviceCommandState?) {
       self.deviceCommandState = deviceCommandState
       deviceDetail.deviceCommandState = deviceCommandState
       deviceDetail.installedApps.isDeviceCommandRunning = deviceCommandState != nil
       deviceDetail.developerTools.deviceCommandState = deviceCommandState
     }
 
-    mutating func setAppCommandState(_ appCommandState: AppCommandState?) {
+    public mutating func setAppCommandState(_ appCommandState: AppCommandState?) {
       self.appCommandState = appCommandState
       deviceDetail.appCommandState = appCommandState
       deviceDetail.installedApps.appCommandState = appCommandState
       deviceDetail.developerTools.appCommandState = appCommandState
     }
 
-    mutating func setOpeningSimulatorApp(_ isOpeningSimulatorApp: Bool) {
+    public mutating func setOpeningSimulatorApp(_ isOpeningSimulatorApp: Bool) {
       self.isOpeningSimulatorApp = isOpeningSimulatorApp
       deviceDetail.isOpeningSimulatorApp = isOpeningSimulatorApp
     }
@@ -321,19 +323,19 @@ public struct WorkspaceFeature {
       inventoryQuery?.deviceTypeByID ?? [:]
     }
 
-    var selectedDevice: SimulatorDevice? {
+    public var selectedDevice: SimulatorDevice? {
       inventoryQuery?.device(id: deviceList.selectedDeviceID)
     }
 
-    var selectedRuntime: SimulatorRuntime? {
+    public var selectedRuntime: SimulatorRuntime? {
       inventoryQuery?.runtime(for: selectedDevice)
     }
 
-    var selectedDeviceType: SimulatorDeviceType? {
+    public var selectedDeviceType: SimulatorDeviceType? {
       inventoryQuery?.deviceType(for: selectedDevice)
     }
 
-    var selectedPairSummary: DeviceDetailFeature.DevicePairSummary? {
+    public var selectedPairSummary: DeviceDetailFeature.DevicePairSummary? {
       guard let summary = inventoryQuery?.pairSummary(for: selectedDevice) else {
         return nil
       }

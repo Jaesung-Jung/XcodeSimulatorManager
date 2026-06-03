@@ -1,5 +1,6 @@
 @testable import MainWindowFeature
 import Testing
+import WorkspaceFeature
 
 @Suite("MainWindowFeature")
 struct MainWindowFeatureSmokeTests {

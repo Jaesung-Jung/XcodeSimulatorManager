@@ -4,6 +4,7 @@ import InspectorFeature
 import SidebarFeature
 import SimControlDomain
 import SwiftUI
+import WorkspaceFeature
 
 @MainActor
 public struct MainWindowView: View {

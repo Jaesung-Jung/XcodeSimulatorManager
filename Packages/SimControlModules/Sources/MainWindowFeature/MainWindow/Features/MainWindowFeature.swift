@@ -9,6 +9,7 @@ import SidebarFeature
 import SimControlClients
 import SimControlDomain
 import Foundation
+import WorkspaceFeature
 
 @Reducer
 public struct MainWindowFeature {

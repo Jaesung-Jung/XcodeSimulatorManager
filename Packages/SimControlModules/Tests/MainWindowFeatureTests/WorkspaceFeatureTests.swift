@@ -7,6 +7,7 @@ import InstalledAppsFeature
 import SimControlDomain
 import Foundation
 import Testing
+import WorkspaceFeature
 
 @testable import MainWindowFeature
 

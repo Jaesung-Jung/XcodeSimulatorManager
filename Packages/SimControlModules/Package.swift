@@ -22,6 +22,7 @@ let package = Package(
     .library(name: "DeviceDetailFeature", targets: ["DeviceDetailFeature"]),
     .library(name: "InspectorFeature", targets: ["InspectorFeature"]),
     .library(name: "SidebarFeature", targets: ["SidebarFeature"]),
+    .library(name: "WorkspaceFeature", targets: ["WorkspaceFeature"]),
     .library(name: "MainWindowFeature", targets: ["MainWindowFeature"]),
     .library(name: "SettingsFeature", targets: ["SettingsFeature"])
   ],
@@ -165,6 +166,23 @@ let package = Package(
       ]
     ),
     .target(
+      name: "WorkspaceFeature",
+      dependencies: [
+        "DeveloperToolsFeature",
+        "DeviceDetailFeature",
+        "DeviceListFeature",
+        "InspectorFeature",
+        "InstalledAppsFeature",
+        "MainWindowFeatureSupport",
+        "SimControlDomain",
+        "SimControlSharedUI",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .target(
       name: "MainWindowFeature",
       dependencies: [
         "DeveloperToolsFeature",
@@ -173,6 +191,7 @@ let package = Package(
         "InspectorFeature",
         "InstalledAppsFeature",
         "SidebarFeature",
+        "WorkspaceFeature",
         "MainWindowDisplaySupport",
         "MainWindowFeatureSupport",
         "MainWindowWorkflows",
@@ -226,6 +245,7 @@ let package = Package(
         "InspectorFeature",
         "InstalledAppsFeature",
         "SidebarFeature",
+        "WorkspaceFeature",
         "MainWindowFeature",
         "MainWindowFeatureSupport",
         "SimControlClients",
@@ -317,6 +337,17 @@ let package = Package(
       dependencies: [
         "MainWindowFeatureSupport",
         "SidebarFeature",
+        .product(
+          name: "ComposableArchitecture",
+          package: "swift-composable-architecture"
+        )
+      ]
+    ),
+    .testTarget(
+      name: "WorkspaceFeatureTests",
+      dependencies: [
+        "MainWindowFeatureSupport",
+        "WorkspaceFeature",
         .product(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"

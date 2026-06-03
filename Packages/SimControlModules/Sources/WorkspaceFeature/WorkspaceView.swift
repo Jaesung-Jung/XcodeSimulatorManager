@@ -6,10 +6,14 @@ import SimControlSharedUI
 import SwiftUI
 
 @MainActor
-struct WorkspaceView: View {
-  let store: StoreOf<WorkspaceFeature>
+public struct WorkspaceView: View {
+  private let store: StoreOf<WorkspaceFeature>
 
-  var body: some View {
+  public init(store: StoreOf<WorkspaceFeature>) {
+    self.store = store
+  }
+
+  public var body: some View {
     DetailContent(store: store)
   }
 }
@@ -101,7 +105,7 @@ extension WorkspaceView {
 
 #Preview {
   WorkspaceView(
-    store: Store(initialState: MainWindowFeature.State.preview.workspace) {
+    store: Store(initialState: WorkspaceFeature.State()) {
       WorkspaceFeature()
     }
   )
