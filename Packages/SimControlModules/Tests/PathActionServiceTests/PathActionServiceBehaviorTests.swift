@@ -1,7 +1,7 @@
 import Foundation
 import SimControlDomain
 import Testing
-@testable import SimControlInfrastructure
+@testable import PathActionService
 
 @MainActor
 @Suite

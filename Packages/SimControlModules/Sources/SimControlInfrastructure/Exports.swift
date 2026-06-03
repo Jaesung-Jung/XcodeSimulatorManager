@@ -1,3 +1,4 @@
 @_exported import AppContainerScanningService
 @_exported import CommandExecutionService
 @_exported import CoreSimulatorService
+@_exported import PathActionService
