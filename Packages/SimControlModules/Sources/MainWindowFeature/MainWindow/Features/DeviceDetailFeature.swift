@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import InstalledAppsFeature
 import MainWindowFeatureSupport
 import SimControlDomain
 

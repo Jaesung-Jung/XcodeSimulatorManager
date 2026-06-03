@@ -5,8 +5,12 @@ import SimControlSharedUI
 import SimControlDomain
 import SwiftUI
 
-struct InstalledAppsView: View {
-  let store: StoreOf<InstalledAppsFeature>
+public struct InstalledAppsView: View {
+  private let store: StoreOf<InstalledAppsFeature>
+
+  public init(store: StoreOf<InstalledAppsFeature>) {
+    self.store = store
+  }
 
   private var appSystemFilter: Binding<SimulatorFilters.AppSystemFilter> {
     Binding(
@@ -43,7 +47,7 @@ struct InstalledAppsView: View {
     )
   }
 
-  var body: some View {
+  public var body: some View {
     VStack(alignment: .leading, spacing: 10) {
       HStack(spacing: 8) {
         SectionHeader(title: "Installed Apps", systemImage: "app")
@@ -642,10 +646,7 @@ extension InstalledAppsView {
 #Preview {
   InstalledAppsView(
     store: Store(
-      initialState: InstalledAppsFeature.State(
-        apps: [MainWindowPreviewFixtures.app],
-        availability: .loaded
-      )
+      initialState: InstalledAppsFeature.State(availability: .loaded)
     ) {
       InstalledAppsFeature()
     }

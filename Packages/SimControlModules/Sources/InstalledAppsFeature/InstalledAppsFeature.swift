@@ -4,19 +4,21 @@ import SimControlDomain
 
 @Reducer
 public struct InstalledAppsFeature {
+  public init() {}
+
   @ObservableState
   public struct State: Equatable {
-    var apps: [InstalledApp]
-    var availability: InstalledAppsAvailability
-    var device: SimulatorDevice?
-    var selectedAppID: String?
-    var appCommandState: AppCommandState?
-    var isDeviceCommandRunning: Bool
-    var compatibleInstallTargetCount: Int
-    var filters: SimulatorFilters
-    var allAppsCount: Int
+    public var apps: [InstalledApp]
+    public var availability: InstalledAppsAvailability
+    public var device: SimulatorDevice?
+    public var selectedAppID: String?
+    public var appCommandState: AppCommandState?
+    public var isDeviceCommandRunning: Bool
+    public var compatibleInstallTargetCount: Int
+    public var filters: SimulatorFilters
+    public var allAppsCount: Int
 
-    init(
+    public init(
       apps: [InstalledApp] = [],
       availability: InstalledAppsAvailability = .notLoaded,
       device: SimulatorDevice? = nil,
@@ -39,7 +41,7 @@ public struct InstalledAppsFeature {
       validateSelection()
     }
 
-    var selectedApp: InstalledApp? {
+    public var selectedApp: InstalledApp? {
       guard let selectedAppID else {
         return nil
       }
@@ -47,11 +49,11 @@ public struct InstalledAppsFeature {
       return apps.first { $0.id == selectedAppID }
     }
 
-    var isActionRunning: Bool {
+    public var isActionRunning: Bool {
       appCommandState != nil || isDeviceCommandRunning
     }
 
-    var canLaunchSelectedApp: Bool {
+    public var canLaunchSelectedApp: Bool {
       guard let device,
             selectedApp != nil,
             device.isAvailable,
@@ -63,7 +65,7 @@ public struct InstalledAppsFeature {
       return device.state == .booted || device.state == .shutdown
     }
 
-    var canTerminateSelectedApp: Bool {
+    public var canTerminateSelectedApp: Bool {
       guard let device,
             selectedApp != nil,
             device.isAvailable,
@@ -75,7 +77,7 @@ public struct InstalledAppsFeature {
       return device.state == .booted
     }
 
-    var canUninstallSelectedApp: Bool {
+    public var canUninstallSelectedApp: Bool {
       guard let device,
             selectedApp != nil,
             device.isAvailable,
@@ -87,21 +89,21 @@ public struct InstalledAppsFeature {
       return device.state == .booted || device.state == .shutdown
     }
 
-    var canResetSelectedAppSandbox: Bool {
+    public var canResetSelectedAppSandbox: Bool {
       selectedApp?.dataContainer != nil && !isActionRunning
     }
 
-    var canInstallSelectedAppOnAnotherSimulator: Bool {
+    public var canInstallSelectedAppOnAnotherSimulator: Bool {
       selectedApp?.appBundlePath != nil
         && compatibleInstallTargetCount > 0
         && !isActionRunning
     }
 
-    var canUseSelectedAppPaths: Bool {
+    public var canUseSelectedAppPaths: Bool {
       selectedApp != nil
     }
 
-    mutating func validateSelection() {
+    public mutating func validateSelection() {
       guard availability == .loaded,
             let selectedAppID
       else {

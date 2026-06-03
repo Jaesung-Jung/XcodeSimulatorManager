@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import DeviceListFeature
+import InstalledAppsFeature
 import SimControlDomain
 import Foundation
 import Testing
