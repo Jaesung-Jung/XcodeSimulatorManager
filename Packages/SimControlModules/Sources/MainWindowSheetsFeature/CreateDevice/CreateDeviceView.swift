@@ -2,14 +2,15 @@ import SimControlLocalization
 import SimControlDomain
 import SwiftUI
 
-struct CreateDeviceView: View {
+/// Sheet view for creating a simulator device from runtime and device type selections.
+public struct CreateDeviceView: View {
   @Environment(\.dismiss) private var dismiss
 
-  @State private var formState: MainWindowFeature.CreateDeviceFormState
+  @State private var formState: CreateDeviceFormState
 
   let runtimes: [SimulatorRuntime]
   let deviceTypes: [SimulatorDeviceType]
-  let onSubmit: (MainWindowFeature.CreateDeviceFormState) -> Void
+  let onSubmit: (CreateDeviceFormState) -> Void
 
   private var availableRuntimes: [SimulatorRuntime] {
     runtimes.filter(\.isAvailable)
@@ -56,11 +57,12 @@ struct CreateDeviceView: View {
     selectedRuntime != nil && selectedDeviceType != nil
   }
 
-  init(
-    formState: MainWindowFeature.CreateDeviceFormState,
+  /// Creates a create-device sheet and normalizes the initial runtime and device type selections.
+  public init(
+    formState: CreateDeviceFormState,
     runtimes: [SimulatorRuntime],
     deviceTypes: [SimulatorDeviceType],
-    onSubmit: @escaping (MainWindowFeature.CreateDeviceFormState) -> Void
+    onSubmit: @escaping (CreateDeviceFormState) -> Void
   ) {
     let normalizedFormState = Self.normalizedFormState(
       formState,
@@ -74,7 +76,7 @@ struct CreateDeviceView: View {
     self.onSubmit = onSubmit
   }
 
-  var body: some View {
+  public var body: some View {
     NavigationStack {
       Form {
         Section {
@@ -145,10 +147,10 @@ struct CreateDeviceView: View {
   }
 
   private static func normalizedFormState(
-    _ formState: MainWindowFeature.CreateDeviceFormState,
+    _ formState: CreateDeviceFormState,
     runtimes: [SimulatorRuntime],
     deviceTypes: [SimulatorDeviceType]
-  ) -> MainWindowFeature.CreateDeviceFormState {
+  ) -> CreateDeviceFormState {
     let availableRuntimes = runtimes.filter(\.isAvailable)
     let runtime = availableRuntimes.first { $0.id == formState.runtimeID }
       ?? availableRuntimes.first
@@ -163,7 +165,7 @@ struct CreateDeviceView: View {
     let deviceType = compatibleDeviceTypes.first { $0.id == formState.deviceTypeID }
       ?? compatibleDeviceTypes.first
 
-    return MainWindowFeature.CreateDeviceFormState(
+    return CreateDeviceFormState(
       name: formState.name,
       runtimeID: runtime.id,
       deviceTypeID: deviceType?.id ?? formState.deviceTypeID

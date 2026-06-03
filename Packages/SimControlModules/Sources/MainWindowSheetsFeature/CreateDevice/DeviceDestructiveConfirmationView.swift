@@ -1,17 +1,35 @@
 import SimControlLocalization
 import SwiftUI
 
-struct AppDestructiveConfirmationView: View {
+/// Confirmation sheet for destructive simulator device commands.
+public struct DeviceDestructiveConfirmationView: View {
   @Environment(\.dismiss) private var dismiss
 
   let titleKey: String
   let messageKey: String
   let actionTitleKey: String
   let systemImage: String
-  let confirmationState: MainWindowFeature.AppDestructiveConfirmationState
-  let onConfirm: (MainWindowFeature.AppDestructiveConfirmationState) -> Void
+  let confirmationState: DeviceDestructiveConfirmationState
+  let onConfirm: (DeviceDestructiveConfirmationState) -> Void
 
-  var body: some View {
+  /// Creates a device confirmation sheet using localized title, message, and action keys.
+  public init(
+    titleKey: String,
+    messageKey: String,
+    actionTitleKey: String,
+    systemImage: String,
+    confirmationState: DeviceDestructiveConfirmationState,
+    onConfirm: @escaping (DeviceDestructiveConfirmationState) -> Void
+  ) {
+    self.titleKey = titleKey
+    self.messageKey = messageKey
+    self.actionTitleKey = actionTitleKey
+    self.systemImage = systemImage
+    self.confirmationState = confirmationState
+    self.onConfirm = onConfirm
+  }
+
+  public var body: some View {
     NavigationStack {
       Form {
         Section {
@@ -25,19 +43,6 @@ struct AppDestructiveConfirmationView: View {
         Section {
           LabeledContent(
             String.localizable("main_window.common.name", bundle: .module),
-            value: confirmationState.appName
-          )
-          LabeledContent(
-            String.localizable("main_window.common.bundle_id", bundle: .module),
-            value: confirmationState.bundleID
-          )
-        } header: {
-          Text(.localizable("main_window.common.app"), bundle: .module)
-        }
-
-        Section {
-          LabeledContent(
-            String.localizable("main_window.common.name", bundle: .module),
             value: confirmationState.deviceName
           )
           LabeledContent(
@@ -46,17 +51,6 @@ struct AppDestructiveConfirmationView: View {
           )
         } header: {
           Text(.localizable("main_window.common.device"), bundle: .module)
-        }
-
-        if let dataContainerPath = confirmationState.dataContainerPath {
-          Section {
-            LabeledContent(
-              String.localizable("main_window.common.path", bundle: .module),
-              value: dataContainerPath
-            )
-          } header: {
-            Text(.localizable("main_window.common.sandbox"), bundle: .module)
-          }
         }
       }
       .formStyle(.grouped)
@@ -80,6 +74,6 @@ struct AppDestructiveConfirmationView: View {
         }
       }
     }
-    .frame(width: 500, height: confirmationState.dataContainerPath == nil ? 340 : 420)
+    .frame(width: 460, height: 260)
   }
 }

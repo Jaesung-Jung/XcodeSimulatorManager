@@ -1,26 +1,28 @@
 import SimControlLocalization
 import SwiftUI
 
-struct CloneDeviceView: View {
+/// Sheet view for entering the name of a cloned simulator device.
+public struct CloneDeviceView: View {
   @Environment(\.dismiss) private var dismiss
 
-  @State private var formState: MainWindowFeature.CloneDeviceFormState
+  @State private var formState: CloneDeviceFormState
 
-  let onSubmit: (MainWindowFeature.CloneDeviceFormState) -> Void
+  let onSubmit: (CloneDeviceFormState) -> Void
 
   private var canSubmit: Bool {
     !formState.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
   }
 
-  init(
-    formState: MainWindowFeature.CloneDeviceFormState,
-    onSubmit: @escaping (MainWindowFeature.CloneDeviceFormState) -> Void
+  /// Creates a clone-device sheet with editable form state.
+  public init(
+    formState: CloneDeviceFormState,
+    onSubmit: @escaping (CloneDeviceFormState) -> Void
   ) {
     self._formState = State(initialValue: formState)
     self.onSubmit = onSubmit
   }
 
-  var body: some View {
+  public var body: some View {
     NavigationStack {
       Form {
         Section {

@@ -32,6 +32,7 @@ FEATURE_SOURCES=(
   "$PACKAGE_SOURCES/SidebarFeature"
   "$PACKAGE_SOURCES/WorkspaceFeature"
   "$PACKAGE_SOURCES/MenuBarFeature"
+  "$PACKAGE_SOURCES/MainWindowSheetsFeature"
   "$PACKAGE_SOURCES/MainWindowFeature"
   "$PACKAGE_SOURCES/GeneralSettingsFeature"
   "$PACKAGE_SOURCES/MenuBarSettingsFeature"
@@ -84,6 +85,17 @@ assert_path_absent() {
   fi
 }
 
+assert_path_present() {
+  local description="$1"
+  local path="$2"
+
+  if [[ ! -e "$path" ]]; then
+    echo "$path" >&2
+    echo "error: ${description}" >&2
+    exit 1
+  fi
+}
+
 assert_max_lines() {
   local description="$1"
   local max_lines="$2"
@@ -107,13 +119,23 @@ assert_no_match \
   "$PACKAGE_SOURCES/SimControlDomain"
 
 assert_no_match \
-  "순수 service target은 UI/AppKit, TCA, dependency, 상위 모듈을 import하면 안 됩니다." \
-  '^import (SwiftUI|AppKit|ComposableArchitecture|Dependencies|SimControlClients|SimControlClientsLive|MainWindowWorkflows|SimControlInfrastructure|.*Feature)\b' \
+  "순수 service target은 UI/AppKit, TCA, dependency layer를 import하면 안 됩니다." \
+  '^import (SwiftUI|AppKit|ComposableArchitecture|Dependencies)\b' \
   "${PURE_SERVICE_SOURCES[@]}"
 
 assert_no_match \
+  "순수 service target은 client/live/workflow/infrastructure/feature layer를 import하면 안 됩니다." \
+  '^import (SimControlClients|SimControlClientsLive|MainWindowWorkflows|SimControlInfrastructure|.*Feature)\b' \
+  "${PURE_SERVICE_SOURCES[@]}"
+
+assert_no_match \
+  "service target은 UI/TCA/dependency layer를 import하면 안 됩니다." \
+  '^import (SwiftUI|ComposableArchitecture|Dependencies)\b' \
+  "${SERVICE_SOURCES[@]}"
+
+assert_no_match \
   "service target은 feature/client/workflow/infrastructure umbrella layer를 import하면 안 됩니다." \
-  '^import (SwiftUI|ComposableArchitecture|Dependencies|SimControlClients|SimControlClientsLive|MainWindowWorkflows|SimControlInfrastructure|.*Feature)\b' \
+  '^import (SimControlClients|SimControlClientsLive|MainWindowWorkflows|SimControlInfrastructure|.*Feature)\b' \
   "${SERVICE_SOURCES[@]}"
 
 assert_no_match \
@@ -162,6 +184,11 @@ assert_no_match \
   "$PACKAGE_SOURCES/MenuBarFeature"
 
 assert_no_match \
+  "MainWindowSheetsFeature는 MainWindowFeature를 직접 import하면 안 됩니다." \
+  '^import MainWindowFeature\b' \
+  "$PACKAGE_SOURCES/MainWindowSheetsFeature"
+
+assert_no_match \
   "feature/workflow/client interface layer에서 concrete service를 직접 생성하면 안 됩니다." \
   '(CommandExecutor|CoreSimulatorService|AppContainerScanner|AppSandboxResetService|PathActionService|SimulatorRepository)\(' \
   "$PACKAGE_SOURCES/SimControlClients" \
@@ -182,6 +209,14 @@ assert_max_lines \
   "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature.swift"
 
 assert_no_app_swift_sources_outside_app
+
+assert_path_present \
+  "MainWindow sheet/form UI는 MainWindowSheetsFeature target으로 분리되어야 합니다." \
+  "$PACKAGE_SOURCES/MainWindowSheetsFeature"
+
+assert_path_absent \
+  "MainWindowFeature에는 sheet/form view 전용 CreateDevice 디렉터리를 남기지 않습니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/CreateDevice"
 
 assert_path_absent "app target에는 예전 Domain 디렉터리를 남기지 않습니다." "$ROOT/SimControl/Domain"
 assert_path_absent "app target에는 예전 Features 디렉터리를 남기지 않습니다." "$ROOT/SimControl/Features"

@@ -1,27 +1,29 @@
 import SimControlLocalization
 import SwiftUI
 
-struct RenameDeviceView: View {
+/// Sheet view for entering a new simulator device name.
+public struct RenameDeviceView: View {
   @Environment(\.dismiss) private var dismiss
 
-  @State private var formState: MainWindowFeature.RenameDeviceFormState
+  @State private var formState: RenameDeviceFormState
 
-  let onSubmit: (MainWindowFeature.RenameDeviceFormState) -> Void
+  let onSubmit: (RenameDeviceFormState) -> Void
 
   private var canSubmit: Bool {
     let name = formState.name.trimmingCharacters(in: .whitespacesAndNewlines)
     return !name.isEmpty && name != formState.currentName
   }
 
-  init(
-    formState: MainWindowFeature.RenameDeviceFormState,
-    onSubmit: @escaping (MainWindowFeature.RenameDeviceFormState) -> Void
+  /// Creates a rename-device sheet with editable form state.
+  public init(
+    formState: RenameDeviceFormState,
+    onSubmit: @escaping (RenameDeviceFormState) -> Void
   ) {
     self._formState = State(initialValue: formState)
     self.onSubmit = onSubmit
   }
 
-  var body: some View {
+  public var body: some View {
     NavigationStack {
       Form {
         Section {

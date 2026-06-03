@@ -1,20 +1,21 @@
 import SimControlLocalization
 import SwiftUI
 
-struct PairDevicesView: View {
+/// Sheet view for choosing a phone simulator and watch simulator to pair.
+public struct PairDevicesView: View {
   @Environment(\.dismiss) private var dismiss
 
-  @State private var formState: MainWindowFeature.PairDevicesFormState
+  @State private var formState: PairDevicesFormState
 
-  let phoneCandidates: [MainWindowFeature.PairDeviceCandidate]
-  let watchCandidates: [MainWindowFeature.PairDeviceCandidate]
-  let onSubmit: (MainWindowFeature.PairDevicesFormState) -> Void
+  let phoneCandidates: [PairDeviceCandidate]
+  let watchCandidates: [PairDeviceCandidate]
+  let onSubmit: (PairDevicesFormState) -> Void
 
-  private var selectedPhone: MainWindowFeature.PairDeviceCandidate? {
+  private var selectedPhone: PairDeviceCandidate? {
     phoneCandidates.first { $0.id == formState.phoneDeviceID }
   }
 
-  private var selectedWatch: MainWindowFeature.PairDeviceCandidate? {
+  private var selectedWatch: PairDeviceCandidate? {
     watchCandidates.first { $0.id == formState.watchDeviceID }
   }
 
@@ -22,11 +23,12 @@ struct PairDevicesView: View {
     selectedPhone != nil && selectedWatch != nil
   }
 
-  init(
-    formState: MainWindowFeature.PairDevicesFormState,
-    phoneCandidates: [MainWindowFeature.PairDeviceCandidate],
-    watchCandidates: [MainWindowFeature.PairDeviceCandidate],
-    onSubmit: @escaping (MainWindowFeature.PairDevicesFormState) -> Void
+  /// Creates a pair-devices sheet from candidate phone and watch devices.
+  public init(
+    formState: PairDevicesFormState,
+    phoneCandidates: [PairDeviceCandidate],
+    watchCandidates: [PairDeviceCandidate],
+    onSubmit: @escaping (PairDevicesFormState) -> Void
   ) {
     self._formState = State(initialValue: formState)
     self.phoneCandidates = phoneCandidates
@@ -34,7 +36,7 @@ struct PairDevicesView: View {
     self.onSubmit = onSubmit
   }
 
-  var body: some View {
+  public var body: some View {
     NavigationStack {
       Form {
         Section {

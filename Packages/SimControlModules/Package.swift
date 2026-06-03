@@ -32,6 +32,7 @@ let package = Package(
     .library(name: "SidebarFeature", targets: ["SidebarFeature"]),
     .library(name: "WorkspaceFeature", targets: ["WorkspaceFeature"]),
     .library(name: "MenuBarFeature", targets: ["MenuBarFeature"]),
+    .library(name: "MainWindowSheetsFeature", targets: ["MainWindowSheetsFeature"]),
     .library(name: "MainWindowFeature", targets: ["MainWindowFeature"]),
     .library(name: "GeneralSettingsFeature", targets: ["GeneralSettingsFeature"]),
     .library(name: "MenuBarSettingsFeature", targets: ["MenuBarSettingsFeature"]),
@@ -250,6 +251,7 @@ let package = Package(
         "WorkspaceFeature",
         "MainWindowDisplaySupport",
         "MainWindowFeatureSupport",
+        "MainWindowSheetsFeature",
         "MainWindowWorkflows",
         "SimControlClients",
         "SimControlLocalization",
@@ -275,6 +277,15 @@ let package = Package(
           name: "PerceptionCore",
           package: "swift-perception"
         )
+      ],
+      resources: [.process("Resources")]
+    ),
+    .target(
+      name: "MainWindowSheetsFeature",
+      dependencies: [
+        "MainWindowDisplaySupport",
+        "SimControlDomain",
+        "SimControlLocalization"
       ],
       resources: [.process("Resources")]
     ),
@@ -450,6 +461,13 @@ let package = Package(
           name: "ComposableArchitecture",
           package: "swift-composable-architecture"
         )
+      ]
+    ),
+    .testTarget(
+      name: "MainWindowSheetsFeatureTests",
+      dependencies: [
+        "MainWindowSheetsFeature",
+        "SimControlDomain"
       ]
     ),
     .testTarget(

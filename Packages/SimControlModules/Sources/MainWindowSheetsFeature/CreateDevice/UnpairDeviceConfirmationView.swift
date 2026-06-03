@@ -1,13 +1,23 @@
 import SimControlLocalization
 import SwiftUI
 
-struct UnpairDeviceConfirmationView: View {
+/// Confirmation sheet for unpairing a phone/watch simulator pair.
+public struct UnpairDeviceConfirmationView: View {
   @Environment(\.dismiss) private var dismiss
 
-  let confirmationState: MainWindowFeature.UnpairDeviceConfirmationState
-  let onConfirm: (MainWindowFeature.UnpairDeviceConfirmationState) -> Void
+  let confirmationState: UnpairDeviceConfirmationState
+  let onConfirm: (UnpairDeviceConfirmationState) -> Void
 
-  var body: some View {
+  /// Creates an unpair confirmation sheet for a simulator pair.
+  public init(
+    confirmationState: UnpairDeviceConfirmationState,
+    onConfirm: @escaping (UnpairDeviceConfirmationState) -> Void
+  ) {
+    self.confirmationState = confirmationState
+    self.onConfirm = onConfirm
+  }
+
+  public var body: some View {
     NavigationStack {
       Form {
         Section {

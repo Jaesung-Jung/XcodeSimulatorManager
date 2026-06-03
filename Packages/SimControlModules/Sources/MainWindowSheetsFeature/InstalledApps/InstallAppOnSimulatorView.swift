@@ -2,15 +2,16 @@ import MainWindowDisplaySupport
 import SimControlLocalization
 import SwiftUI
 
-struct InstallAppOnSimulatorView: View {
+/// Sheet view for installing an app bundle on a selected simulator device.
+public struct InstallAppOnSimulatorView: View {
   @Environment(\.dismiss) private var dismiss
 
-  @State private var formState: MainWindowFeature.InstallAppTargetFormState
+  @State private var formState: InstallAppTargetFormState
 
-  let targetCandidates: [MainWindowFeature.InstallAppTargetCandidate]
-  let onSubmit: (MainWindowFeature.InstallAppTargetFormState) -> Void
+  let targetCandidates: [InstallAppTargetCandidate]
+  let onSubmit: (InstallAppTargetFormState) -> Void
 
-  private var selectedTarget: MainWindowFeature.InstallAppTargetCandidate? {
+  private var selectedTarget: InstallAppTargetCandidate? {
     targetCandidates.first { $0.id == formState.targetDeviceID }
   }
 
@@ -18,17 +19,18 @@ struct InstallAppOnSimulatorView: View {
     selectedTarget != nil
   }
 
-  init(
-    formState: MainWindowFeature.InstallAppTargetFormState,
-    targetCandidates: [MainWindowFeature.InstallAppTargetCandidate],
-    onSubmit: @escaping (MainWindowFeature.InstallAppTargetFormState) -> Void
+  /// Creates an install-app sheet from a source app and target simulator candidates.
+  public init(
+    formState: InstallAppTargetFormState,
+    targetCandidates: [InstallAppTargetCandidate],
+    onSubmit: @escaping (InstallAppTargetFormState) -> Void
   ) {
     self._formState = State(initialValue: formState)
     self.targetCandidates = targetCandidates
     self.onSubmit = onSubmit
   }
 
-  var body: some View {
+  public var body: some View {
     NavigationStack {
       Form {
         Section {

@@ -4,6 +4,7 @@ import InspectorFeature
 import SidebarFeature
 import SimControlLocalization
 import SimControlDomain
+import MainWindowSheetsFeature
 import SwiftUI
 import WorkspaceFeature
 
