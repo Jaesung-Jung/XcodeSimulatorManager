@@ -1,3 +1,4 @@
+import MainWindowDisplaySupport
 import SwiftUI
 
 struct InstallAppOnSimulatorView: View {

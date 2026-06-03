@@ -3,7 +3,7 @@ import SimControlDomain
 import SwiftUI
 
 extension SimulatorPlatform {
-  var displayTitle: String {
+  public var displayTitle: String {
     switch self {
     case .iOS:
       "iOS"
@@ -18,7 +18,7 @@ extension SimulatorPlatform {
     }
   }
 
-  var symbolName: String {
+  public var symbolName: String {
     switch self {
     case .iOS:
       "ipad.landscape.and.iphone"
@@ -35,7 +35,7 @@ extension SimulatorPlatform {
 }
 
 extension SimulatorDevice {
-  var symbolName: String {
+  public var symbolName: String {
     switch platform {
     case .iOS:
       name.lowercased().hasPrefix("ipad") ? "ipad.landscape" : "iphone"
@@ -52,7 +52,7 @@ extension SimulatorDevice {
 }
 
 extension SimulatorDevice.State {
-  var displayTitle: String {
+  public var displayTitle: String {
     switch self {
     case .creating:
       "Creating"
@@ -69,7 +69,7 @@ extension SimulatorDevice.State {
     }
   }
 
-  var statusTint: Color {
+  public var statusTint: Color {
     switch self {
     case .booted:
       .green
@@ -84,7 +84,7 @@ extension SimulatorDevice.State {
 }
 
 extension SimulatorWarning.Severity {
-  var displayTitle: String {
+  public var displayTitle: String {
     switch self {
     case .info:
       "Info"
@@ -95,7 +95,7 @@ extension SimulatorWarning.Severity {
     }
   }
 
-  var badgeTint: Color {
+  public var badgeTint: Color {
     switch self {
     case .info:
       .blue
@@ -108,11 +108,11 @@ extension SimulatorWarning.Severity {
 }
 
 extension SimulatorDevice {
-  var availabilityTitle: String {
+  public var availabilityTitle: String {
     isAvailable ? "Available" : "Unavailable"
   }
 
-  var dataPathSizeTitle: String {
+  public var dataPathSizeTitle: String {
     guard let dataPathSize else {
       return "Unknown"
     }
@@ -122,18 +122,18 @@ extension SimulatorDevice {
 }
 
 extension CommandResult {
-  var commandLineSummary: String {
+  public var commandLineSummary: String {
     let executableName = URL(fileURLWithPath: executable).lastPathComponent
     return ([executableName] + arguments).joined(separator: " ")
   }
 
-  var durationTitle: String {
+  public var durationTitle: String {
     String(format: "%.2fs", duration)
   }
 }
 
 extension SimulatorFilters.SidebarScope {
-  var displayTitle: String {
+  public var displayTitle: String {
     switch self {
     case .all:
       "All Devices"
@@ -152,7 +152,7 @@ extension SimulatorFilters.SidebarScope {
 }
 
 extension SimulatorFilters.SortDirection {
-  var displayTitle: String {
+  public var displayTitle: String {
     switch self {
     case .ascending:
       "Ascending"
@@ -163,7 +163,7 @@ extension SimulatorFilters.SortDirection {
 }
 
 extension SimulatorFilters.DeviceSort {
-  var displayTitle: String {
+  public var displayTitle: String {
     switch self {
     case .name:
       "Name"
@@ -182,7 +182,7 @@ extension SimulatorFilters.DeviceSort {
 }
 
 extension SimulatorFilters.AppSort {
-  var displayTitle: String {
+  public var displayTitle: String {
     switch self {
     case .name:
       "Name"
@@ -197,7 +197,7 @@ extension SimulatorFilters.AppSort {
 }
 
 extension SimulatorFilters.AppSystemFilter {
-  var displayTitle: String {
+  public var displayTitle: String {
     switch self {
     case .user:
       "User Apps"
@@ -210,7 +210,7 @@ extension SimulatorFilters.AppSystemFilter {
 }
 
 extension SimulatorFilters.PresenceFilter {
-  var appGroupDisplayTitle: String {
+  public var appGroupDisplayTitle: String {
     switch self {
     case .all:
       "Any App Groups"
@@ -221,7 +221,7 @@ extension SimulatorFilters.PresenceFilter {
     }
   }
 
-  var databaseDisplayTitle: String {
+  public var databaseDisplayTitle: String {
     switch self {
     case .all:
       "Any Databases"
@@ -234,7 +234,7 @@ extension SimulatorFilters.PresenceFilter {
 }
 
 extension InstalledApp {
-  var dataContainerSizeTitle: String {
+  public var dataContainerSizeTitle: String {
     guard let dataContainerSize else {
       return "Unknown"
     }

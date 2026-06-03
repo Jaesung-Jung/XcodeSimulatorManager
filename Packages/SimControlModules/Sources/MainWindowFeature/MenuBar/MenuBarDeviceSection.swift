@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import MainWindowDisplaySupport
 import SimControlDomain
 import SwiftUI
 

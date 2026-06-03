@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import MainWindowDisplaySupport
 import MainWindowFeatureSupport
 import SimControlSharedUI
 import SimControlDomain
