@@ -238,6 +238,16 @@ assert_max_lines \
   180 \
   "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+DeveloperTools.swift"
 
+assert_max_lines \
+  "DeveloperToolsFeature.swift는 Action과 reducer 조합만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/DeveloperToolsFeature/DeveloperToolsFeature.swift"
+
+assert_max_lines \
+  "DeveloperToolsFeature+State.swift는 저장 상태와 초기화만 남겨 180줄 이하로 유지합니다." \
+  180 \
+  "$PACKAGE_SOURCES/DeveloperToolsFeature/DeveloperToolsFeature+State.swift"
+
 assert_no_app_swift_sources_outside_app
 
 assert_path_present \
