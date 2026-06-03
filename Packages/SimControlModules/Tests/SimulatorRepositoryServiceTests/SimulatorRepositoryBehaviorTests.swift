@@ -1,7 +1,9 @@
+import AppContainerScanningService
+import CoreSimulatorService
 import Foundation
 import SimControlDomain
 import Testing
-@testable import SimControlInfrastructure
+@testable import SimulatorRepositoryService
 
 @Suite
 struct SimulatorRepositoryTests {

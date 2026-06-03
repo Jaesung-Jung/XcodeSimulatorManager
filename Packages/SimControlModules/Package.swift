@@ -14,6 +14,7 @@ let package = Package(
     .library(name: "AppContainerScanningService", targets: ["AppContainerScanningService"]),
     .library(name: "PathActionService", targets: ["PathActionService"]),
     .library(name: "AppSandboxResetService", targets: ["AppSandboxResetService"]),
+    .library(name: "SimulatorRepositoryService", targets: ["SimulatorRepositoryService"]),
     .library(name: "SimControlInfrastructure", targets: ["SimControlInfrastructure"]),
     .library(name: "SimControlClients", targets: ["SimControlClients"]),
     .library(name: "SimControlClientsLive", targets: ["SimControlClientsLive"]),
@@ -80,6 +81,14 @@ let package = Package(
       dependencies: ["SimControlDomain"]
     ),
     .target(
+      name: "SimulatorRepositoryService",
+      dependencies: [
+        "AppContainerScanningService",
+        "CoreSimulatorService",
+        "SimControlDomain"
+      ]
+    ),
+    .target(
       name: "SimControlInfrastructure",
       dependencies: [
         "AppContainerScanningService",
@@ -87,6 +96,7 @@ let package = Package(
         "CommandExecutionService",
         "CoreSimulatorService",
         "PathActionService",
+        "SimulatorRepositoryService",
         "SimControlDomain"
       ]
     ),
@@ -314,6 +324,15 @@ let package = Package(
       name: "AppSandboxResetServiceTests",
       dependencies: [
         "AppSandboxResetService",
+        "SimControlDomain"
+      ]
+    ),
+    .testTarget(
+      name: "SimulatorRepositoryServiceTests",
+      dependencies: [
+        "AppContainerScanningService",
+        "CoreSimulatorService",
+        "SimulatorRepositoryService",
         "SimControlDomain"
       ]
     ),

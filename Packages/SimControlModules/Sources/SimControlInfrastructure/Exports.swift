@@ -3,3 +3,4 @@
 @_exported import CommandExecutionService
 @_exported import CoreSimulatorService
 @_exported import PathActionService
+@_exported import SimulatorRepositoryService
