@@ -15,16 +15,22 @@
 2026-06-04 기준 1차 작업은 다음 범위까지 완료했다.
 
 - `Packages/SimControlModules` local package 생성.
-- `SimControlDomain`, `SimControlInfrastructure`, `SimControlClients`, `SimControlClientsLive` target 구성.
+- `SimControlDomain`, `SimControlClients`, `SimControlClientsLive` target 구성.
+- `CommandExecutionService`, `CoreSimulatorService`, `AppContainerScanningService`, `PathActionService`, `AppSandboxResetService`, `SimulatorRepositoryService`로 concrete service micro target 분리.
+- `SimControlInfrastructure`를 concrete service를 재수출하는 umbrella target으로 축소.
 - `MainWindowWorkflows` target으로 command orchestration 분리.
-- `MainWindowFeature` target으로 main window reducer/view/menu bar/shared UI 이동.
+- `MainWindowFeatureSupport`, `MainWindowDisplaySupport`, `SimControlSharedUI` target 분리.
+- `DeviceListFeature`, `InstalledAppsFeature`, `DeveloperToolsFeature`, `DeviceDetailFeature`, `InspectorFeature`, `SidebarFeature`, `WorkspaceFeature` target 분리.
+- `MainWindowFeature` target으로 main window reducer/view 이동.
+- `MenuBarFeature` target으로 menu bar extra UI 이동.
 - `SettingsFeature` target으로 settings scene view 이동.
-- `MainWindowFeatureTests`를 package test target으로 이동.
+- 각 feature/service/support target의 smoke/behavior test를 package test target으로 이동.
 - app target은 `AppContainer`, scene 선언, app delegate, asset 중심으로 축소.
-- 책임 없는 app target placeholder였던 `Services/`와 `State/` 제거.
+- 책임 없는 app target placeholder였던 `Services/`, `State/`, old feature/source directory 제거.
 - 반복 검증 스크립트 `scripts/verify-modularization.sh` 추가.
+- service/feature/client/workflow 경계 검사를 `scripts/verify-modularization.sh`에 추가.
 
-남은 후속 작업은 `MenuBarFeature`, `SimControlSharedUI`의 독립 target 분리와 root package 전환 여부 결정이다. root package 전환은 현재 local package 구조가 안정된 뒤 선택한다.
+남은 후속 작업은 선택 사항이다. `MenuBarFeature`가 독립 상태를 가져야 할 만큼 커지면 `MainWindowFeature` 의존성을 줄이고, 필요할 때 feature별 preview harness와 root package 전환 여부를 검토한다.
 
 ## 전체 작업 순서
 
@@ -36,8 +42,11 @@
 6. Workflow client 추출.
 7. Feature target 이동.
 8. App target composition root 정리.
-9. Preview/resource/localization 정리.
-10. Root package 전환 여부 결정.
+9. SharedUI, MenuBarFeature, SettingsFeature target 정리.
+10. App target composition root 정리.
+11. Placeholder 타입 정리.
+12. Preview/resource/localization 정리.
+13. Root package 전환 여부 결정.
 
 ## Task 1: Baseline 확인과 package skeleton 생성
 
@@ -159,53 +168,102 @@ swift test --package-path Packages/SimControlModules --filter SimulatorInventory
 xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'platform=macOS'
 ```
 
-## Task 4: Infrastructure target 생성과 DTO 이동
+## Task 4: Infrastructure/service target 생성과 DTO 이동
 
 **파일:**
 
 - 수정: `Packages/SimControlModules/Package.swift`
-- 생성 target: `SimControlInfrastructure`
-- 이동: `SimControl/Services/Models/*.swift` -> `Packages/SimControlModules/Sources/SimControlInfrastructure/Models/`
-- 이동: `SimControl/Services/CommandExecutor.swift`
-- 이동: `SimControl/Services/CoreSimulatorService.swift`
-- 이동: `SimControl/Services/AppContainerScanner.swift`
-- 이동: `SimControl/Services/PathActionService.swift`
-- 이동: `SimControl/Services/AppSandboxResetService.swift`
-- 이동: `SimControl/Repositories/SimulatorRepository.swift`
-- 이동: `SimControlTests/Services`와 `SimControlTests/Repositories`의 관련 test
+- 완료: `CommandExecutionService`
+- 완료: `CoreSimulatorService`
+- 완료: `AppContainerScanningService`
+- 완료: `PathActionService`
+- 완료: `AppSandboxResetService`
+- 완료: `SimulatorRepositoryService`
+- 완료: `SimControlInfrastructure` umbrella target
+- 완료: `SimControl/Services/**`, `SimControl/Repositories/**` 관련 test를 package test target으로 이동
 
-**Package target 추가 예시:**
+**Package target 구조:**
 
 ```swift
+.library(name: "CommandExecutionService", targets: ["CommandExecutionService"])
+.library(name: "CoreSimulatorService", targets: ["CoreSimulatorService"])
+.library(name: "AppContainerScanningService", targets: ["AppContainerScanningService"])
+.library(name: "PathActionService", targets: ["PathActionService"])
+.library(name: "AppSandboxResetService", targets: ["AppSandboxResetService"])
+.library(name: "SimulatorRepositoryService", targets: ["SimulatorRepositoryService"])
 .library(name: "SimControlInfrastructure", targets: ["SimControlInfrastructure"])
 ```
 
 ```swift
 .target(
-  name: "SimControlInfrastructure",
-  dependencies: ["SimControlDomain"]
+  name: "CoreSimulatorService",
+  dependencies: [
+    "CommandExecutionService",
+    "SimControlDomain"
+  ]
 ),
-.testTarget(
-  name: "SimControlInfrastructureTests",
-  dependencies: ["SimControlInfrastructure"]
+.target(
+  name: "SimulatorRepositoryService",
+  dependencies: [
+    "AppContainerScanningService",
+    "CoreSimulatorService",
+    "SimControlDomain"
+  ]
+),
+.target(
+  name: "SimControlInfrastructure",
+  dependencies: [
+    "CommandExecutionService",
+    "CoreSimulatorService",
+    "AppContainerScanningService",
+    "PathActionService",
+    "AppSandboxResetService",
+    "SimulatorRepositoryService",
+    "SimControlDomain"
+  ]
 )
+```
+
+`SimControlInfrastructure`는 service 구현을 직접 많이 담는 모듈이 아니라 다음처럼 재수출만 담당한다.
+
+```swift
+@_exported import AppContainerScanningService
+@_exported import AppSandboxResetService
+@_exported import CommandExecutionService
+@_exported import CoreSimulatorService
+@_exported import PathActionService
+@_exported import SimulatorRepositoryService
+@_exported import SimControlDomain
 ```
 
 **규칙:**
 
-- `SimControlInfrastructure`는 `Foundation`과 `SimControlDomain`만 기본 의존성으로 둔다.
-- TCA dependency client 파일은 아직 옮기지 않는다.
-- `CoreSimulatorServiceClient` 같은 client 파일은 다음 task에서 처리한다.
+- concrete service target은 상위 feature/client/workflow layer를 import하지 않는다.
+- 순수 service target은 `Foundation`과 `SimControlDomain` 중심으로 유지한다.
+- `PathActionService`의 `AppKit` import는 Finder/clipboard 연동을 위한 예외다.
+- TCA dependency client 파일은 service target에 두지 않는다.
+- `CoreSimulatorClient` 같은 client 파일은 다음 task에서 처리한다.
 
 **검증:**
 
 ```bash
-rg "import SwiftUI|import ComposableArchitecture" Packages/SimControlModules/Sources/SimControlInfrastructure
+rg "import SwiftUI|import ComposableArchitecture|import SimControlClients" Packages/SimControlModules/Sources/*Service
 swift test --package-path Packages/SimControlModules
 xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'platform=macOS'
 ```
 
-`rg` 명령은 결과가 없어야 한다.
+`rg` 명령은 결과가 없어야 한다. 단, `PathActionService`의 `AppKit` import는 허용한다.
+
+**초기 설계 참고:**
+
+초기에는 다음처럼 하나의 `SimControlInfrastructure` target에 모든 concrete service를 두는 방안도 검토했다.
+
+```swift
+.target(
+  name: "SimControlInfrastructure",
+  dependencies: ["SimControlDomain"]
+)
+```
 
 ## Task 5: Dependency client target 생성
 
@@ -410,10 +468,10 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 
 **파일:**
 
-- 생성 target: `SimControlSharedUI`
-- 이동: `SimControl/SharedUI/**`
-- 생성 target: `MenuBarFeature`
-- 이동: `SimControl/Features/MenuBar/**`
+- 완료: `SimControlSharedUI`
+- 완료: `SimControl/SharedUI/**` -> `Packages/SimControlModules/Sources/SimControlSharedUI/`
+- 완료: `MenuBarFeature`
+- 완료: `SimControl/Features/MenuBar/**` -> `Packages/SimControlModules/Sources/MenuBarFeature/`
 - 완료: `SettingsFeature`
 - 완료: `SimControl/Features/Settings/**` -> `Packages/SimControlModules/Sources/SettingsFeature/`
 
@@ -427,9 +485,12 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 `MenuBarFeature` depends on:
 
 - `SimControlDomain`
-- `SimControlClients`
-- `SimControlSharedUI`
+- `MainWindowFeature`
+- `WorkspaceFeature`
+- child feature targets
 - `ComposableArchitecture`
+
+현재 menu bar는 별도 reducer가 아니라 `StoreOf<MainWindowFeature>`를 렌더링하는 scene adapter다. 따라서 `MainWindowFeature` 의존성은 현 단계의 의도된 타협이며, menu bar 전용 상태가 필요해질 때 분리한다.
 
 `SettingsFeature` depends on:
 
@@ -536,7 +597,7 @@ xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'p
 - `scripts/verify-modularization.sh`가 통과한다.
 - `swift test --package-path Packages/SimControlModules`가 통과한다.
 - `xcodebuild test -project SimControl.xcodeproj -scheme SimControl -destination 'platform=macOS,arch=arm64,name=My Mac' -parallel-testing-enabled NO`가 통과한다.
-- `SimControlDomain`과 `SimControlInfrastructure`가 SwiftUI/TCA를 import하지 않는다.
+- `SimControlDomain`, concrete service target, `SimControlInfrastructure`가 금지된 상위 레이어를 import하지 않는다.
 - concrete service 생성은 app composition root 또는 live target에만 있다.
 - `MainWindowFeature.swift`의 workflow-heavy action handling이 workflow client와 child feature로 분산된다.
 - app target은 scene, assets, app delegate, dependency wiring 중심으로 축소된다.
