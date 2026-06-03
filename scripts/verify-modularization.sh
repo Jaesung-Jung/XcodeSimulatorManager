@@ -84,6 +84,21 @@ assert_path_absent() {
   fi
 }
 
+assert_max_lines() {
+  local description="$1"
+  local max_lines="$2"
+  local path="$3"
+  local line_count
+
+  line_count="$(wc -l < "$path" | tr -d ' ')"
+
+  if (( line_count > max_lines )); then
+    echo "$path has $line_count lines; limit is $max_lines." >&2
+    echo "error: ${description}" >&2
+    exit 1
+  fi
+}
+
 echo "==> 모듈 경계 검사"
 
 assert_no_match \
@@ -155,6 +170,11 @@ assert_no_match \
   "$PACKAGE_TESTS" \
   "$ROOT/SimControl" \
   "$ROOT/SimControlTests"
+
+assert_max_lines \
+  "MainWindowFeature.swift는 책임별 extension 파일로 분리해 1,200줄 이하로 유지합니다." \
+  1200 \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature.swift"
 
 assert_no_app_swift_sources_outside_app
 
