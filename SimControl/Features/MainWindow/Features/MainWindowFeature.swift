@@ -1420,57 +1420,33 @@ struct MainWindowFeature {
     )
     state.workspace.setAppCommandState(appCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      var commandResults: [CommandResult] = []
-
-      if context.device.state == .shutdown {
-        let bootResult = await coreSimulatorService.bootDeviceIfNeeded(context.device.id)
-        commandResults.append(bootResult)
-
-        guard bootResult.succeeded else {
-          await send(
-            .appCommandCommandsCompleted(
-              appCommandState,
-              commandResults,
-              preferredSelectedDeviceID: context.device.id,
-              preferredSelectedAppID: context.app.id
-            )
-          )
-          let refreshResult = await simulatorRepository.refresh()
-          await send(
-            .appCommandRefreshResponse(
-              appCommandState,
-              refreshResult,
-              preferredSelectedDeviceID: context.device.id,
-              preferredSelectedAppID: context.app.id
-            )
-          )
-          return
-        }
-      }
-
-      commandResults.append(
-        await coreSimulatorService.launchApp(
-          context.device.id,
-          context.app.bundleID
-        )
+    return .run { [coreSimulatorService, appSandboxReset, simulatorRepository] send in
+      let workflow = InstalledAppWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        appSandboxReset: appSandboxReset,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.launchApp(
+        context.device.id,
+        context.app.id,
+        context.app.bundleID,
+        context.device.state
       )
       await send(
         .appCommandCommandsCompleted(
           appCommandState,
-          commandResults,
-          preferredSelectedDeviceID: context.device.id,
-          preferredSelectedAppID: context.app.id
+          result.commandResults,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID,
+          preferredSelectedAppID: result.preferredSelectedAppID
         )
       )
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .appCommandRefreshResponse(
           appCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: context.device.id,
-          preferredSelectedAppID: context.app.id
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID,
+          preferredSelectedAppID: result.preferredSelectedAppID
         )
       )
     }
@@ -1495,29 +1471,32 @@ struct MainWindowFeature {
     )
     state.workspace.setAppCommandState(appCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let commandResults = [
-        await coreSimulatorService.terminateApp(
-          context.device.id,
-          context.app.bundleID
-        )
-      ]
+    return .run { [coreSimulatorService, appSandboxReset, simulatorRepository] send in
+      let workflow = InstalledAppWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        appSandboxReset: appSandboxReset,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.terminateApp(
+        context.device.id,
+        context.app.id,
+        context.app.bundleID
+      )
       await send(
         .appCommandCommandsCompleted(
           appCommandState,
-          commandResults,
-          preferredSelectedDeviceID: context.device.id,
-          preferredSelectedAppID: context.app.id
+          result.commandResults,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID,
+          preferredSelectedAppID: result.preferredSelectedAppID
         )
       )
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .appCommandRefreshResponse(
           appCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: context.device.id,
-          preferredSelectedAppID: context.app.id
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID,
+          preferredSelectedAppID: result.preferredSelectedAppID
         )
       )
     }
@@ -1547,29 +1526,32 @@ struct MainWindowFeature {
     )
     state.workspace.setAppCommandState(appCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let uninstallResult = await coreSimulatorService.uninstallApp(
+    return .run { [coreSimulatorService, appSandboxReset, simulatorRepository] send in
+      let workflow = InstalledAppWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        appSandboxReset: appSandboxReset,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.uninstallApp(
         context.device.id,
+        context.app.id,
         context.app.bundleID
       )
-      let preferredSelectedAppID = uninstallResult.succeeded ? nil : context.app.id
-
       await send(
         .appCommandCommandsCompleted(
           appCommandState,
-          [uninstallResult],
-          preferredSelectedDeviceID: context.device.id,
-          preferredSelectedAppID: preferredSelectedAppID
+          result.commandResults,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID,
+          preferredSelectedAppID: result.preferredSelectedAppID
         )
       )
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .appCommandRefreshResponse(
           appCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: context.device.id,
-          preferredSelectedAppID: preferredSelectedAppID
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID,
+          preferredSelectedAppID: result.preferredSelectedAppID
         )
       )
     }
@@ -1599,24 +1581,32 @@ struct MainWindowFeature {
     )
     state.workspace.setAppCommandState(appCommandState)
 
-    return .run { [appSandboxReset, simulatorRepository] send in
-      let resetResult = await appSandboxReset.resetSandbox(dataContainer)
+    return .run { [coreSimulatorService, appSandboxReset, simulatorRepository] send in
+      let workflow = InstalledAppWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        appSandboxReset: appSandboxReset,
+        simulatorRepository: simulatorRepository
+      )
+      let result = await workflow.resetSandbox(
+        context.device.id,
+        context.app.id,
+        dataContainer
+      )
       await send(
         .appCommandCommandsCompleted(
           appCommandState,
-          [resetResult],
-          preferredSelectedDeviceID: context.device.id,
-          preferredSelectedAppID: context.app.id
+          result.commandResults,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID,
+          preferredSelectedAppID: result.preferredSelectedAppID
         )
       )
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .appCommandRefreshResponse(
           appCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: context.device.id,
-          preferredSelectedAppID: context.app.id
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID,
+          preferredSelectedAppID: result.preferredSelectedAppID
         )
       )
     }
@@ -1646,73 +1636,36 @@ struct MainWindowFeature {
     )
     state.workspace.setAppCommandState(appCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      var commandResults: [CommandResult] = []
-      var installed = false
-
-      if targetDevice.state == .shutdown {
-        let bootResult = await coreSimulatorService.bootDeviceIfNeeded(targetDevice.id)
-        commandResults.append(bootResult)
-
-        guard bootResult.succeeded else {
-          await send(
-            .appCommandCommandsCompleted(
-              appCommandState,
-              commandResults,
-              preferredSelectedDeviceID: nil,
-              preferredSelectedAppID: nil
-            )
-          )
-          let refreshResult = await simulatorRepository.refresh()
-          await send(
-            .appCommandRefreshResponse(
-              appCommandState,
-              refreshResult,
-              preferredSelectedDeviceID: nil,
-              preferredSelectedAppID: nil
-            )
-          )
-          return
-        }
-      }
-
-      let installResult = await coreSimulatorService.installApp(
-        targetDevice.id,
-        appBundlePath
+    return .run { [coreSimulatorService, appSandboxReset, simulatorRepository] send in
+      let workflow = InstalledAppWorkflowClient.live(
+        coreSimulatorService: coreSimulatorService,
+        appSandboxReset: appSandboxReset,
+        simulatorRepository: simulatorRepository
       )
-      commandResults.append(installResult)
-      installed = installResult.succeeded
-
-      if installed, formState.launchAfterInstall {
-        commandResults.append(
-          await coreSimulatorService.launchApp(
-            targetDevice.id,
-            context.app.bundleID
-          )
+      let result = await workflow.installAppOnSimulator(
+        InstallAppOnSimulatorWorkflowRequest(
+          targetDeviceID: targetDevice.id,
+          targetDeviceState: targetDevice.state,
+          bundleID: context.app.bundleID,
+          appBundlePath: appBundlePath,
+          launchAfterInstall: formState.launchAfterInstall
         )
-      }
-
-      let preferredSelectedDeviceID = installed ? targetDevice.id : nil
-      let preferredSelectedAppID = installed
-        ? "\(targetDevice.id):\(context.app.bundleID)"
-        : nil
-
+      )
       await send(
         .appCommandCommandsCompleted(
           appCommandState,
-          commandResults,
-          preferredSelectedDeviceID: preferredSelectedDeviceID,
-          preferredSelectedAppID: preferredSelectedAppID
+          result.commandResults,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID,
+          preferredSelectedAppID: result.preferredSelectedAppID
         )
       )
 
-      let refreshResult = await simulatorRepository.refresh()
       await send(
         .appCommandRefreshResponse(
           appCommandState,
-          refreshResult,
-          preferredSelectedDeviceID: preferredSelectedDeviceID,
-          preferredSelectedAppID: preferredSelectedAppID
+          result.refreshResult,
+          preferredSelectedDeviceID: result.preferredSelectedDeviceID,
+          preferredSelectedAppID: result.preferredSelectedAppID
         )
       )
     }

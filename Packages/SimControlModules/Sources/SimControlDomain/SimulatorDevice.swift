@@ -7,7 +7,7 @@ import Foundation
 /// execute `simctl` commands or inspect the filesystem directly.
 public struct SimulatorDevice: Identifiable, Equatable, Hashable {
   /// The boot lifecycle state of a simulator device.
-  public enum State: String, Equatable, Hashable {
+  public enum State: String, Equatable, Hashable, Sendable {
     /// The simulator is being created.
     case creating
 
