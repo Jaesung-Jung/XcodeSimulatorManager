@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		4B2825E42FA18B7D0006787D /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2825E32FA18B7D0006787D /* ComposableArchitecture */; };
+		4B2826102FA4B0000006787D /* SimControlDomain in Frameworks */ = {isa = PBXBuildFile; productRef = 4B2826122FA4B0000006787D /* SimControlDomain */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +45,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B2825E42FA18B7D0006787D /* ComposableArchitecture in Frameworks */,
+				4B2826102FA4B0000006787D /* SimControlDomain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -96,6 +98,7 @@
 			name = SimControl;
 			packageProductDependencies = (
 				4B2825E32FA18B7D0006787D /* ComposableArchitecture */,
+				4B2826122FA4B0000006787D /* SimControlDomain */,
 			);
 			productName = SimControl;
 			productReference = 4B2820622FA0BF520006787D /* SimControl.app */;
@@ -153,6 +156,7 @@
 			mainGroup = 4B2820592FA0BF520006787D;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				4B2826112FA4B0000006787D /* XCLocalSwiftPackageReference "Packages/SimControlModules" */,
 				4B2825E22FA18B7D0006787D /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -457,6 +461,13 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		4B2826112FA4B0000006787D /* XCLocalSwiftPackageReference "Packages/SimControlModules" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/SimControlModules;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCRemoteSwiftPackageReference section */
 		4B2825E22FA18B7D0006787D /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -473,6 +484,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4B2825E22FA18B7D0006787D /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
 			productName = ComposableArchitecture;
+		};
+		4B2826122FA4B0000006787D /* SimControlDomain */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4B2826112FA4B0000006787D /* XCLocalSwiftPackageReference "Packages/SimControlModules" */;
+			productName = SimControlDomain;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
