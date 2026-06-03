@@ -1,2 +1,3 @@
+@_exported import AppContainerScanningService
 @_exported import CommandExecutionService
 @_exported import CoreSimulatorService

@@ -3,9 +3,14 @@ import SimControlDomain
 
 /// Reads CoreSimulator app container folders and builds installed app entries.
 public struct AppContainerScanner {
-  struct ScanResult: Equatable {
-    let apps: [InstalledApp]
-    let warnings: [SimulatorWarning]
+  public struct ScanResult: Equatable {
+    public let apps: [InstalledApp]
+    public let warnings: [SimulatorWarning]
+
+    public init(apps: [InstalledApp], warnings: [SimulatorWarning]) {
+      self.apps = apps
+      self.warnings = warnings
+    }
   }
 
   private struct BundleMetadata {
@@ -39,7 +44,7 @@ public struct AppContainerScanner {
     self.hidesSystemApps = hidesSystemApps
   }
 
-  func scanInstalledApps(for device: SimulatorDevice) -> ScanResult {
+  public func scanInstalledApps(for device: SimulatorDevice) -> ScanResult {
     var warnings: [SimulatorWarning] = []
 
     guard let dataPath = device.dataPath else {

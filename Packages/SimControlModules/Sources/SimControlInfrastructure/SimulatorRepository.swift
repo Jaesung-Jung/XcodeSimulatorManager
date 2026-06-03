@@ -1,3 +1,4 @@
+import AppContainerScanningService
 import CoreSimulatorService
 import Foundation
 import SimControlDomain
