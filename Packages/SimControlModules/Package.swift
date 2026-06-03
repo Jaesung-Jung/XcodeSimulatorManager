@@ -134,7 +134,11 @@ let package = Package(
       name: "MainWindowWorkflows",
       dependencies: [
         "SimControlClients",
-        "SimControlDomain"
+        "SimControlDomain",
+        .product(
+          name: "Dependencies",
+          package: "swift-dependencies"
+        )
       ]
     ),
     .target(name: "MainWindowFeatureSupport"),
@@ -253,7 +257,6 @@ let package = Package(
         "MainWindowFeatureSupport",
         "MainWindowSheetsFeature",
         "MainWindowWorkflows",
-        "SimControlClients",
         "SimControlLocalization",
         "SimControlSharedUI",
         "SimControlDomain",

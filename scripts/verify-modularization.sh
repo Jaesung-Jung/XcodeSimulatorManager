@@ -96,6 +96,21 @@ assert_path_present() {
   fi
 }
 
+assert_no_files_matching() {
+  local description="$1"
+  local path="$2"
+  local pattern="$3"
+  local matches
+
+  matches="$(find "$path" -maxdepth 1 -type f -name "$pattern" | sort)"
+
+  if [[ -n "$matches" ]]; then
+    echo "$matches" >&2
+    echo "error: ${description}" >&2
+    exit 1
+  fi
+}
+
 echo "==> 모듈 경계 검사"
 
 assert_no_match \
@@ -181,6 +196,11 @@ assert_no_match \
   "${FEATURE_SOURCES[@]}"
 
 assert_no_match \
+  "MainWindowFeature는 workflow client live 조립을 직접 하지 않고 하위 책임 경계에 위임해야 합니다." \
+  '(InventoryWorkflowClient|DeviceLifecycleWorkflowClient|InstalledAppWorkflowClient|DeveloperToolWorkflowClient|PathActionWorkflowClient)\.live\(' \
+  "$PACKAGE_SOURCES/MainWindowFeature"
+
+assert_no_match \
   "Swift source는 150자를 넘는 줄을 만들지 않습니다." \
   '.{151,}' \
   "$PACKAGE_SOURCES" \
@@ -193,6 +213,16 @@ assert_no_app_swift_sources_outside_app
 assert_path_present \
   "MainWindow sheet/form UI는 MainWindowSheetsFeature target으로 분리되어야 합니다." \
   "$PACKAGE_SOURCES/MainWindowSheetsFeature"
+
+assert_no_files_matching \
+  "DeveloperToolsFeature는 불필요한 파일별 extension으로 나누지 않고 하나의 feature 파일에 둡니다." \
+  "$PACKAGE_SOURCES/DeveloperToolsFeature" \
+  "DeveloperToolsFeature+*.swift"
+
+assert_no_files_matching \
+  "WorkspaceFeature는 불필요한 파일별 extension으로 나누지 않고 하나의 feature 파일에 둡니다." \
+  "$PACKAGE_SOURCES/WorkspaceFeature" \
+  "WorkspaceFeature+*.swift"
 
 assert_path_absent \
   "MainWindowFeature에는 sheet/form view 전용 CreateDevice 디렉터리를 남기지 않습니다." \

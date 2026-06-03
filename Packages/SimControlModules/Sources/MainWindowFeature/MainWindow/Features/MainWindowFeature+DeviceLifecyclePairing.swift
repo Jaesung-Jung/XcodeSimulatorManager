@@ -19,12 +19,8 @@ extension MainWindowFeature {
     let deviceCommandState = DeviceCommandState(command: .pair)
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = DeviceLifecycleWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await workflow.pairDevices(
+    return .run { [deviceLifecycleWorkflow] send in
+      let result = await deviceLifecycleWorkflow.pairDevices(
         formState.watchDeviceID,
         formState.phoneDeviceID
       )
@@ -54,12 +50,8 @@ extension MainWindowFeature {
     let deviceCommandState = DeviceCommandState(command: .unpair)
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = DeviceLifecycleWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await workflow.unpairDevice(confirmationState.pairID)
+    return .run { [deviceLifecycleWorkflow] send in
+      let result = await deviceLifecycleWorkflow.unpairDevice(confirmationState.pairID)
       await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
 
       await send(

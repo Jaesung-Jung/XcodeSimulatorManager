@@ -27,12 +27,8 @@ extension MainWindowFeature {
     let deviceCommandState = DeviceCommandState(command: .create)
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = DeviceLifecycleWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await workflow.createDevice(
+    return .run { [deviceLifecycleWorkflow] send in
+      let result = await deviceLifecycleWorkflow.createDevice(
         name,
         deviceType.id,
         runtime.id

@@ -30,12 +30,8 @@ extension MainWindowFeature {
     state.sidebar.refreshState = .refreshing
     state.workspace.setRefreshState(.refreshing)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = InventoryWorkflowClient.live(
-        simulatorRepository: simulatorRepository,
-        coreSimulatorService: coreSimulatorService
-      )
-      await send(.refreshResponse(await workflow.refresh()))
+    return .run { [inventoryWorkflow] send in
+      await send(.refreshResponse(await inventoryWorkflow.refresh()))
     }
   }
 
@@ -46,12 +42,8 @@ extension MainWindowFeature {
 
     state.workspace.setOpeningSimulatorApp(true)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = InventoryWorkflowClient.live(
-        simulatorRepository: simulatorRepository,
-        coreSimulatorService: coreSimulatorService
-      )
-      let commandResult = await workflow.openSimulatorApp()
+    return .run { [inventoryWorkflow] send in
+      let commandResult = await inventoryWorkflow.openSimulatorApp()
       await send(.openSimulatorAppResponse(commandResult))
     }
   }

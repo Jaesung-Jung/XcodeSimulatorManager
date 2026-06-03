@@ -20,18 +20,14 @@ extension MainWindowFeature {
 
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = DeviceLifecycleWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        simulatorRepository: simulatorRepository
-      )
+    return .run { [deviceLifecycleWorkflow] send in
       let result: DeviceLifecycleWorkflowResult
 
       switch deviceCommandState.command {
       case .boot:
-        result = await workflow.bootDevice(deviceID)
+        result = await deviceLifecycleWorkflow.bootDevice(deviceID)
       case .shutdown:
-        result = await workflow.shutdownDevice(deviceID)
+        result = await deviceLifecycleWorkflow.shutdownDevice(deviceID)
       case .create,
            .clone,
            .rename,

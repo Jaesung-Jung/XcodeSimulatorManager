@@ -24,13 +24,8 @@ extension MainWindowFeature {
     )
     state.workspace.setAppCommandState(appCommandState)
 
-    return .run { [coreSimulatorService, appSandboxReset, simulatorRepository] send in
-      let workflow = InstalledAppWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        appSandboxReset: appSandboxReset,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await workflow.launchApp(
+    return .run { [installedAppWorkflow] send in
+      let result = await installedAppWorkflow.launchApp(
         context.device.id,
         context.app.id,
         context.app.bundleID,
@@ -75,13 +70,8 @@ extension MainWindowFeature {
     )
     state.workspace.setAppCommandState(appCommandState)
 
-    return .run { [coreSimulatorService, appSandboxReset, simulatorRepository] send in
-      let workflow = InstalledAppWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        appSandboxReset: appSandboxReset,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await workflow.terminateApp(
+    return .run { [installedAppWorkflow] send in
+      let result = await installedAppWorkflow.terminateApp(
         context.device.id,
         context.app.id,
         context.app.bundleID

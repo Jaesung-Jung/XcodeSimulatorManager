@@ -1,5 +1,5 @@
 import Foundation
-import SimControlClients
+import MainWindowWorkflows
 import SimControlDomain
 
 #if DEBUG
@@ -24,61 +24,169 @@ extension Store where State == MainWindowFeature.State, Action == MainWindowFeat
     Store(initialState: .preview) {
       MainWindowFeature()
     } withDependencies: {
-      $0.simulatorRepository.refresh = {
-        MainWindowPreviewFixtures.refreshResult
-      }
-      $0.coreSimulatorService.openSimulatorApp = {
-        MainWindowPreviewFixtures.openSimulatorCommandResult
-      }
-      $0.coreSimulatorService.bootDevice = { _ in
-        MainWindowPreviewFixtures.commandResults[1]
-      }
-      $0.coreSimulatorService.bootDeviceIfNeeded = { _ in
-        MainWindowPreviewFixtures.bootStatusCommandResult
-      }
-      $0.coreSimulatorService.shutdownDevice = { _ in
-        MainWindowPreviewFixtures.commandResults[1]
-      }
-      $0.coreSimulatorService.createDevice = { _, _, _ in
-        MainWindowPreviewFixtures.createDeviceCommandResult
-      }
-      $0.coreSimulatorService.cloneDevice = { _, _ in
-        MainWindowPreviewFixtures.cloneDeviceCommandResult
-      }
-      $0.coreSimulatorService.renameDevice = { _, _ in
-        MainWindowPreviewFixtures.renameDeviceCommandResult
-      }
-      $0.coreSimulatorService.eraseDevice = { _ in
-        MainWindowPreviewFixtures.eraseDeviceCommandResult
-      }
-      $0.coreSimulatorService.deleteDevice = { _ in
-        MainWindowPreviewFixtures.deleteDeviceCommandResult
-      }
-      $0.coreSimulatorService.pairDevices = { _, _ in
-        MainWindowPreviewFixtures.pairDevicesCommandResult
-      }
-      $0.coreSimulatorService.unpairDevice = { _ in
-        MainWindowPreviewFixtures.unpairDeviceCommandResult
-      }
-      $0.coreSimulatorService.launchApp = { _, _ in
-        MainWindowPreviewFixtures.launchAppCommandResult
-      }
-      $0.coreSimulatorService.terminateApp = { _, _ in
-        MainWindowPreviewFixtures.terminateAppCommandResult
-      }
-      $0.coreSimulatorService.uninstallApp = { _, _ in
-        MainWindowPreviewFixtures.uninstallAppCommandResult
-      }
-      $0.coreSimulatorService.installApp = { _, _ in
-        MainWindowPreviewFixtures.installAppCommandResult
-      }
-      $0.appSandboxReset.resetSandbox = { _ in
-        MainWindowPreviewFixtures.resetSandboxCommandResult
-      }
+      $0.inventoryWorkflow = MainWindowPreviewFixtures.inventoryWorkflow
+      $0.deviceLifecycleWorkflow = MainWindowPreviewFixtures.deviceLifecycleWorkflow
+      $0.installedAppWorkflow = MainWindowPreviewFixtures.installedAppWorkflow
+      $0.developerToolWorkflow = MainWindowPreviewFixtures.developerToolWorkflow
+      $0.pathActionWorkflow = MainWindowPreviewFixtures.pathActionWorkflow
     }
   }
 }
 
 enum MainWindowPreviewFixtures {}
+
+extension MainWindowPreviewFixtures {
+  static var inventoryWorkflow: InventoryWorkflowClient {
+    InventoryWorkflowClient(
+      refresh: {
+        refreshResult
+      },
+      openSimulatorApp: {
+        openSimulatorCommandResult
+      }
+    )
+  }
+
+  static var deviceLifecycleWorkflow: DeviceLifecycleWorkflowClient {
+    DeviceLifecycleWorkflowClient(
+      bootDevice: { _ in
+        deviceLifecycleResult(commandResult: commandResults[1], preferredSelectedDeviceID: nil)
+      },
+      shutdownDevice: { _ in
+        deviceLifecycleResult(commandResult: commandResults[1], preferredSelectedDeviceID: nil)
+      },
+      createDevice: { _, _, _ in
+        deviceLifecycleResult(commandResult: createDeviceCommandResult, preferredSelectedDeviceID: "PREVIEW-DEVICE-CREATED")
+      },
+      cloneDevice: { _, _ in
+        deviceLifecycleResult(commandResult: cloneDeviceCommandResult, preferredSelectedDeviceID: "PREVIEW-DEVICE-CLONED")
+      },
+      renameDevice: { _, _ in
+        deviceLifecycleResult(commandResult: renameDeviceCommandResult, preferredSelectedDeviceID: nil)
+      },
+      eraseDevice: { _ in
+        deviceLifecycleResult(commandResult: eraseDeviceCommandResult, preferredSelectedDeviceID: nil)
+      },
+      deleteDevice: { _ in
+        deviceLifecycleResult(commandResult: deleteDeviceCommandResult, preferredSelectedDeviceID: nil)
+      },
+      pairDevices: { _, _ in
+        deviceLifecycleResult(commandResult: pairDevicesCommandResult, preferredSelectedDeviceID: nil)
+      },
+      unpairDevice: { _ in
+        deviceLifecycleResult(commandResult: unpairDeviceCommandResult, preferredSelectedDeviceID: nil)
+      }
+    )
+  }
+
+  static var installedAppWorkflow: InstalledAppWorkflowClient {
+    InstalledAppWorkflowClient(
+      launchApp: { deviceID, appID, _, deviceState in
+        let commandResults = deviceState == .shutdown
+          ? [bootStatusCommandResult, launchAppCommandResult]
+          : [launchAppCommandResult]
+        return installedAppResult(commandResults: commandResults, preferredSelectedDeviceID: deviceID, preferredSelectedAppID: appID)
+      },
+      terminateApp: { deviceID, appID, _ in
+        installedAppResult(commandResults: [terminateAppCommandResult], preferredSelectedDeviceID: deviceID, preferredSelectedAppID: appID)
+      },
+      uninstallApp: { deviceID, appID, _ in
+        installedAppResult(
+          commandResults: [uninstallAppCommandResult],
+          preferredSelectedDeviceID: deviceID,
+          preferredSelectedAppID: uninstallAppCommandResult.succeeded ? nil : appID
+        )
+      },
+      resetSandbox: { deviceID, appID, _ in
+        installedAppResult(commandResults: [resetSandboxCommandResult], preferredSelectedDeviceID: deviceID, preferredSelectedAppID: appID)
+      },
+      installAppOnSimulator: { request in
+        let commandResults = request.targetDeviceState == .shutdown
+          ? [bootStatusCommandResult, installAppCommandResult]
+          : [installAppCommandResult]
+        return installedAppResult(
+          commandResults: commandResults,
+          preferredSelectedDeviceID: installAppCommandResult.succeeded ? request.targetDeviceID : nil,
+          preferredSelectedAppID: installAppCommandResult.succeeded ? "\(request.targetDeviceID):\(request.bundleID)" : nil
+        )
+      }
+    )
+  }
+
+  static var developerToolWorkflow: DeveloperToolWorkflowClient {
+    DeveloperToolWorkflowClient(
+      openURL: { deviceID, _, _ in
+        developerToolResult(commandResults: [openSimulatorCommandResult], preferredSelectedDeviceID: deviceID)
+      },
+      pushNotification: { deviceID, _, _, _ in
+        developerToolResult(commandResults: [commandResults[1]], preferredSelectedDeviceID: deviceID)
+      },
+      setPrivacyPermission: { deviceID, _, _, _, _ in
+        developerToolResult(commandResults: [commandResults[1]], preferredSelectedDeviceID: deviceID)
+      },
+      setLocation: { deviceID, _, _ in
+        developerToolResult(commandResults: [commandResults[1]], preferredSelectedDeviceID: deviceID)
+      },
+      clearLocation: { deviceID, _ in
+        developerToolResult(commandResults: [commandResults[1]], preferredSelectedDeviceID: deviceID)
+      },
+      setStatusBarOverride: { deviceID, _ in
+        developerToolResult(commandResults: [commandResults[1]], preferredSelectedDeviceID: deviceID)
+      },
+      clearStatusBarOverride: { deviceID in
+        developerToolResult(commandResults: [commandResults[1]], preferredSelectedDeviceID: deviceID)
+      }
+    )
+  }
+
+  static var pathActionWorkflow: PathActionWorkflowClient {
+    PathActionWorkflowClient(
+      runDevicePathAction: { _, _, _ in
+        [commandResults[1]]
+      },
+      copyValue: { _, _ in
+        [commandResults[1]]
+      },
+      runAppContainerPathAction: { _ in
+        [commandResults[1]]
+      }
+    )
+  }
+
+  static func deviceLifecycleResult(
+    commandResult: CommandResult,
+    preferredSelectedDeviceID: SimulatorDevice.ID?
+  ) -> DeviceLifecycleWorkflowResult {
+    DeviceLifecycleWorkflowResult(
+      commandResult: commandResult,
+      refreshResult: refreshResult,
+      preferredSelectedDeviceID: preferredSelectedDeviceID
+    )
+  }
+
+  static func installedAppResult(
+    commandResults: [CommandResult],
+    preferredSelectedDeviceID: SimulatorDevice.ID?,
+    preferredSelectedAppID: InstalledApp.ID?
+  ) -> InstalledAppWorkflowResult {
+    InstalledAppWorkflowResult(
+      commandResults: commandResults,
+      refreshResult: refreshResult,
+      preferredSelectedDeviceID: preferredSelectedDeviceID,
+      preferredSelectedAppID: preferredSelectedAppID
+    )
+  }
+
+  static func developerToolResult(
+    commandResults: [CommandResult],
+    preferredSelectedDeviceID: SimulatorDevice.ID?
+  ) -> DeveloperToolWorkflowResult {
+    DeveloperToolWorkflowResult(
+      commandResults: commandResults,
+      refreshResult: refreshResult,
+      preferredSelectedDeviceID: preferredSelectedDeviceID
+    )
+  }
+}
 
 #endif

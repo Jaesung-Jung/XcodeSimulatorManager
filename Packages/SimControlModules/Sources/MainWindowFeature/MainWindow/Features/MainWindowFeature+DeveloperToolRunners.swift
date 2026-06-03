@@ -27,12 +27,8 @@ extension MainWindowFeature {
     let deviceCommandState = DeviceCommandState(command: command, deviceID: device.id)
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = DeveloperToolWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await run(workflow, device.id, device.state)
+    return .run { [developerToolWorkflow] send in
+      let result = await run(developerToolWorkflow, device.id, device.state)
       await send(
         .developerToolCommandResults(
           deviceCommandState,
@@ -73,12 +69,8 @@ extension MainWindowFeature {
     let deviceCommandState = DeviceCommandState(command: command, deviceID: device.id)
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = DeveloperToolWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await run(workflow, device.id)
+    return .run { [developerToolWorkflow] send in
+      let result = await run(developerToolWorkflow, device.id)
       await send(
         .developerToolCommandResults(
           deviceCommandState,

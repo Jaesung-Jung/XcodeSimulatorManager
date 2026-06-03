@@ -18,12 +18,8 @@ extension MainWindowFeature {
     }
 
     let url = path(device)
-    return .run { [coreSimulatorService, pathAction] send in
-      let workflow = PathActionWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        pathAction: pathAction
-      )
-      await send(.pathActionResults(await workflow.runDevicePathAction(url, label, operation)))
+    return .run { [pathActionWorkflow] send in
+      await send(.pathActionResults(await pathActionWorkflow.runDevicePathAction(url, label, operation)))
     }
   }
 
@@ -38,12 +34,8 @@ extension MainWindowFeature {
     }
 
     let value = value(device)
-    return .run { [coreSimulatorService, pathAction] send in
-      let workflow = PathActionWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        pathAction: pathAction
-      )
-      await send(.pathActionResults(await workflow.copyValue(value, label)))
+    return .run { [pathActionWorkflow] send in
+      await send(.pathActionResults(await pathActionWorkflow.copyValue(value, label)))
     }
   }
 
@@ -58,12 +50,8 @@ extension MainWindowFeature {
     }
 
     let value = value(context.app)
-    return .run { [coreSimulatorService, pathAction] send in
-      let workflow = PathActionWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        pathAction: pathAction
-      )
-      await send(.pathActionResults(await workflow.copyValue(value, label)))
+    return .run { [pathActionWorkflow] send in
+      await send(.pathActionResults(await pathActionWorkflow.copyValue(value, label)))
     }
   }
 
@@ -91,12 +79,8 @@ extension MainWindowFeature {
       operation: operation
     )
 
-    return .run { [coreSimulatorService, pathAction] send in
-      let workflow = PathActionWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        pathAction: pathAction
-      )
-      await send(.pathActionResults(await workflow.runAppContainerPathAction(request)))
+    return .run { [pathActionWorkflow] send in
+      await send(.pathActionResults(await pathActionWorkflow.runAppContainerPathAction(request)))
     }
   }
 

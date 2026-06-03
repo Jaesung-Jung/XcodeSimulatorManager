@@ -23,12 +23,8 @@ extension MainWindowFeature {
     )
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = DeviceLifecycleWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await workflow.cloneDevice(
+    return .run { [deviceLifecycleWorkflow] send in
+      let result = await deviceLifecycleWorkflow.cloneDevice(
         formState.sourceDeviceID,
         name
       )
@@ -63,12 +59,8 @@ extension MainWindowFeature {
     )
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = DeviceLifecycleWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await workflow.renameDevice(
+    return .run { [deviceLifecycleWorkflow] send in
+      let result = await deviceLifecycleWorkflow.renameDevice(
         formState.deviceID,
         name
       )

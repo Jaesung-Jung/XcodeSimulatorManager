@@ -1,9 +1,9 @@
 import ComposableArchitecture
 import Foundation
 import MainWindowFeatureSupport
+import MainWindowWorkflows
 import MenuBarFeature
 import SidebarFeature
-import SimControlClients
 import SimControlDomain
 import WorkspaceFeature
 
@@ -11,10 +11,11 @@ import WorkspaceFeature
 public struct MainWindowFeature {
   static let menuBarAutoRefreshInterval: TimeInterval = 60
 
-  @Dependency(\.appSandboxReset) var appSandboxReset
-  @Dependency(\.coreSimulatorService) var coreSimulatorService
-  @Dependency(\.pathAction) var pathAction
-  @Dependency(\.simulatorRepository) var simulatorRepository
+  @Dependency(\.developerToolWorkflow) var developerToolWorkflow
+  @Dependency(\.deviceLifecycleWorkflow) var deviceLifecycleWorkflow
+  @Dependency(\.installedAppWorkflow) var installedAppWorkflow
+  @Dependency(\.inventoryWorkflow) var inventoryWorkflow
+  @Dependency(\.pathActionWorkflow) var pathActionWorkflow
 
   public init() {}
 

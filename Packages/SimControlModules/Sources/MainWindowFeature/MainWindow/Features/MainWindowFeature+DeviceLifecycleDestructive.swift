@@ -23,12 +23,8 @@ extension MainWindowFeature {
     )
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = DeviceLifecycleWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await workflow.eraseDevice(confirmationState.deviceID)
+    return .run { [deviceLifecycleWorkflow] send in
+      let result = await deviceLifecycleWorkflow.eraseDevice(confirmationState.deviceID)
       await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
 
       await send(
@@ -59,12 +55,8 @@ extension MainWindowFeature {
     )
     state.workspace.setDeviceCommandState(deviceCommandState)
 
-    return .run { [coreSimulatorService, simulatorRepository] send in
-      let workflow = DeviceLifecycleWorkflowClient.live(
-        coreSimulatorService: coreSimulatorService,
-        simulatorRepository: simulatorRepository
-      )
-      let result = await workflow.deleteDevice(confirmationState.deviceID)
+    return .run { [deviceLifecycleWorkflow] send in
+      let result = await deviceLifecycleWorkflow.deleteDevice(confirmationState.deviceID)
       await send(.deviceCommandResponse(deviceCommandState, result.commandResult))
 
       await send(
