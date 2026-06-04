@@ -253,6 +253,22 @@ assert_path_absent \
   "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+Helpers.swift"
 
 assert_path_absent \
+  "MainWindowFeature root reducer routing은 MainWindowFeature.swift에 둡니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+Reducer.swift"
+
+assert_path_absent \
+  "MainWindowFeature menu refresh routing은 MainWindowFeature+Inventory.swift에 모읍니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+MenuRefreshRouting.swift"
+
+assert_path_absent \
+  "MainWindowFeature의 작은 nested model 조각은 사용하는 책임 파일 가까이에 둡니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+Models.swift"
+
+assert_path_absent \
+  "MainWindowFeature device helper 조각은 독립 helper 파일로 분리하지 않습니다." \
+  "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+DeviceHelpers.swift"
+
+assert_path_absent \
   "MainWindowFeature의 command response 조각은 MainWindowFeature+CommandResponseRouting.swift에 모읍니다." \
   "$PACKAGE_SOURCES/MainWindowFeature/MainWindow/Features/MainWindowFeature+AppCommandResponseRouting.swift"
 

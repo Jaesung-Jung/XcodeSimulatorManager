@@ -1,7 +1,7 @@
 # isowords 기반 SimControl 모듈화 아키텍처
 
 **작성일:** 2026-06-04
-**현 상태:** Swift Package target 분리, workflow boundary, MainWindowFeature 책임 단위 재정리 완료
+**현 상태:** Swift Package target 분리, workflow boundary, MainWindowFeature 책임 단위 재정리와 과분리 축소 완료
 
 ## 목적
 
@@ -30,6 +30,20 @@ SimControl의 아키텍처를 `pointfreeco/isowords`의 방향성에 맞춰 재�
 현재 `Packages/SimControlModules`에는 30개 library product가 있다. 이제 단순한 5-7개 레이어 분리가 아니라, feature와 service가 각각 작은 target으로 분리된 마이크로 모듈라이제이션 구조다.
 
 다만 target 수가 충분하다는 사실이 아키텍처 완료를 의미하지는 않는다. `MainWindowFeature`는 scene composition, navigation/sheet routing, child action delegation, workflow response application에 집중하고, 반복 command sequence는 `MainWindowWorkflows`가 소유한다. 남은 `MainWindowFeature+...` 파일은 state, routing, workflow response, command intent처럼 책임 단위로만 유지한다.
+
+현재 `MainWindowFeature/MainWindow/Features`에서 유지하는 extension 파일은 다음 9개다.
+
+- `MainWindowFeature+State.swift`
+- `MainWindowFeature+WorkspaceRouting.swift`
+- `MainWindowFeature+CommandResponseRouting.swift`
+- `MainWindowFeature+SheetRouting.swift`
+- `MainWindowFeature+Inventory.swift`
+- `MainWindowFeature+DeviceLifecycle.swift`
+- `MainWindowFeature+InstalledApps.swift`
+- `MainWindowFeature+DeveloperTools.swift`
+- `MainWindowFeature+PathActions.swift`
+
+`MainWindowFeature+Reducer.swift`, `MainWindowFeature+MenuRefreshRouting.swift`, `MainWindowFeature+Models.swift`, `MainWindowFeature+DeviceHelpers.swift`처럼 단일 함수, generic helper, 또는 사용하는 책임 파일과 항상 같이 읽히는 조각은 별도 파일로 되살리지 않는다.
 
 ### Domain
 
@@ -333,6 +347,7 @@ feature 간 공유되지만 domain은 아닌 타입과 표시 helper를 소유�
 - settings child feature는 root `SettingsFeature`, sibling settings target, client/live/infrastructure layer를 직접 import하지 않는다.
 - `MenuBarFeature`는 `MainWindowFeature`를 직접 import하지 않는다.
 - feature/workflow/client interface layer에서는 concrete service를 직접 생성하지 않는다.
+- `MainWindowFeature` 내부에서는 작은 helper/model/routing 조각을 별도 extension 파일로 되살리지 않는다.
 
 ## 검증 명령
 

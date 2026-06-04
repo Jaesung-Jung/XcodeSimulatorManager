@@ -3,6 +3,38 @@ import Foundation
 import MainWindowWorkflows
 import SimControlDomain
 
+// MARK: - MainWindowFeature.AppContainerPathTarget
+
+extension MainWindowFeature {
+  enum AppContainerPathTarget: Equatable, Sendable {
+    case bundle
+    case data
+    case appGroup(String)
+
+    var simctlContainer: SimulatorAppContainerKind {
+      switch self {
+      case .bundle:
+        .app
+      case .data:
+        .data
+      case .appGroup(let groupID):
+        .appGroup(groupID)
+      }
+    }
+
+    var label: String {
+      switch self {
+      case .bundle:
+        "app bundle container"
+      case .data:
+        "app data container"
+      case .appGroup(let groupID):
+        "App Group \(groupID) container"
+      }
+    }
+  }
+}
+
 // MARK: - MainWindowFeature Path Actions
 
 extension MainWindowFeature {

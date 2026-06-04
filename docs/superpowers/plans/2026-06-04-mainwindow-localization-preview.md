@@ -1,5 +1,7 @@
 # MainWindow, Localization, Preview 작업 계획
 
+> **현재 상태:** 이 계획의 `MainWindowFeature+Models.swift`, `MainWindowFeature+Helpers.swift` 생성 방향은 이후 아키텍처 정리에서 폐기되었습니다. 현재 기준은 `docs/architecture/isowords-inspired-modularization.md`의 MainWindowFeature 책임 파일 목록과 `scripts/verify-modularization.sh` guardrail을 따릅니다.
+
 > **에이전트 작업자 필수 안내:** 이 계획을 단계별로 실행할 때는 `superpowers:subagent-driven-development` 또는 `superpowers:executing-plans`를 사용합니다. 진행 관리는 체크박스(`- [ ]`)로 추적합니다.
 
 **목표:** `MainWindowFeature`의 비대한 reducer 파일을 먼저 줄이고, 이후 기능별 문자열을 리소스 기반 localization으로 이동한 다음, 동일한 리소스와 상태를 사용하는 preview harness를 추가합니다.

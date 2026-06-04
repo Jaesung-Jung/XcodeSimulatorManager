@@ -3,6 +3,15 @@ import MainWindowFeatureSupport
 import MainWindowWorkflows
 import SimControlDomain
 
+// MARK: - MainWindowFeature.AppCommandContext
+
+extension MainWindowFeature {
+  struct AppCommandContext {
+    let device: SimulatorDevice
+    let app: InstalledApp
+  }
+}
+
 // MARK: - MainWindowFeature Installed Apps
 
 extension MainWindowFeature {

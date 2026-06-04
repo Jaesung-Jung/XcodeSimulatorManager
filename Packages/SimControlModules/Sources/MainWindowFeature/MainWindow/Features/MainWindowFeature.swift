@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import Foundation
 import MainWindowFeatureSupport
+import MainWindowSheetsFeature
 import MainWindowWorkflows
 import MenuBarFeature
 import SidebarFeature
@@ -87,5 +88,80 @@ public struct MainWindowFeature {
     Scope(state: \.menuBar, action: \.menuBar) {
       MenuBarFeature()
     }
+  }
+}
+
+// MARK: - MainWindowFeature Sheet Typealiases
+
+extension MainWindowFeature {
+  public typealias DeviceLifecycleSheet = MainWindowSheetsFeature.DeviceLifecycleSheet
+  public typealias DeviceDestructiveConfirmationState = MainWindowSheetsFeature.DeviceDestructiveConfirmationState
+  public typealias CreateDeviceFormState = MainWindowSheetsFeature.CreateDeviceFormState
+  public typealias CloneDeviceFormState = MainWindowSheetsFeature.CloneDeviceFormState
+  public typealias RenameDeviceFormState = MainWindowSheetsFeature.RenameDeviceFormState
+  public typealias PairDeviceCandidate = MainWindowSheetsFeature.PairDeviceCandidate
+  public typealias PairDevicesFormState = MainWindowSheetsFeature.PairDevicesFormState
+  public typealias UnpairDeviceConfirmationState = MainWindowSheetsFeature.UnpairDeviceConfirmationState
+  public typealias AppDestructiveConfirmationState = MainWindowSheetsFeature.AppDestructiveConfirmationState
+  public typealias InstallAppTargetCandidate = MainWindowSheetsFeature.InstallAppTargetCandidate
+  public typealias InstallAppTargetFormState = MainWindowSheetsFeature.InstallAppTargetFormState
+}
+
+// MARK: - MainWindowFeature Action Routing
+
+extension MainWindowFeature {
+  func route(
+    into state: inout State,
+    action: Action
+  ) -> Effect<Action> {
+    switch action {
+    case .task,
+         .menuBar,
+         .refreshButtonTapped,
+         .refreshResponse,
+         .openSimulatorAppButtonTapped,
+         .openSimulatorAppResponse:
+      return routeMenuRefreshAction(into: &state, action: action)
+
+    case .createSimulatorButtonTapped,
+         .cloneSelectedSimulatorButtonTapped,
+         .pairDevicesButtonTapped,
+         .lifecycleSheetDismissed,
+         .createDeviceSubmitted,
+         .cloneDeviceSubmitted,
+         .renameDeviceSubmitted,
+         .eraseDeviceConfirmed,
+         .deleteDeviceConfirmed,
+         .pairDevicesSubmitted,
+         .unpairDeviceConfirmed,
+         .uninstallAppConfirmed,
+         .resetAppSandboxConfirmed,
+         .installAppOnSimulatorSubmitted:
+      return routeSheetAction(into: &state, action: action)
+
+    case .pathActionResults,
+         .developerToolCommandResults,
+         .developerToolCommandRefreshResponse,
+         .deviceCommandResponse,
+         .deviceCommandRefreshResponse,
+         .appCommandCommandsCompleted,
+         .appCommandRefreshResponse:
+      return routeCommandResponseAction(into: &state, action: action)
+
+    case .workspace(let workspaceAction):
+      return routeWorkspaceAction(workspaceAction, into: &state)
+
+    case .sidebar:
+      return .none
+    }
+  }
+}
+
+// MARK: - MainWindowFeature Shared Input Helpers
+
+extension MainWindowFeature {
+  func nonEmpty(_ value: String) -> String? {
+    let trimmedValue = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    return trimmedValue.isEmpty ? nil : trimmedValue
   }
 }
