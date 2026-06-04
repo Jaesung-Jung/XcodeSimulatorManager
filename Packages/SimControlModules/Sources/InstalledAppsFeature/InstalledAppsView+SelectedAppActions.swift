@@ -26,32 +26,28 @@ extension InstalledAppsView {
     let onCopyAppGroup: (String) -> Void
 
     var body: some View {
-      VStack(alignment: .leading, spacing: 10) {
-        SelectedAppHeader(app: app)
-
-        SelectedAppActionGrid(
-          app: app,
-          appCommandState: appCommandState,
-          canLaunch: canLaunch,
-          canTerminate: canTerminate,
-          canUninstall: canUninstall,
-          canResetSandbox: canResetSandbox,
-          canInstallOnAnotherSimulator: canInstallOnAnotherSimulator,
-          canUsePaths: canUsePaths,
-          onLaunch: onLaunch,
-          onTerminate: onTerminate,
-          onUninstall: onUninstall,
-          onResetSandbox: onResetSandbox,
-          onInstallOnAnotherSimulator: onInstallOnAnotherSimulator,
-          onOpenBundleContainer: onOpenBundleContainer,
-          onCopyBundleContainer: onCopyBundleContainer,
-          onOpenDataContainer: onOpenDataContainer,
-          onCopyDataContainer: onCopyDataContainer,
-          onCopyBundleID: onCopyBundleID,
-          onOpenAppGroup: onOpenAppGroup,
-          onCopyAppGroup: onCopyAppGroup
-        )
-      }
+      SelectedAppActionGrid(
+        app: app,
+        appCommandState: appCommandState,
+        canLaunch: canLaunch,
+        canTerminate: canTerminate,
+        canUninstall: canUninstall,
+        canResetSandbox: canResetSandbox,
+        canInstallOnAnotherSimulator: canInstallOnAnotherSimulator,
+        canUsePaths: canUsePaths,
+        onLaunch: onLaunch,
+        onTerminate: onTerminate,
+        onUninstall: onUninstall,
+        onResetSandbox: onResetSandbox,
+        onInstallOnAnotherSimulator: onInstallOnAnotherSimulator,
+        onOpenBundleContainer: onOpenBundleContainer,
+        onCopyBundleContainer: onCopyBundleContainer,
+        onOpenDataContainer: onOpenDataContainer,
+        onCopyDataContainer: onCopyDataContainer,
+        onCopyBundleID: onCopyBundleID,
+        onOpenAppGroup: onOpenAppGroup,
+        onCopyAppGroup: onCopyAppGroup
+      )
       .padding(10)
       .background(.quaternary.opacity(0.25), in: RoundedRectangle(cornerRadius: 8))
     }
@@ -104,29 +100,3 @@ extension InstalledAppsView {
 }
 
 #endif
-
-extension InstalledAppsView {
-  struct SelectedAppHeader: View {
-    let app: InstalledApp
-
-    var body: some View {
-      HStack(spacing: 8) {
-        AppIconView(iconPath: app.iconPath)
-
-        VStack(alignment: .leading, spacing: 2) {
-          Text(app.displayName)
-            .font(.subheadline.weight(.medium))
-            .lineLimit(1)
-
-          Text(app.bundleID)
-            .font(.caption.monospaced())
-            .foregroundStyle(.secondary)
-            .lineLimit(1)
-            .truncationMode(.middle)
-        }
-
-        Spacer()
-      }
-    }
-  }
-}

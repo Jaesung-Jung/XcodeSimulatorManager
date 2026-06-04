@@ -52,55 +52,6 @@ extension InstalledAppsView {
               }
             }
           }
-
-          if let selectedApp = store.selectedApp {
-            SelectedAppActions(
-              app: selectedApp,
-              appCommandState: store.appCommandState,
-              canLaunch: store.canLaunchSelectedApp,
-              canTerminate: store.canTerminateSelectedApp,
-              canUninstall: store.canUninstallSelectedApp,
-              canResetSandbox: store.canResetSelectedAppSandbox,
-              canInstallOnAnotherSimulator: store.canInstallSelectedAppOnAnotherSimulator,
-              canUsePaths: store.canUseSelectedAppPaths,
-              onLaunch: {
-                store.send(.launchButtonTapped(selectedApp.id))
-              },
-              onTerminate: {
-                store.send(.terminateButtonTapped(selectedApp.id))
-              },
-              onUninstall: {
-                store.send(.uninstallButtonTapped(selectedApp.id))
-              },
-              onResetSandbox: {
-                store.send(.resetSandboxButtonTapped(selectedApp.id))
-              },
-              onInstallOnAnotherSimulator: {
-                store.send(.installOnAnotherSimulatorButtonTapped(selectedApp.id))
-              },
-              onOpenBundleContainer: {
-                store.send(.openBundleContainerButtonTapped(selectedApp.id))
-              },
-              onCopyBundleContainer: {
-                store.send(.copyBundleContainerButtonTapped(selectedApp.id))
-              },
-              onOpenDataContainer: {
-                store.send(.openDataContainerButtonTapped(selectedApp.id))
-              },
-              onCopyDataContainer: {
-                store.send(.copyDataContainerButtonTapped(selectedApp.id))
-              },
-              onCopyBundleID: {
-                store.send(.copyBundleIDButtonTapped(selectedApp.id))
-              },
-              onOpenAppGroup: { groupID in
-                store.send(.openAppGroupContainerButtonTapped(selectedApp.id, groupID))
-              },
-              onCopyAppGroup: { groupID in
-                store.send(.copyAppGroupContainerButtonTapped(selectedApp.id, groupID))
-              }
-            )
-          }
         }
       }
     }
@@ -129,11 +80,63 @@ extension InstalledAppsView {
         apps: apps,
         selectedAppID: store.selectedAppID,
         pinnedAppIDs: store.filters.pinnedAppIDs,
+        selectedAppActions: { app in
+          selectedAppActions(for: app)
+        },
         onSelection: { id in
           store.send(.selectionChanged(id))
         },
         onPin: { id in
           store.send(.pinButtonTapped(id))
+        }
+      )
+    }
+
+    private func selectedAppActions(for app: InstalledApp) -> some View {
+      SelectedAppActions(
+        app: app,
+        appCommandState: store.appCommandState,
+        canLaunch: store.canLaunchSelectedApp,
+        canTerminate: store.canTerminateSelectedApp,
+        canUninstall: store.canUninstallSelectedApp,
+        canResetSandbox: store.canResetSelectedAppSandbox,
+        canInstallOnAnotherSimulator: store.canInstallSelectedAppOnAnotherSimulator,
+        canUsePaths: store.canUseSelectedAppPaths,
+        onLaunch: {
+          store.send(.launchButtonTapped(app.id))
+        },
+        onTerminate: {
+          store.send(.terminateButtonTapped(app.id))
+        },
+        onUninstall: {
+          store.send(.uninstallButtonTapped(app.id))
+        },
+        onResetSandbox: {
+          store.send(.resetSandboxButtonTapped(app.id))
+        },
+        onInstallOnAnotherSimulator: {
+          store.send(.installOnAnotherSimulatorButtonTapped(app.id))
+        },
+        onOpenBundleContainer: {
+          store.send(.openBundleContainerButtonTapped(app.id))
+        },
+        onCopyBundleContainer: {
+          store.send(.copyBundleContainerButtonTapped(app.id))
+        },
+        onOpenDataContainer: {
+          store.send(.openDataContainerButtonTapped(app.id))
+        },
+        onCopyDataContainer: {
+          store.send(.copyDataContainerButtonTapped(app.id))
+        },
+        onCopyBundleID: {
+          store.send(.copyBundleIDButtonTapped(app.id))
+        },
+        onOpenAppGroup: { groupID in
+          store.send(.openAppGroupContainerButtonTapped(app.id, groupID))
+        },
+        onCopyAppGroup: { groupID in
+          store.send(.copyAppGroupContainerButtonTapped(app.id, groupID))
         }
       )
     }

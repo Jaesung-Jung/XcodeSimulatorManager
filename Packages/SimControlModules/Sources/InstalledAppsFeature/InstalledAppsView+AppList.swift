@@ -4,15 +4,16 @@ import SimControlSharedUI
 import SwiftUI
 
 extension InstalledAppsView {
-  struct InstalledAppList: View {
+  struct InstalledAppList<SelectedAppActions: View>: View {
     let apps: [InstalledApp]
     let selectedAppID: String?
     let pinnedAppIDs: Set<String>
+    let selectedAppActions: (InstalledApp) -> SelectedAppActions
     let onSelection: (String) -> Void
     let onPin: (String) -> Void
 
     var body: some View {
-      LazyVStack(spacing: 0) {
+      VStack(spacing: 0) {
         ForEach(apps) { app in
           Button {
             onSelection(app.id)
@@ -28,6 +29,12 @@ extension InstalledAppsView {
           }
           .buttonStyle(.plain)
 
+          if app.id == selectedAppID {
+            selectedAppActions(app)
+              .padding(.horizontal, 10)
+              .padding(.bottom, 10)
+          }
+
           if app.id != apps.last?.id {
             Divider()
           }
@@ -35,6 +42,23 @@ extension InstalledAppsView {
       }
       .background(.quaternary.opacity(0.35), in: RoundedRectangle(cornerRadius: 8))
     }
+  }
+}
+
+extension InstalledAppsView.InstalledAppList where SelectedAppActions == EmptyView {
+  init(
+    apps: [InstalledApp],
+    selectedAppID: String?,
+    pinnedAppIDs: Set<String>,
+    onSelection: @escaping (String) -> Void,
+    onPin: @escaping (String) -> Void
+  ) {
+    self.apps = apps
+    self.selectedAppID = selectedAppID
+    self.pinnedAppIDs = pinnedAppIDs
+    self.selectedAppActions = { _ in EmptyView() }
+    self.onSelection = onSelection
+    self.onPin = onPin
   }
 }
 

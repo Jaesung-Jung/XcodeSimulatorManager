@@ -3,6 +3,7 @@ import ComposableArchitecture
 import Foundation
 import MainWindowFeatureSupport
 import SimControlDomain
+import SwiftUI
 import Testing
 @testable import InstalledAppsFeature
 
@@ -97,6 +98,74 @@ struct InstalledAppsFeatureTests {
   @Test func appIconViewCanBeConstructedForRealAndFallbackIcons() {
     _ = InstalledAppsView.AppIconView(iconPath: URL(fileURLWithPath: "/tmp/AppIcon.png"))
     _ = InstalledAppsView.AppIconView(iconPath: nil)
+  }
+
+  @Test func appListCanRenderSelectedAppActionsInline() {
+    let app = InstalledApp(
+      id: "app-1",
+      bundleID: "com.example.app",
+      displayName: "Example",
+      version: nil,
+      build: nil,
+      deviceID: "device-1",
+      bundleContainer: nil,
+      dataContainer: nil,
+      appBundlePath: nil,
+      appGroups: [],
+      iconPath: nil
+    )
+
+    _ = InstalledAppsView.InstalledAppList(
+      apps: [app],
+      selectedAppID: app.id,
+      pinnedAppIDs: [],
+      selectedAppActions: { selectedApp in
+        Text(selectedApp.bundleID)
+      },
+      onSelection: { _ in },
+      onPin: { _ in }
+    )
+  }
+
+  @Test func selectedAppActionsRenderButtonsWithoutAppSummaryHeader() {
+    let app = InstalledApp(
+      id: "app-1",
+      bundleID: "com.example.app",
+      displayName: "Example",
+      version: nil,
+      build: nil,
+      deviceID: "device-1",
+      bundleContainer: nil,
+      dataContainer: nil,
+      appBundlePath: nil,
+      appGroups: [],
+      iconPath: nil
+    )
+
+    let actions = InstalledAppsView.SelectedAppActions(
+      app: app,
+      appCommandState: nil,
+      canLaunch: true,
+      canTerminate: true,
+      canUninstall: true,
+      canResetSandbox: true,
+      canInstallOnAnotherSimulator: true,
+      canUsePaths: true,
+      onLaunch: {},
+      onTerminate: {},
+      onUninstall: {},
+      onResetSandbox: {},
+      onInstallOnAnotherSimulator: {},
+      onOpenBundleContainer: {},
+      onCopyBundleContainer: {},
+      onOpenDataContainer: {},
+      onCopyDataContainer: {},
+      onCopyBundleID: {},
+      onOpenAppGroup: { _ in },
+      onCopyAppGroup: { _ in }
+    )
+
+    #expect(!String(reflecting: type(of: actions.body)).contains("SelectedAppHeader"))
   }
 
   @Test func appIconImageLoaderCachesLoadedImages() async {
