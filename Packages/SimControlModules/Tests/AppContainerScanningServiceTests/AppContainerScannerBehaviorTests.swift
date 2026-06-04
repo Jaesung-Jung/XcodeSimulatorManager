@@ -120,6 +120,34 @@ struct AppContainerScannerTests {
     #expect(app.isSystemApp)
   }
 
+  @Test func scansSystemAppsFromRuntimeRoot() throws {
+    let temporaryDirectory = try TemporaryDirectory()
+    let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
+    let runtimeRoot = temporaryDirectory.url.appendingPathComponent("RuntimeRoot", isDirectory: true)
+    let appBundle = runtimeRoot.appendingPathComponent("Applications/Preferences.app", isDirectory: true)
+
+    try createDirectory(appBundle)
+    try createDirectory(dataPath.appendingPathComponent("Containers/Bundle/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Data/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Shared/AppGroup", isDirectory: true))
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.Preferences",
+        "CFBundleName": "Settings"
+      ],
+      to: appBundle
+    )
+
+    let scanner = AppContainerScanner()
+    let result = scanner.scanInstalledApps(for: makeDevice(dataPath: dataPath), runtimeRoot: runtimeRoot)
+
+    let app = try #require(result.apps.first)
+    #expect(app.bundleID == "com.apple.Preferences")
+    #expect(app.displayName == "Settings")
+    #expect(app.appBundlePath?.resolvingSymlinksInPath() == appBundle.resolvingSymlinksInPath())
+    #expect(app.isSystemApp)
+  }
+
   @Test func hidesSystemAppsWhenConfigured() throws {
     let temporaryDirectory = try TemporaryDirectory()
     let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)

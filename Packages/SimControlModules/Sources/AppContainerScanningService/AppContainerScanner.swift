@@ -25,7 +25,10 @@ public struct AppContainerScanner {
     self.hidesSystemApps = hidesSystemApps
   }
 
-  public func scanInstalledApps(for device: SimulatorDevice) -> ScanResult {
+  public func scanInstalledApps(
+    for device: SimulatorDevice,
+    runtimeRoot: URL? = nil
+  ) -> ScanResult {
     var warnings: [SimulatorWarning] = []
 
     guard let dataPath = device.dataPath else {
@@ -60,9 +63,14 @@ public struct AppContainerScanner {
       appGroupsByID: appGroupsByID,
       warnings: &warnings
     )
+    let systemApps = scanRuntimeSystemApps(
+      in: runtimeRoot,
+      device: device,
+      warnings: &warnings
+    )
 
     return ScanResult(
-      apps: apps.sorted(by: installedAppSort),
+      apps: uniqued(apps + systemApps).sorted(by: installedAppSort),
       warnings: warnings
     )
   }

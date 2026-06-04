@@ -62,6 +62,7 @@ extension SimulatorRepository {
     )
     let installedAppsByDeviceID = await scanInstalledApps(
       for: devices,
+      runtimeByID: runtimeByID,
       warnings: &warnings
     )
 
@@ -83,12 +84,13 @@ extension SimulatorRepository {
 
   func scanInstalledApps(
     for devices: [SimulatorDevice],
+    runtimeByID: [String: SimulatorRuntime],
     warnings: inout [SimulatorWarning]
   ) async -> [String: [InstalledApp]] {
     var installedAppsByDeviceID: [String: [InstalledApp]] = [:]
 
     for device in devices {
-      let scanResult = await installedApps(device)
+      let scanResult = await installedApps(device, runtimeByID[device.runtimeID]?.runtimeRoot)
       warnings.append(contentsOf: scanResult.warnings)
 
       if !scanResult.apps.isEmpty {

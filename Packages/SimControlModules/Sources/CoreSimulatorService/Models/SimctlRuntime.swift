@@ -5,6 +5,7 @@ public struct SimctlRuntime: Decodable, Equatable {
   public let buildVersion: String?
   public let platform: String?
   public let isAvailable: Bool?
+  public let runtimeRoot: String?
   public let supportedDeviceTypes: [SimctlSupportedDeviceType]
 
   private enum CodingKeys: String, CodingKey {
@@ -14,6 +15,7 @@ public struct SimctlRuntime: Decodable, Equatable {
     case buildVersion = "buildversion"
     case platform
     case isAvailable
+    case runtimeRoot
     case supportedDeviceTypes
   }
 
@@ -26,6 +28,7 @@ public struct SimctlRuntime: Decodable, Equatable {
     buildVersion = try container.decodeIfPresent(String.self, forKey: .buildVersion)
     platform = try container.decodeIfPresent(String.self, forKey: .platform)
     isAvailable = try container.decodeIfPresent(Bool.self, forKey: .isAvailable)
+    runtimeRoot = try container.decodeIfPresent(String.self, forKey: .runtimeRoot)
     supportedDeviceTypes = try container.decodeIfPresent(
       [SimctlSupportedDeviceType].self,
       forKey: .supportedDeviceTypes

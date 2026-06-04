@@ -89,4 +89,82 @@ extension AppContainerScanner {
 
     return apps
   }
+
+  func scanRuntimeSystemApps(
+    in runtimeRoot: URL?,
+    device: SimulatorDevice,
+    warnings: inout [SimulatorWarning]
+  ) -> [InstalledApp] {
+    guard !hidesSystemApps,
+          let runtimeRoot
+    else {
+      return []
+    }
+
+    let roots = [
+      runtimeRoot.appendingPathComponent("Applications", isDirectory: true),
+      runtimeRoot.appendingPathComponent("System/Applications", isDirectory: true)
+    ]
+
+    return roots.flatMap { root in
+      systemApps(in: root, device: device, warnings: &warnings)
+    }
+  }
+
+  func systemApps(
+    in root: URL,
+    device: SimulatorDevice,
+    warnings: inout [SimulatorWarning]
+  ) -> [InstalledApp] {
+    guard directoryExists(at: root) else {
+      return []
+    }
+
+    let appBundles: [URL]
+    do {
+      appBundles = try fileManager.contentsOfDirectory(
+        at: root,
+        includingPropertiesForKeys: [.isDirectoryKey],
+        options: [.skipsHiddenFiles, .skipsPackageDescendants]
+      )
+      .filter { $0.pathExtension == "app" && directoryExists(at: $0) }
+      .sorted { $0.lastPathComponent < $1.lastPathComponent }
+    } catch {
+      warnings.append(fileWarning(
+        id: "apps-\(device.id)-system-\(root.lastPathComponent)-read-failed",
+        message: "System app bundles for \(device.name) could not be read: \(error.localizedDescription)",
+        relatedID: device.id,
+        error: error
+      ))
+      return []
+    }
+
+    return appBundles.compactMap { appBundle in
+      let bundleMetadata = readBundleMetadata(
+        from: appBundle,
+        device: device,
+        warnings: &warnings
+      )
+      guard let bundleID = nonEmpty(bundleMetadata.bundleID),
+            isSystemBundleID(bundleID)
+      else {
+        return nil
+      }
+
+      return InstalledApp(
+        id: "\(device.id):\(bundleID)",
+        bundleID: bundleID,
+        displayName: nonEmpty(bundleMetadata.displayName) ?? bundleID,
+        version: nonEmpty(bundleMetadata.version),
+        build: nonEmpty(bundleMetadata.build),
+        deviceID: device.id,
+        bundleContainer: nil,
+        dataContainer: nil,
+        appBundlePath: appBundle,
+        appGroups: [],
+        iconPath: bundleMetadata.iconPath,
+        isSystemApp: true
+      )
+    }
+  }
 }

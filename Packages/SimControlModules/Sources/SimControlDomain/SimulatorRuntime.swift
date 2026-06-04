@@ -1,3 +1,5 @@
+import Foundation
+
 /// A platform family supported by CoreSimulator inventory.
 ///
 /// The value is intentionally small and tolerant of unknown platform strings so
@@ -43,6 +45,9 @@ public struct SimulatorRuntime: Identifiable, Equatable, Hashable {
   /// Indicates whether CoreSimulator reports the runtime as available.
   public let isAvailable: Bool
 
+  /// The runtime root directory URL, when CoreSimulator provides it.
+  public let runtimeRoot: URL?
+
   /// Device type identifiers reported as compatible with this runtime.
   public let supportedDeviceTypeIDs: [String]
 
@@ -54,6 +59,7 @@ public struct SimulatorRuntime: Identifiable, Equatable, Hashable {
     buildVersion: String,
     platform: SimulatorPlatform,
     isAvailable: Bool,
+    runtimeRoot: URL? = nil,
     supportedDeviceTypeIDs: [String]
   ) {
     self.id = id
@@ -62,6 +68,7 @@ public struct SimulatorRuntime: Identifiable, Equatable, Hashable {
     self.buildVersion = buildVersion
     self.platform = platform
     self.isAvailable = isAvailable
+    self.runtimeRoot = runtimeRoot
     self.supportedDeviceTypeIDs = supportedDeviceTypeIDs
   }
 }

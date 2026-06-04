@@ -32,6 +32,7 @@ struct SimulatorRepositoryTests {
               "buildversion": "23E244",
               "platform": "iOS",
               "isAvailable": true,
+              "runtimeRoot": "/tmp/CoreSimulator/Runtimes/iOS.runtime/RuntimeRoot",
               "supportedDeviceTypes": [
                 {
                   "identifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro"
@@ -122,6 +123,7 @@ struct SimulatorRepositoryTests {
     #expect(runtime.buildVersion == "23E244")
     #expect(runtime.platform == .iOS)
     #expect(runtime.isAvailable)
+    #expect(runtime.runtimeRoot == URL(fileURLWithPath: "/tmp/CoreSimulator/Runtimes/iOS.runtime/RuntimeRoot"))
     #expect(runtime.supportedDeviceTypeIDs == ["com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro"])
 
     let deviceType = try #require(snapshot.deviceTypes.first)
@@ -205,6 +207,7 @@ struct SimulatorRepositoryTests {
       message: "Fixture scanner warning.",
       relatedID: "PHONE-UDID"
     )
+    let expectedRuntimeRoot = URL(fileURLWithPath: "/tmp/CoreSimulator/Runtimes/iOS.runtime/RuntimeRoot")
     let recorder = try RepositoryServiceRecorder(
       selectedXcodePathResult: makeSelectedXcodePathResult(),
       listResult: makeListResult(
@@ -214,7 +217,8 @@ struct SimulatorRepositoryTests {
             {
               "identifier": "runtime-ios",
               "name": "iOS 26.4",
-              "platform": "iOS"
+              "platform": "iOS",
+              "runtimeRoot": "/tmp/CoreSimulator/Runtimes/iOS.runtime/RuntimeRoot"
             }
           ],
           "devicetypes": [],
@@ -241,7 +245,8 @@ struct SimulatorRepositoryTests {
     )
     let repository = makeRepository(
       recorder: recorder,
-      installedApps: { device in
+      installedApps: { device, runtimeRoot in
+        #expect(runtimeRoot == expectedRuntimeRoot)
         if device.id == "PHONE-UDID" {
           return AppContainerScanner.ScanResult(apps: [app], warnings: [scannerWarning])
         }
@@ -438,7 +443,7 @@ struct SimulatorRepositoryTests {
   private func makeRepository(
     recorder: RepositoryServiceRecorder,
     now: @escaping () -> Date = { Date(timeIntervalSince1970: 500) },
-    installedApps: @escaping SimulatorRepository.InstalledAppsProvider = { _ in
+    installedApps: @escaping SimulatorRepository.InstalledAppsProvider = { _, _ in
       AppContainerScanner.ScanResult(apps: [], warnings: [])
     }
   ) -> SimulatorRepository {
@@ -450,8 +455,8 @@ struct SimulatorRepositoryTests {
       list: {
         await recorder.list()
       },
-      installedApps: { device in
-        await installedApps(device)
+      installedApps: { device, runtimeRoot in
+        await installedApps(device, runtimeRoot)
       }
     )
   }

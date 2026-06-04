@@ -7,7 +7,7 @@ import SimControlDomain
 public actor SimulatorRepository {
   typealias SelectedXcodePathProvider = () async -> CoreSimulatorService.DeveloperPathResult
   typealias SimctlListProvider = () async -> CoreSimulatorService.ListResult
-  typealias InstalledAppsProvider = (SimulatorDevice) async -> AppContainerScanner.ScanResult
+  typealias InstalledAppsProvider = (SimulatorDevice, URL?) async -> AppContainerScanner.ScanResult
 
   let selectedXcodePath: SelectedXcodePathProvider
   let list: SimctlListProvider
@@ -29,8 +29,8 @@ public actor SimulatorRepository {
       list: {
         await coreSimulatorService.list()
       },
-      installedApps: { device in
-        appContainerScanner.scanInstalledApps(for: device)
+      installedApps: { device, runtimeRoot in
+        appContainerScanner.scanInstalledApps(for: device, runtimeRoot: runtimeRoot)
       }
     )
   }
@@ -39,7 +39,7 @@ public actor SimulatorRepository {
     now: @escaping () -> Date = Date.init,
     selectedXcodePath: @escaping SelectedXcodePathProvider,
     list: @escaping SimctlListProvider,
-    installedApps: @escaping InstalledAppsProvider = { _ in
+    installedApps: @escaping InstalledAppsProvider = { _, _ in
       AppContainerScanner.ScanResult(apps: [], warnings: [])
     }
   ) {

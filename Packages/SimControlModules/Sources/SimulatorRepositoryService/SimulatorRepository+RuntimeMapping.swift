@@ -71,6 +71,7 @@ extension SimulatorRepository {
         buildVersion: nonEmpty(sourceRuntime.buildVersion) ?? "",
         platform: platform,
         isAvailable: isAvailable,
+        runtimeRoot: fileURL(from: sourceRuntime.runtimeRoot),
         supportedDeviceTypeIDs: supportedDeviceTypeIDs
       )
     }

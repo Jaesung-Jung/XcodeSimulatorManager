@@ -20,6 +20,18 @@ extension AppContainerScanner {
       || groupID.contains(".groups.com.apple.")
   }
 
+  func uniqued(_ apps: [InstalledApp]) -> [InstalledApp] {
+    var seenIDs = Set<InstalledApp.ID>()
+    var uniqueApps: [InstalledApp] = []
+
+    for app in apps where !seenIDs.contains(app.id) {
+      seenIDs.insert(app.id)
+      uniqueApps.append(app)
+    }
+
+    return uniqueApps
+  }
+
   func nonEmpty(_ value: String?) -> String? {
     guard let trimmedValue = value?.trimmingCharacters(in: .whitespacesAndNewlines),
           !trimmedValue.isEmpty
