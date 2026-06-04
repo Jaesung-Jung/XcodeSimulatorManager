@@ -24,7 +24,7 @@ extension DeviceListView {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
       } else {
         ScrollView {
-          LazyVStack(alignment: .leading, spacing: 0) {
+          LazyVStack(alignment: .leading, spacing: 4) {
             ForEach(store.devices) { device in
               Button {
                 store.send(.selectionChanged(device.id))
@@ -33,7 +33,6 @@ extension DeviceListView {
                   device: device,
                   runtime: store.runtimeByID[device.runtimeID],
                   deviceType: store.deviceTypeByID[device.deviceTypeID],
-                  installedAppCount: installedAppCount(for: device),
                   isPinned: store.filters.pinnedDeviceIDs.contains(device.id),
                   onPin: {
                     store.send(.pinButtonTapped(device.id))
@@ -58,14 +57,6 @@ extension DeviceListView {
         }
         .scrollIndicators(.hidden)
       }
-    }
-
-    private func installedAppCount(for device: SimulatorDevice) -> Int? {
-      guard store.installedAppsAvailability == .loaded else {
-        return nil
-      }
-
-      return store.installedAppsByDeviceID[device.id]?.count ?? 0
     }
   }
 }

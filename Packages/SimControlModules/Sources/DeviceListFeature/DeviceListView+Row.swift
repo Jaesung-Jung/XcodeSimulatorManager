@@ -8,7 +8,6 @@ extension DeviceListView {
     let device: SimulatorDevice
     let runtime: SimulatorRuntime?
     let deviceType: SimulatorDeviceType?
-    let installedAppCount: Int?
     let isPinned: Bool
     let onPin: () -> Void
 
@@ -19,60 +18,47 @@ extension DeviceListView {
     }
 
     var body: some View {
-      HStack(spacing: 10) {
-        Image(systemName: device.symbolName)
-          .font(.title3)
-          .foregroundStyle(.secondary)
-          .frame(width: 24)
-          .accessibilityHidden(true)
+      HStack(spacing: 8) {
+        Circle()
+          .fill(device.state.statusTint)
+          .frame(width: 6)
 
-        VStack(alignment: .leading, spacing: 4) {
-          Text(device.name)
-            .font(.subheadline.weight(.medium))
-            .lineLimit(1)
-
-          Text(subtitle)
-            .font(.caption)
+        HStack(spacing: 10) {
+          Image(systemName: device.symbolName)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
             .foregroundStyle(.secondary)
-            .lineLimit(1)
+            .frame(width: 32, height: 32)
+            .accessibilityHidden(true)
 
-          HStack(spacing: 6) {
-            StatusBadge(
-              title: LocalizedStringKey(device.state.displayTitle)
-            )
-            .tint(device.state.statusTint)
+          VStack(alignment: .leading, spacing: 4) {
+            Text(device.name)
+              .font(.subheadline.weight(.medium))
+              .lineLimit(1)
 
-            if let installedAppCount, installedAppCount > 0 {
-              StatusBadge(
-                title: "\(installedAppCount) apps"
-              )
-            }
-          }
-        }
-
-        Spacer(minLength: 8)
-
-        VStack(alignment: .trailing, spacing: 6) {
-          Button {
-            onPin()
-          } label: {
-            Image(systemName: isPinned ? "pin.fill" : "pin")
-              .foregroundStyle(isPinned ? Color.accentColor : Color.secondary)
-          }
-          .buttonStyle(.plain)
-          .help(isPinned ? "Unpin device" : "Pin device")
-
-          if device.dataPathSize != nil {
-            Text(device.dataPathSizeTitle)
-              .font(.caption2)
+            Text(subtitle)
+              .font(.caption)
               .foregroundStyle(.secondary)
               .lineLimit(1)
           }
+
+          Spacer(minLength: 8)
+
+          VStack(alignment: .trailing, spacing: 6) {
+            Button {
+              onPin()
+            } label: {
+              Image(systemName: isPinned ? "pin.fill" : "pin")
+                .foregroundStyle(isPinned ? Color.accentColor : Color.secondary)
+            }
+            .buttonStyle(.plain)
+            .help(isPinned ? "Unpin device" : "Pin device")
+          }
         }
+        .padding(.vertical, 5)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(device.name), \(subtitle), \(device.state.displayTitle)")
       }
-      .padding(.vertical, 5)
-      .accessibilityElement(children: .combine)
-      .accessibilityLabel("\(device.name), \(subtitle), \(device.state.displayTitle)")
     }
   }
 }
@@ -116,7 +102,6 @@ extension DeviceListView {
     device: device,
     runtime: runtime,
     deviceType: deviceType,
-    installedAppCount: 3,
     isPinned: true,
     onPin: {}
   )

@@ -1,7 +1,7 @@
 import ComposableArchitecture
-import DeviceListFeature
 import SimControlDomain
 import Testing
+@testable import DeviceListFeature
 
 @Suite("DeviceListFeatureTests")
 @MainActor
@@ -41,5 +41,28 @@ struct DeviceListFeatureTests {
     await store.send(.selectionChanged("device-1")) {
       $0.selectedDeviceID = "device-1"
     }
+  }
+
+  @Test func deviceRowCanBeConstructedWithoutInstalledAppCount() {
+    _ = DeviceListView.Row(
+      device: SimulatorDevice(
+        id: "device-1",
+        udid: "device-1",
+        name: "iPhone 16",
+        runtimeID: "runtime-1",
+        deviceTypeID: "type-1",
+        platform: .iOS,
+        state: .booted,
+        isAvailable: true,
+        dataPath: nil,
+        logPath: nil,
+        lastBootedAt: nil,
+        dataPathSize: nil
+      ),
+      runtime: nil,
+      deviceType: nil,
+      isPinned: false,
+      onPin: {}
+    )
   }
 }
