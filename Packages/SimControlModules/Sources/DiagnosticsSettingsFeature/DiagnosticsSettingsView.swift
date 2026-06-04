@@ -1,5 +1,4 @@
 import ComposableArchitecture
-import SimControlLocalization
 import SwiftUI
 
 /// Renders diagnostics settings.
@@ -20,10 +19,10 @@ public struct DiagnosticsSettingsView: View {
   public var body: some View {
     Section {
       Toggle(isOn: enablesDiagnostics) {
-        Text(.localizable("settings.diagnostics.enable_diagnostics"), bundle: .module)
+        Text(.settingsDiagnosticsEnableDiagnostics)
       }
     } header: {
-      Text(.localizable("settings.diagnostics.section"), bundle: .module)
+      Text(.settingsDiagnosticsSection)
     }
   }
 }

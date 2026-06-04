@@ -32,9 +32,7 @@ extension MainWindowView {
         }
       case .erase(let confirmationState):
         DeviceDestructiveConfirmationView(
-          titleKey: "main_window.erase.title",
-          messageKey: "main_window.erase.message",
-          actionTitleKey: "main_window.erase.action",
+          kind: .erase,
           systemImage: "eraser",
           confirmationState: confirmationState
         ) { confirmationState in
@@ -42,9 +40,7 @@ extension MainWindowView {
         }
       case .delete(let confirmationState):
         DeviceDestructiveConfirmationView(
-          titleKey: "main_window.delete.title",
-          messageKey: "main_window.delete.message",
-          actionTitleKey: "main_window.delete.action",
+          kind: .delete,
           systemImage: "trash",
           confirmationState: confirmationState
         ) { confirmationState in
@@ -64,9 +60,7 @@ extension MainWindowView {
         }
       case .uninstallApp(let confirmationState):
         AppDestructiveConfirmationView(
-          titleKey: "main_window.uninstall_app.title",
-          messageKey: "main_window.uninstall_app.message",
-          actionTitleKey: "main_window.uninstall_app.action",
+          kind: .uninstall,
           systemImage: "trash",
           confirmationState: confirmationState
         ) { confirmationState in
@@ -74,9 +68,7 @@ extension MainWindowView {
         }
       case .resetAppSandbox(let confirmationState):
         AppDestructiveConfirmationView(
-          titleKey: "main_window.reset_sandbox.title",
-          messageKey: "main_window.reset_sandbox.message",
-          actionTitleKey: "main_window.reset_sandbox.action",
+          kind: .resetSandbox,
           systemImage: "folder.badge.minus",
           confirmationState: confirmationState
         ) { confirmationState in

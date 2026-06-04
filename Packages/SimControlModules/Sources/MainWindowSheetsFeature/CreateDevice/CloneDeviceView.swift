@@ -1,4 +1,3 @@
-import SimControlLocalization
 import SwiftUI
 
 /// Sheet view for entering the name of a cloned simulator device.
@@ -31,19 +30,19 @@ public struct CloneDeviceView: View {
             .foregroundStyle(.secondary)
 
           TextField(text: $formState.name) {
-            Text(.localizable("main_window.clone.new_name"), bundle: .module)
+            Text(.mainWindowCloneNewName)
           }
             .textFieldStyle(.roundedBorder)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String.localizable("main_window.clone.title", bundle: .module))
+      .navigationTitle(String(localized: .mainWindowCloneTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.localizable("main_window.common.cancel"), bundle: .module)
+            Text(.mainWindowCommonCancel)
           }
         }
 
@@ -52,7 +51,7 @@ public struct CloneDeviceView: View {
             onSubmit(formState)
             dismiss()
           } label: {
-            Text(.localizable("main_window.clone.action"), bundle: .module)
+            Text(.mainWindowCloneAction)
           }
           .disabled(!canSubmit)
         }

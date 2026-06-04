@@ -1,5 +1,4 @@
 import MainWindowDisplaySupport
-import SimControlLocalization
 import SimControlDomain
 import SwiftUI
 
@@ -36,19 +35,19 @@ public struct InstallAppOnSimulatorView: View {
       Form {
         Section {
           LabeledContent(
-            String.localizable("main_window.common.name", bundle: .module),
+            String(localized: .mainWindowCommonName),
             value: formState.appName
           )
           LabeledContent(
-            String.localizable("main_window.common.bundle_id", bundle: .module),
+            String(localized: .mainWindowCommonBundleId),
             value: formState.bundleID
           )
           LabeledContent(
-            String.localizable("main_window.common.bundle", bundle: .module),
+            String(localized: .mainWindowCommonBundle),
             value: formState.appBundlePath.path
           )
         } header: {
-          Text(.localizable("main_window.common.app"), bundle: .module)
+          Text(.mainWindowCommonApp)
         }
 
         Section {
@@ -58,36 +57,33 @@ public struct InstallAppOnSimulatorView: View {
                 .tag(candidate.id)
             }
           } label: {
-            Text(.localizable("main_window.common.simulator"), bundle: .module)
+            Text(.mainWindowCommonSimulator)
           }
 
           Toggle(isOn: $formState.launchAfterInstall) {
-            Text(.localizable("main_window.install_app.launch_after_install"), bundle: .module)
+            Text(.mainWindowInstallAppLaunchAfterInstall)
           }
 
           LabeledContent(
-            String.localizable("main_window.common.state", bundle: .module),
-            value: selectedTarget?.state.displayTitle ?? String.localizable(
-              "main_window.common.not_available",
-              bundle: .module
-            )
+            String(localized: .mainWindowCommonState),
+            value: selectedTarget?.state.displayTitle ?? String(localized: .mainWindowCommonNotAvailable)
           )
           LabeledContent(
-            String.localizable("main_window.common.udid", bundle: .module),
-            value: selectedTarget?.udid ?? String.localizable("main_window.common.not_available", bundle: .module)
+            String(localized: .mainWindowCommonUdid),
+            value: selectedTarget?.udid ?? String(localized: .mainWindowCommonNotAvailable)
           )
         } header: {
-          Text(.localizable("main_window.common.target"), bundle: .module)
+          Text(.mainWindowCommonTarget)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String.localizable("main_window.install_app.title", bundle: .module))
+      .navigationTitle(String(localized: .mainWindowInstallAppTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.localizable("main_window.common.cancel"), bundle: .module)
+            Text(.mainWindowCommonCancel)
           }
         }
 
@@ -96,7 +92,7 @@ public struct InstallAppOnSimulatorView: View {
             onSubmit(formState)
             dismiss()
           } label: {
-            Text(.localizable("main_window.install_app.action"), bundle: .module)
+            Text(.mainWindowInstallAppAction)
           }
           .disabled(!canSubmit)
         }

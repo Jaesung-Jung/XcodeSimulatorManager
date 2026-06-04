@@ -1,29 +1,22 @@
-import SimControlLocalization
 import SwiftUI
 
 /// Confirmation sheet for destructive simulator device commands.
 public struct DeviceDestructiveConfirmationView: View {
   @Environment(\.dismiss) private var dismiss
 
-  let titleKey: String
-  let messageKey: String
-  let actionTitleKey: String
+  let kind: DeviceDestructiveConfirmationKind
   let systemImage: String
   let confirmationState: DeviceDestructiveConfirmationState
   let onConfirm: (DeviceDestructiveConfirmationState) -> Void
 
-  /// Creates a device confirmation sheet using localized title, message, and action keys.
+  /// Creates a device confirmation sheet using a destructive device action kind.
   public init(
-    titleKey: String,
-    messageKey: String,
-    actionTitleKey: String,
+    kind: DeviceDestructiveConfirmationKind,
     systemImage: String,
     confirmationState: DeviceDestructiveConfirmationState,
     onConfirm: @escaping (DeviceDestructiveConfirmationState) -> Void
   ) {
-    self.titleKey = titleKey
-    self.messageKey = messageKey
-    self.actionTitleKey = actionTitleKey
+    self.kind = kind
     self.systemImage = systemImage
     self.confirmationState = confirmationState
     self.onConfirm = onConfirm
@@ -34,7 +27,7 @@ public struct DeviceDestructiveConfirmationView: View {
       Form {
         Section {
           Label {
-            Text(.localizable(messageKey), bundle: .module)
+            Text(kind.message)
           } icon: {
             Image(systemName: systemImage)
           }
@@ -42,25 +35,25 @@ public struct DeviceDestructiveConfirmationView: View {
 
         Section {
           LabeledContent(
-            String.localizable("main_window.common.name", bundle: .module),
+            String(localized: .mainWindowCommonName),
             value: confirmationState.deviceName
           )
           LabeledContent(
-            String.localizable("main_window.common.udid", bundle: .module),
+            String(localized: .mainWindowCommonUdid),
             value: confirmationState.deviceUDID
           )
         } header: {
-          Text(.localizable("main_window.common.device"), bundle: .module)
+          Text(.mainWindowCommonDevice)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String.localizable(titleKey, bundle: .module))
+      .navigationTitle(String(localized: kind.title))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.localizable("main_window.common.cancel"), bundle: .module)
+            Text(.mainWindowCommonCancel)
           }
         }
 
@@ -69,7 +62,7 @@ public struct DeviceDestructiveConfirmationView: View {
             onConfirm(confirmationState)
             dismiss()
           } label: {
-            Text(.localizable(actionTitleKey), bundle: .module)
+            Text(kind.actionTitle)
           }
         }
       }
@@ -84,9 +77,7 @@ public struct DeviceDestructiveConfirmationView: View {
 
 #Preview("Erase Simulator Confirmation") {
   DeviceDestructiveConfirmationView(
-    titleKey: "main_window.erase.title",
-    messageKey: "main_window.erase.message",
-    actionTitleKey: "main_window.erase.action",
+    kind: .erase,
     systemImage: "eraser",
     confirmationState: DeviceDestructiveConfirmationState(
       deviceID: "PREVIEW-DEVICE-1",

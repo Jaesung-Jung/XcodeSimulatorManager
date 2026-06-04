@@ -1,4 +1,3 @@
-import SimControlLocalization
 import SimControlDomain
 import SwiftUI
 
@@ -39,18 +38,14 @@ public struct CreateDeviceView: View {
 
   private var compatibilityMessage: Text {
     guard let selectedRuntime else {
-      return Text(.localizable("main_window.create.no_runtime"), bundle: .module)
+      return Text(.mainWindowCreateNoRuntime)
     }
 
     guard !selectedRuntime.supportedDeviceTypeIDs.isEmpty else {
-      return Text(.localizable("main_window.create.unreported_compatibility"), bundle: .module)
+      return Text(.mainWindowCreateUnreportedCompatibility)
     }
 
-    return Text.localizable(
-      "main_window.create.compatible_device_types_count",
-      bundle: .module,
-      compatibleDeviceTypes.count
-    )
+    return Text(.mainWindowCreateCompatibleDeviceTypesCount(count: compatibleDeviceTypes.count))
   }
 
   private var canSubmit: Bool {
@@ -87,13 +82,13 @@ public struct CreateDeviceView: View {
         )
       }
       .formStyle(.grouped)
-      .navigationTitle(String.localizable("main_window.create.title", bundle: .module))
+      .navigationTitle(String(localized: .mainWindowCreateTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.localizable("main_window.common.cancel"), bundle: .module)
+            Text(.mainWindowCommonCancel)
           }
         }
 
@@ -102,7 +97,7 @@ public struct CreateDeviceView: View {
             onSubmit(formState)
             dismiss()
           } label: {
-            Text(.localizable("main_window.create.action"), bundle: .module)
+            Text(.mainWindowCreateAction)
           }
           .disabled(!canSubmit)
         }

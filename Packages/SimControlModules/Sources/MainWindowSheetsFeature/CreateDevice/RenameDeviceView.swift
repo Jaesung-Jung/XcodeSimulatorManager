@@ -1,4 +1,3 @@
-import SimControlLocalization
 import SwiftUI
 
 /// Sheet view for entering a new simulator device name.
@@ -32,19 +31,19 @@ public struct RenameDeviceView: View {
             .foregroundStyle(.secondary)
 
           TextField(text: $formState.name) {
-            Text(.localizable("main_window.common.name"), bundle: .module)
+            Text(.mainWindowCommonName)
           }
             .textFieldStyle(.roundedBorder)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String.localizable("main_window.rename.title", bundle: .module))
+      .navigationTitle(String(localized: .mainWindowRenameTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.localizable("main_window.common.cancel"), bundle: .module)
+            Text(.mainWindowCommonCancel)
           }
         }
 
@@ -53,7 +52,7 @@ public struct RenameDeviceView: View {
             onSubmit(formState)
             dismiss()
           } label: {
-            Text(.localizable("main_window.rename.action"), bundle: .module)
+            Text(.mainWindowRenameAction)
           }
           .disabled(!canSubmit)
         }

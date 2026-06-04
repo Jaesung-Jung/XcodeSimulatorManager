@@ -1,4 +1,3 @@
-import SimControlLocalization
 import SimControlDomain
 import SwiftUI
 
@@ -47,7 +46,7 @@ public struct PairDevicesView: View {
                 .tag(candidate.id)
             }
           } label: {
-            Text(.localizable("main_window.common.phone"), bundle: .module)
+            Text(.mainWindowCommonPhone)
           }
 
           Picker(selection: $formState.watchDeviceID) {
@@ -56,31 +55,31 @@ public struct PairDevicesView: View {
                 .tag(candidate.id)
             }
           } label: {
-            Text(.localizable("main_window.common.watch"), bundle: .module)
+            Text(.mainWindowCommonWatch)
           }
         }
 
         Section {
           LabeledContent(
-            String.localizable("main_window.pair.phone_udid", bundle: .module),
-            value: selectedPhone?.udid ?? String.localizable("main_window.common.not_available", bundle: .module)
+            String(localized: .mainWindowPairPhoneUdid),
+            value: selectedPhone?.udid ?? String(localized: .mainWindowCommonNotAvailable)
           )
           LabeledContent(
-            String.localizable("main_window.pair.watch_udid", bundle: .module),
-            value: selectedWatch?.udid ?? String.localizable("main_window.common.not_available", bundle: .module)
+            String(localized: .mainWindowPairWatchUdid),
+            value: selectedWatch?.udid ?? String(localized: .mainWindowCommonNotAvailable)
           )
         } header: {
-          Text(.localizable("main_window.pair.selected_devices"), bundle: .module)
+          Text(.mainWindowPairSelectedDevices)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String.localizable("main_window.pair.title", bundle: .module))
+      .navigationTitle(String(localized: .mainWindowPairTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.localizable("main_window.common.cancel"), bundle: .module)
+            Text(.mainWindowCommonCancel)
           }
         }
 
@@ -89,7 +88,7 @@ public struct PairDevicesView: View {
             onSubmit(formState)
             dismiss()
           } label: {
-            Text(.localizable("main_window.pair.action"), bundle: .module)
+            Text(.mainWindowPairAction)
           }
           .disabled(!canSubmit)
         }

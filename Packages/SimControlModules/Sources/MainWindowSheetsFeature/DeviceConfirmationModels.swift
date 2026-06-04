@@ -1,3 +1,38 @@
+import Foundation
+
+/// Destructive simulator device confirmation variants.
+public enum DeviceDestructiveConfirmationKind: Equatable {
+  case erase
+  case delete
+
+  var title: LocalizedStringResource {
+    switch self {
+    case .erase:
+      .mainWindowEraseTitle
+    case .delete:
+      .mainWindowDeleteTitle
+    }
+  }
+
+  var message: LocalizedStringResource {
+    switch self {
+    case .erase:
+      .mainWindowEraseMessage
+    case .delete:
+      .mainWindowDeleteMessage
+    }
+  }
+
+  var actionTitle: LocalizedStringResource {
+    switch self {
+    case .erase:
+      .mainWindowEraseAction
+    case .delete:
+      .mainWindowDeleteAction
+    }
+  }
+}
+
 /// Confirmation payload for destructive simulator device commands.
 public struct DeviceDestructiveConfirmationState: Equatable {
   public let deviceID: String

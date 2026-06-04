@@ -1,0 +1,39 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "settings.link_folder.path": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Folder Path"
+          }
+        }
+      }
+    },
+    "settings.link_folder.path_prompt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "~/Library/Application Support/SimControl/Links"
+          }
+        }
+      }
+    },
+    "settings.link_folder.section": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link Folder"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.1"
+}

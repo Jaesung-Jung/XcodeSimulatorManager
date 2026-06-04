@@ -1,0 +1,39 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "settings.xcode.developer_directory": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Developer Directory"
+          }
+        }
+      }
+    },
+    "settings.xcode.developer_directory_prompt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "/Applications/Xcode.app/Contents/Developer"
+          }
+        }
+      }
+    },
+    "settings.xcode.section": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Xcode"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.1"
+}

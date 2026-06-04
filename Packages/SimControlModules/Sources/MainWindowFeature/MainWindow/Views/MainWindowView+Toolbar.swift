@@ -1,5 +1,4 @@
 import ComposableArchitecture
-import SimControlLocalization
 import SwiftUI
 
 // MARK: - MainWindowView.MainToolbar
@@ -31,13 +30,13 @@ extension MainWindowView {
         store.send(.createSimulatorButtonTapped)
       } label: {
         Label {
-          Text(.localizable("main_window.toolbar.create_simulator"), bundle: .module)
+          Text(.mainWindowToolbarCreateSimulator)
         } icon: {
           Image(systemName: "plus")
         }
       }
       .disabled(!store.canCreateDevice)
-      .help(String.localizable("main_window.toolbar.create_simulator.help", bundle: .module))
+      .help(String(localized: .mainWindowToolbarCreateSimulatorHelp))
     }
 
     private var cloneButton: some View {
@@ -45,13 +44,13 @@ extension MainWindowView {
         store.send(.cloneSelectedSimulatorButtonTapped)
       } label: {
         Label {
-          Text(.localizable("main_window.toolbar.clone_simulator"), bundle: .module)
+          Text(.mainWindowToolbarCloneSimulator)
         } icon: {
           Image(systemName: "plus.square.on.square")
         }
       }
       .disabled(!store.canCloneSelectedDevice)
-      .help(String.localizable("main_window.toolbar.clone_simulator.help", bundle: .module))
+      .help(String(localized: .mainWindowToolbarCloneSimulatorHelp))
     }
 
     private var pairButton: some View {
@@ -59,13 +58,13 @@ extension MainWindowView {
         store.send(.pairDevicesButtonTapped)
       } label: {
         Label {
-          Text(.localizable("main_window.toolbar.pair_simulators"), bundle: .module)
+          Text(.mainWindowToolbarPairSimulators)
         } icon: {
           Image(systemName: "link")
         }
       }
       .disabled(!store.canPairDevices)
-      .help(String.localizable("main_window.toolbar.pair_simulators.help", bundle: .module))
+      .help(String(localized: .mainWindowToolbarPairSimulatorsHelp))
     }
 
     private var refreshButton: some View {
@@ -78,14 +77,14 @@ extension MainWindowView {
             .frame(width: 18, height: 18)
         } else {
           Label {
-            Text(.localizable("main_window.toolbar.refresh"), bundle: .module)
+            Text(.mainWindowToolbarRefresh)
           } icon: {
             Image(systemName: "arrow.clockwise")
           }
         }
       }
       .disabled(isRefreshing)
-      .help(String.localizable("main_window.toolbar.refresh.help", bundle: .module))
+      .help(String(localized: .mainWindowToolbarRefreshHelp))
       .keyboardShortcut("r", modifiers: .command)
     }
 
@@ -94,16 +93,13 @@ extension MainWindowView {
         isInspectorPresented.toggle()
       } label: {
         Label {
-          Text(.localizable("main_window.toolbar.inspector"), bundle: .module)
+          Text(.mainWindowToolbarInspector)
         } icon: {
           Image(systemName: "sidebar.trailing")
         }
       }
       .help(
-        String.localizable(
-          isInspectorPresented ? "main_window.toolbar.hide_inspector.help" : "main_window.toolbar.show_inspector.help",
-          bundle: .module
-        )
+        String(localized: isInspectorPresented ? .mainWindowToolbarHideInspectorHelp : .mainWindowToolbarShowInspectorHelp)
       )
     }
   }

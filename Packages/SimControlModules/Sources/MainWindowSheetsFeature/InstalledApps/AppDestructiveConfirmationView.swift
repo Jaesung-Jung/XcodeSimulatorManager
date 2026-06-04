@@ -1,29 +1,22 @@
-import SimControlLocalization
 import SwiftUI
 
 /// Confirmation sheet for destructive installed app commands.
 public struct AppDestructiveConfirmationView: View {
   @Environment(\.dismiss) private var dismiss
 
-  let titleKey: String
-  let messageKey: String
-  let actionTitleKey: String
+  let kind: AppDestructiveConfirmationKind
   let systemImage: String
   let confirmationState: AppDestructiveConfirmationState
   let onConfirm: (AppDestructiveConfirmationState) -> Void
 
-  /// Creates an app confirmation sheet using localized title, message, and action keys.
+  /// Creates an app confirmation sheet using a destructive installed app action kind.
   public init(
-    titleKey: String,
-    messageKey: String,
-    actionTitleKey: String,
+    kind: AppDestructiveConfirmationKind,
     systemImage: String,
     confirmationState: AppDestructiveConfirmationState,
     onConfirm: @escaping (AppDestructiveConfirmationState) -> Void
   ) {
-    self.titleKey = titleKey
-    self.messageKey = messageKey
-    self.actionTitleKey = actionTitleKey
+    self.kind = kind
     self.systemImage = systemImage
     self.confirmationState = confirmationState
     self.onConfirm = onConfirm
@@ -34,7 +27,7 @@ public struct AppDestructiveConfirmationView: View {
       Form {
         Section {
           Label {
-            Text(.localizable(messageKey), bundle: .module)
+            Text(kind.message)
           } icon: {
             Image(systemName: systemImage)
           }
@@ -42,49 +35,49 @@ public struct AppDestructiveConfirmationView: View {
 
         Section {
           LabeledContent(
-            String.localizable("main_window.common.name", bundle: .module),
+            String(localized: .mainWindowCommonName),
             value: confirmationState.appName
           )
           LabeledContent(
-            String.localizable("main_window.common.bundle_id", bundle: .module),
+            String(localized: .mainWindowCommonBundleId),
             value: confirmationState.bundleID
           )
         } header: {
-          Text(.localizable("main_window.common.app"), bundle: .module)
+          Text(.mainWindowCommonApp)
         }
 
         Section {
           LabeledContent(
-            String.localizable("main_window.common.name", bundle: .module),
+            String(localized: .mainWindowCommonName),
             value: confirmationState.deviceName
           )
           LabeledContent(
-            String.localizable("main_window.common.udid", bundle: .module),
+            String(localized: .mainWindowCommonUdid),
             value: confirmationState.deviceUDID
           )
         } header: {
-          Text(.localizable("main_window.common.device"), bundle: .module)
+          Text(.mainWindowCommonDevice)
         }
 
         if let dataContainerPath = confirmationState.dataContainerPath {
           Section {
             LabeledContent(
-              String.localizable("main_window.common.path", bundle: .module),
+              String(localized: .mainWindowCommonPath),
               value: dataContainerPath
             )
           } header: {
-            Text(.localizable("main_window.common.sandbox"), bundle: .module)
+            Text(.mainWindowCommonSandbox)
           }
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String.localizable(titleKey, bundle: .module))
+      .navigationTitle(String(localized: kind.title))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.localizable("main_window.common.cancel"), bundle: .module)
+            Text(.mainWindowCommonCancel)
           }
         }
 
@@ -93,7 +86,7 @@ public struct AppDestructiveConfirmationView: View {
             onConfirm(confirmationState)
             dismiss()
           } label: {
-            Text(.localizable(actionTitleKey), bundle: .module)
+            Text(kind.actionTitle)
           }
         }
       }
@@ -108,9 +101,7 @@ public struct AppDestructiveConfirmationView: View {
 
 #Preview("Reset Sandbox Confirmation") {
   AppDestructiveConfirmationView(
-    titleKey: "main_window.reset_sandbox.title",
-    messageKey: "main_window.reset_sandbox.message",
-    actionTitleKey: "main_window.reset_sandbox.action",
+    kind: .resetSandbox,
     systemImage: "folder.badge.minus",
     confirmationState: AppDestructiveConfirmationState(
       appID: "PREVIEW-DEVICE-1:com.example.preview",

@@ -1,4 +1,3 @@
-import SimControlLocalization
 import SimControlDomain
 import SwiftUI
 
@@ -12,7 +11,7 @@ struct CreateDeviceFormContent: View {
   var body: some View {
     Section {
       TextField(text: $formState.name) {
-        Text(.localizable("main_window.common.name"), bundle: .module)
+        Text(.mainWindowCommonName)
       }
         .textFieldStyle(.roundedBorder)
 
@@ -22,7 +21,7 @@ struct CreateDeviceFormContent: View {
             .tag(runtime.id)
         }
       } label: {
-        Text(.localizable("main_window.create.runtime"), bundle: .module)
+        Text(.mainWindowCreateRuntime)
       }
 
       Picker(selection: $formState.deviceTypeID) {
@@ -31,7 +30,7 @@ struct CreateDeviceFormContent: View {
             .tag(deviceType.id)
         }
       } label: {
-        Text(.localizable("main_window.create.device_type"), bundle: .module)
+        Text(.mainWindowCreateDeviceType)
       }
 
       compatibilityMessage

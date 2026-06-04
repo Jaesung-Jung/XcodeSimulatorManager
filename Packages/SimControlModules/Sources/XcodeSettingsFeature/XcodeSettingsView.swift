@@ -1,5 +1,4 @@
 import ComposableArchitecture
-import SimControlLocalization
 import SwiftUI
 
 /// Renders Xcode path settings.
@@ -21,12 +20,12 @@ public struct XcodeSettingsView: View {
     Section {
       TextField(
         text: preferredXcodeDeveloperPath,
-        prompt: Text(.localizable("settings.xcode.developer_directory_prompt"), bundle: .module)
+        prompt: Text(.settingsXcodeDeveloperDirectoryPrompt)
       ) {
-        Text(.localizable("settings.xcode.developer_directory"), bundle: .module)
+        Text(.settingsXcodeDeveloperDirectory)
       }
     } header: {
-      Text(.localizable("settings.xcode.section"), bundle: .module)
+      Text(.settingsXcodeSection)
     }
   }
 }

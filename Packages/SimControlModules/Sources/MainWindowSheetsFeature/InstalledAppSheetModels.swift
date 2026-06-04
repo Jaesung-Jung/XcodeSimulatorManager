@@ -1,6 +1,39 @@
 import Foundation
 import SimControlDomain
 
+/// Destructive installed app confirmation variants.
+public enum AppDestructiveConfirmationKind: Equatable {
+  case uninstall
+  case resetSandbox
+
+  var title: LocalizedStringResource {
+    switch self {
+    case .uninstall:
+      .mainWindowUninstallAppTitle
+    case .resetSandbox:
+      .mainWindowResetSandboxTitle
+    }
+  }
+
+  var message: LocalizedStringResource {
+    switch self {
+    case .uninstall:
+      .mainWindowUninstallAppMessage
+    case .resetSandbox:
+      .mainWindowResetSandboxMessage
+    }
+  }
+
+  var actionTitle: LocalizedStringResource {
+    switch self {
+    case .uninstall:
+      .mainWindowUninstallAppAction
+    case .resetSandbox:
+      .mainWindowResetSandboxAction
+    }
+  }
+}
+
 /// Confirmation payload for destructive installed app commands.
 public struct AppDestructiveConfirmationState: Equatable {
   public let appID: String
