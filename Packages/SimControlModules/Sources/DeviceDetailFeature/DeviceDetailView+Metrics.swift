@@ -52,6 +52,37 @@ extension DeviceDetailView {
   }
 }
 
+// MARK: - DeviceDetailView.MetricsGrid Preview
+
+#if DEBUG
+
+#Preview {
+  let device = SimulatorDevice(
+    id: "PREVIEW-DEVICE-1",
+    udid: "PREVIEW-DEVICE-1",
+    name: "iPhone 17 Pro",
+    runtimeID: "com.apple.CoreSimulator.SimRuntime.iOS-26-4",
+    deviceTypeID: "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+    platform: .iOS,
+    state: .booted,
+    isAvailable: true,
+    dataPath: nil,
+    logPath: nil,
+    lastBootedAt: Date(timeIntervalSince1970: 1_000),
+    dataPathSize: 5_200_000_000
+  )
+
+  DeviceDetailView.MetricsGrid(
+    device: device,
+    runtimeName: "iOS 26.4",
+    appMetricValue: "3"
+  )
+  .padding(20)
+  .frame(width: 560)
+}
+
+#endif
+
 // MARK: - DeviceDetailView.MetricTile
 
 extension DeviceDetailView {

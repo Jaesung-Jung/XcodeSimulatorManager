@@ -82,3 +82,33 @@ extension DeveloperToolsView {
     }
   }
 }
+
+// MARK: - LocationPanel Preview
+
+#if DEBUG
+
+#Preview {
+  DeveloperToolsView.LocationPanel(
+    preset: .constant(.applePark),
+    customLatitude: .constant("37.3349"),
+    customLongitude: .constant("-122.0090"),
+    recentLocations: [
+      DeveloperToolsFeature.LocationCoordinateInput(
+        name: "Preview",
+        latitude: "37.3349",
+        longitude: "-122.0090"
+      )
+    ],
+    disabledReason: nil,
+    clearDisabledReason: nil,
+    isSetRunning: false,
+    isClearRunning: false,
+    onRecentSelected: { _ in },
+    onSet: {},
+    onClear: {}
+  )
+  .padding(20)
+  .frame(width: 420)
+}
+
+#endif

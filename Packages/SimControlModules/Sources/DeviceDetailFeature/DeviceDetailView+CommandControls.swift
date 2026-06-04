@@ -167,3 +167,49 @@ extension DeviceDetailView {
     }
   }
 }
+
+// MARK: - DeviceCommandControls Preview
+
+#if DEBUG
+
+#Preview {
+  let device = SimulatorDevice(
+    id: "PREVIEW-DEVICE-1",
+    udid: "PREVIEW-DEVICE-1",
+    name: "iPhone 17 Pro",
+    runtimeID: "com.apple.CoreSimulator.SimRuntime.iOS-26-4",
+    deviceTypeID: "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+    platform: .iOS,
+    state: .booted,
+    isAvailable: true,
+    dataPath: URL(fileURLWithPath: "/tmp/PreviewDevice/data"),
+    logPath: URL(fileURLWithPath: "/tmp/PreviewDevice/logs"),
+    lastBootedAt: Date(timeIntervalSince1970: 1_000),
+    dataPathSize: 5_200_000_000
+  )
+
+  DeviceDetailView.DeviceCommandControls(
+    device: device,
+    pairSummary: nil,
+    deviceCommandState: nil,
+    appCommandState: nil,
+    isOpeningSimulatorApp: false,
+    onBoot: {},
+    onShutdown: {},
+    onOpenSimulatorApp: {},
+    onRename: {},
+    onErase: {},
+    onDelete: {},
+    onUnpair: { _ in },
+    onOpenDataFolder: {},
+    onCopyDataPath: {},
+    onOpenLogFolder: {},
+    onCopyLogPath: {},
+    onCopyUDID: {},
+    onCopyRuntimeIdentifier: {},
+    onCopyDeviceTypeIdentifier: {}
+  )
+  .padding(20)
+}
+
+#endif

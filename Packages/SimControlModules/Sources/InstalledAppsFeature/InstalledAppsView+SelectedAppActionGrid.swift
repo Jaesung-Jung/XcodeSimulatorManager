@@ -108,3 +108,50 @@ extension InstalledAppsView {
     }
   }
 }
+
+// MARK: - InstalledAppsView.SelectedAppActionGrid Preview
+
+#if DEBUG
+
+#Preview {
+  let app = InstalledApp(
+    id: "PREVIEW-DEVICE-1:com.example.preview",
+    bundleID: "com.example.preview",
+    displayName: "Preview App",
+    version: "1.0",
+    build: "100",
+    deviceID: "PREVIEW-DEVICE-1",
+    bundleContainer: URL(fileURLWithPath: "/tmp/PreviewApp/Bundle"),
+    dataContainer: URL(fileURLWithPath: "/tmp/PreviewApp/Data"),
+    appBundlePath: URL(fileURLWithPath: "/tmp/PreviewApp/Bundle/Preview.app"),
+    appGroups: [],
+    iconPath: nil
+  )
+
+  InstalledAppsView.SelectedAppActionGrid(
+    app: app,
+    appCommandState: nil,
+    canLaunch: true,
+    canTerminate: true,
+    canUninstall: true,
+    canResetSandbox: true,
+    canInstallOnAnotherSimulator: true,
+    canUsePaths: true,
+    onLaunch: {},
+    onTerminate: {},
+    onUninstall: {},
+    onResetSandbox: {},
+    onInstallOnAnotherSimulator: {},
+    onOpenBundleContainer: {},
+    onCopyBundleContainer: {},
+    onOpenDataContainer: {},
+    onCopyDataContainer: {},
+    onCopyBundleID: {},
+    onOpenAppGroup: { _ in },
+    onCopyAppGroup: { _ in }
+  )
+  .padding(20)
+  .frame(width: 520)
+}
+
+#endif

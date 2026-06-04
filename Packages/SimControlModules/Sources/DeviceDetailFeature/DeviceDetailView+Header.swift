@@ -99,3 +99,67 @@ extension DeviceDetailView {
     }
   }
 }
+
+// MARK: - DeviceDetailView.Header Preview
+
+#if DEBUG
+
+#Preview {
+  let runtime = SimulatorRuntime(
+    id: "com.apple.CoreSimulator.SimRuntime.iOS-26-4",
+    name: "iOS 26.4",
+    version: "26.4",
+    buildVersion: "23E244",
+    platform: .iOS,
+    isAvailable: true,
+    supportedDeviceTypeIDs: ["com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro"]
+  )
+  let deviceType = SimulatorDeviceType(
+    id: "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+    name: "iPhone 17 Pro",
+    productFamily: "iPhone",
+    modelIdentifier: "iPhone18,1"
+  )
+  let device = SimulatorDevice(
+    id: "PREVIEW-DEVICE-1",
+    udid: "PREVIEW-DEVICE-1",
+    name: "iPhone 17 Pro",
+    runtimeID: runtime.id,
+    deviceTypeID: deviceType.id,
+    platform: .iOS,
+    state: .booted,
+    isAvailable: true,
+    dataPath: URL(fileURLWithPath: "/tmp/PreviewDevice/data"),
+    logPath: URL(fileURLWithPath: "/tmp/PreviewDevice/logs"),
+    lastBootedAt: Date(timeIntervalSince1970: 1_000),
+    dataPathSize: 5_200_000_000
+  )
+
+  DeviceDetailView.Header(
+    device: device,
+    runtime: runtime,
+    deviceType: deviceType,
+    pairSummary: nil,
+    deviceCommandState: nil,
+    appCommandState: nil,
+    isOpeningSimulatorApp: false,
+    onBoot: {},
+    onShutdown: {},
+    onOpenSimulatorApp: {},
+    onRename: {},
+    onErase: {},
+    onDelete: {},
+    onUnpair: { _ in },
+    onOpenDataFolder: {},
+    onCopyDataPath: {},
+    onOpenLogFolder: {},
+    onCopyLogPath: {},
+    onCopyUDID: {},
+    onCopyRuntimeIdentifier: {},
+    onCopyDeviceTypeIdentifier: {}
+  )
+  .padding(20)
+  .frame(width: 720)
+}
+
+#endif

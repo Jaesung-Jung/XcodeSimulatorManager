@@ -27,3 +27,21 @@ public struct GeneralSettingsView: View {
     }
   }
 }
+
+// MARK: - GeneralSettingsView Preview
+
+#if DEBUG
+
+#Preview("General Settings") {
+  Form {
+    GeneralSettingsView(
+      store: Store(initialState: GeneralSettingsFeature.State(launchesAtLogin: true)) {
+        GeneralSettingsFeature()
+      }
+    )
+  }
+  .formStyle(.grouped)
+  .frame(width: 520)
+}
+
+#endif

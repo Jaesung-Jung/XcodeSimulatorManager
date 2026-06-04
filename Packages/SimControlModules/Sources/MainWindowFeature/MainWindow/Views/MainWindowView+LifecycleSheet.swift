@@ -93,3 +93,24 @@ extension MainWindowView {
     }
   }
 }
+
+// MARK: - LifecycleSheetContent Preview
+
+#if DEBUG
+
+#Preview("Clone Sheet Routing") {
+  MainWindowView.LifecycleSheetContent(
+    store: Store(initialState: MainWindowFeature.State.initial) {
+      MainWindowFeature()
+    },
+    sheet: .clone(
+      CloneDeviceFormState(
+        sourceDeviceID: "PREVIEW-DEVICE-1",
+        sourceName: "iPhone 17 Pro",
+        name: "iPhone 17 Pro Copy"
+      )
+    )
+  )
+}
+
+#endif

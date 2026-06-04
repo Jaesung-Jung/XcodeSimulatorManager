@@ -91,3 +91,27 @@ extension InspectorView {
     }
   }
 }
+
+// MARK: - InspectorView.FieldRow Preview
+
+#if DEBUG
+
+#Preview {
+  VStack(alignment: .leading, spacing: 12) {
+    InspectorView.FieldRow(
+      title: "Bundle ID",
+      value: "com.example.preview",
+      onOpen: {},
+      onCopy: {}
+    )
+
+    InspectorView.FieldRow(
+      title: "Data",
+      value: nil
+    )
+  }
+  .padding(20)
+  .frame(width: 320)
+}
+
+#endif

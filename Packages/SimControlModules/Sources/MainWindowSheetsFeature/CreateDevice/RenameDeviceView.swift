@@ -62,3 +62,19 @@ public struct RenameDeviceView: View {
     .frame(width: 420, height: 190)
   }
 }
+
+// MARK: - RenameDeviceView Preview
+
+#if DEBUG
+
+#Preview("Rename Simulator Sheet") {
+  RenameDeviceView(
+    formState: RenameDeviceFormState(
+      deviceID: "PREVIEW-DEVICE-1",
+      currentName: "iPhone 17 Pro",
+      name: "Renamed Simulator"
+    )
+  ) { _ in }
+}
+
+#endif

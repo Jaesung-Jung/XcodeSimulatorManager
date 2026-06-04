@@ -30,3 +30,25 @@ public struct XcodeSettingsView: View {
     }
   }
 }
+
+// MARK: - XcodeSettingsView Preview
+
+#if DEBUG
+
+#Preview("Xcode Settings") {
+  Form {
+    XcodeSettingsView(
+      store: Store(
+        initialState: XcodeSettingsFeature.State(
+          preferredXcodeDeveloperPath: "/Applications/Xcode.app/Contents/Developer"
+        )
+      ) {
+        XcodeSettingsFeature()
+      }
+    )
+  }
+  .formStyle(.grouped)
+  .frame(width: 520)
+}
+
+#endif

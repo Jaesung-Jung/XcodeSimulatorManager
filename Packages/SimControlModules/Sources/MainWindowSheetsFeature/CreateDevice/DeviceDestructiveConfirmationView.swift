@@ -77,3 +77,23 @@ public struct DeviceDestructiveConfirmationView: View {
     .frame(width: 460, height: 260)
   }
 }
+
+// MARK: - DeviceDestructiveConfirmationView Preview
+
+#if DEBUG
+
+#Preview("Erase Simulator Confirmation") {
+  DeviceDestructiveConfirmationView(
+    titleKey: "main_window.erase.title",
+    messageKey: "main_window.erase.message",
+    actionTitleKey: "main_window.erase.action",
+    systemImage: "eraser",
+    confirmationState: DeviceDestructiveConfirmationState(
+      deviceID: "PREVIEW-DEVICE-1",
+      deviceName: "iPhone 17 Pro",
+      deviceUDID: "PREVIEW-DEVICE-1"
+    )
+  ) { _ in }
+}
+
+#endif

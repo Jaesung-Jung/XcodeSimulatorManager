@@ -40,6 +40,29 @@ extension DeviceDetailView {
   }
 }
 
+// MARK: - DeviceDetailView.CommandResultsSection Preview
+
+#if DEBUG
+
+#Preview {
+  let result = CommandResult(
+    id: "preview-command",
+    executable: "xcrun",
+    arguments: ["simctl", "boot", "PREVIEW-DEVICE-1"],
+    stdout: "",
+    stderr: "",
+    exitCode: 0,
+    duration: 0.24,
+    startedAt: Date(timeIntervalSince1970: 1_000)
+  )
+
+  DeviceDetailView.CommandResultsSection(results: [result])
+    .padding(20)
+    .frame(width: 520)
+}
+
+#endif
+
 // MARK: - DeviceDetailView.CommandResultRow
 
 extension DeviceDetailView {

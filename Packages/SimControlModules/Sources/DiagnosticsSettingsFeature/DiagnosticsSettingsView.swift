@@ -27,3 +27,21 @@ public struct DiagnosticsSettingsView: View {
     }
   }
 }
+
+// MARK: - DiagnosticsSettingsView Preview
+
+#if DEBUG
+
+#Preview("Diagnostics Settings") {
+  Form {
+    DiagnosticsSettingsView(
+      store: Store(initialState: DiagnosticsSettingsFeature.State(enablesDiagnostics: true)) {
+        DiagnosticsSettingsFeature()
+      }
+    )
+  }
+  .formStyle(.grouped)
+  .frame(width: 520)
+}
+
+#endif

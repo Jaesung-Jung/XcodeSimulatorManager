@@ -27,3 +27,21 @@ public struct SafetySettingsView: View {
     }
   }
 }
+
+// MARK: - SafetySettingsView Preview
+
+#if DEBUG
+
+#Preview("Safety Settings") {
+  Form {
+    SafetySettingsView(
+      store: Store(initialState: SafetySettingsFeature.State(confirmsDestructiveActions: true)) {
+        SafetySettingsFeature()
+      }
+    )
+  }
+  .formStyle(.grouped)
+  .frame(width: 520)
+}
+
+#endif

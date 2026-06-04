@@ -61,3 +61,26 @@ extension DeveloperToolsView {
     }
   }
 }
+
+// MARK: - PrivacyPanel Preview
+
+#if DEBUG
+
+#Preview {
+  DeveloperToolsView.PrivacyPanel(
+    action: .constant(.grant),
+    bundleID: .constant("com.example.preview"),
+    service: .location,
+    bundleIDOptions: ["com.example.preview"],
+    selectedAppBundleID: "com.example.preview",
+    disabledReason: nil,
+    isRunning: false,
+    onServiceSelected: { _ in },
+    onUseSelectedApp: {},
+    onApply: {}
+  )
+  .padding(20)
+  .frame(width: 420)
+}
+
+#endif

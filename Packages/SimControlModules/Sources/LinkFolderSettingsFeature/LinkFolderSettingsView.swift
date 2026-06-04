@@ -30,3 +30,25 @@ public struct LinkFolderSettingsView: View {
     }
   }
 }
+
+// MARK: - LinkFolderSettingsView Preview
+
+#if DEBUG
+
+#Preview("Link Folder Settings") {
+  Form {
+    LinkFolderSettingsView(
+      store: Store(
+        initialState: LinkFolderSettingsFeature.State(
+          linkFolderPath: "~/Library/Application Support/SimControl/Links"
+        )
+      ) {
+        LinkFolderSettingsFeature()
+      }
+    )
+  }
+  .formStyle(.grouped)
+  .frame(width: 520)
+}
+
+#endif

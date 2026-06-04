@@ -78,3 +78,21 @@ public struct UnpairDeviceConfirmationView: View {
     .frame(width: 460, height: 340)
   }
 }
+
+// MARK: - UnpairDeviceConfirmationView Preview
+
+#if DEBUG
+
+#Preview("Unpair Device Confirmation") {
+  UnpairDeviceConfirmationView(
+    confirmationState: UnpairDeviceConfirmationState(
+      pairID: "PREVIEW-PAIR-1",
+      phoneName: "iPhone 17 Pro",
+      phoneUDID: "PREVIEW-PHONE-1",
+      watchName: "Apple Watch Series 11",
+      watchUDID: "PREVIEW-WATCH-1"
+    )
+  ) { _ in }
+}
+
+#endif

@@ -26,3 +26,26 @@ extension DeviceDetailView {
     }
   }
 }
+
+// MARK: - DeviceDetailView.ActionButtonLabel Preview
+
+#if DEBUG
+
+#Preview {
+  VStack(spacing: 12) {
+    DeviceDetailView.ActionButtonLabel(
+      title: "Boot",
+      systemImage: "power",
+      isRunning: false
+    )
+
+    DeviceDetailView.ActionButtonLabel(
+      title: "Booting",
+      systemImage: "power",
+      isRunning: true
+    )
+  }
+  .padding(20)
+}
+
+#endif

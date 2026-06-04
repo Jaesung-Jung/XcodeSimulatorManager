@@ -61,3 +61,19 @@ public struct CloneDeviceView: View {
     .frame(width: 420, height: 190)
   }
 }
+
+// MARK: - CloneDeviceView Preview
+
+#if DEBUG
+
+#Preview("Clone Simulator Sheet") {
+  CloneDeviceView(
+    formState: CloneDeviceFormState(
+      sourceDeviceID: "PREVIEW-DEVICE-1",
+      sourceName: "iPhone 17 Pro",
+      name: "iPhone 17 Pro Copy"
+    )
+  ) { _ in }
+}
+
+#endif

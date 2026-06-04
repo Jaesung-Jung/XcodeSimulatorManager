@@ -52,3 +52,24 @@ extension DeveloperToolsView {
     }
   }
 }
+
+// MARK: - PushPanel Preview
+
+#if DEBUG
+
+#Preview {
+  DeveloperToolsView.PushPanel(
+    bundleID: .constant("com.example.preview"),
+    payloadJSON: .constant("{\n  \"aps\": {\n    \"alert\": \"Preview\"\n  }\n}"),
+    bundleIDOptions: ["com.example.preview"],
+    selectedAppBundleID: "com.example.preview",
+    disabledReason: nil,
+    isRunning: false,
+    onUseSelectedApp: {},
+    onSend: {}
+  )
+  .padding(20)
+  .frame(width: 420)
+}
+
+#endif

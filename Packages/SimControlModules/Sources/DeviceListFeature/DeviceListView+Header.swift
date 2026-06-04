@@ -74,3 +74,18 @@ extension DeviceListView {
     }
   }
 }
+
+// MARK: - DeviceListView.Header Preview
+
+#if DEBUG
+
+#Preview {
+  DeviceListView.Header(
+    store: Store(initialState: DeviceListFeature.State()) {
+      DeviceListFeature()
+    }
+  )
+  .frame(width: 360)
+}
+
+#endif

@@ -46,6 +46,60 @@ extension InspectorView {
   }
 }
 
+// MARK: - InspectorView.DeviceSection Preview
+
+#if DEBUG
+
+#Preview {
+  let runtime = SimulatorRuntime(
+    id: "com.apple.CoreSimulator.SimRuntime.iOS-26-4",
+    name: "iOS 26.4",
+    version: "26.4",
+    buildVersion: "23E244",
+    platform: .iOS,
+    isAvailable: true,
+    supportedDeviceTypeIDs: []
+  )
+  let deviceType = SimulatorDeviceType(
+    id: "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+    name: "iPhone 17 Pro",
+    productFamily: "iPhone",
+    modelIdentifier: "iPhone18,1"
+  )
+  let device = SimulatorDevice(
+    id: "PREVIEW-DEVICE-1",
+    udid: "PREVIEW-DEVICE-1",
+    name: "iPhone 17 Pro",
+    runtimeID: runtime.id,
+    deviceTypeID: deviceType.id,
+    platform: .iOS,
+    state: .booted,
+    isAvailable: true,
+    dataPath: URL(fileURLWithPath: "/tmp/PreviewDevice/data"),
+    logPath: URL(fileURLWithPath: "/tmp/PreviewDevice/logs"),
+    lastBootedAt: Date(timeIntervalSince1970: 1_000),
+    dataPathSize: 5_200_000_000
+  )
+  let store = Store(
+    initialState: InspectorFeature.State(
+      device: device,
+      runtime: runtime,
+      deviceType: deviceType
+    )
+  ) {
+    InspectorFeature()
+  }
+
+  VStack(alignment: .leading, spacing: 18) {
+    InspectorView.DeviceSection(store: store, device: device)
+    InspectorView.DeviceFoldersSection(store: store, device: device)
+  }
+  .padding(20)
+  .frame(width: 360)
+}
+
+#endif
+
 // MARK: - InspectorView.DeviceFoldersSection
 
 extension InspectorView {

@@ -25,3 +25,18 @@ extension InspectorView {
     }
   }
 }
+
+// MARK: - InspectorView.InspectorSection Preview
+
+#if DEBUG
+
+#Preview {
+  InspectorView.InspectorSection("Preview Section") {
+    InspectorView.FieldRow(title: "Name", value: "iPhone 17 Pro")
+    InspectorView.FieldRow(title: "State", value: "Booted")
+  }
+  .padding(20)
+  .frame(width: 320)
+}
+
+#endif

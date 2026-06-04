@@ -40,3 +40,23 @@ extension InspectorView {
     }
   }
 }
+
+// MARK: - InspectorView.WarningRow Preview
+
+#if DEBUG
+
+#Preview {
+  InspectorView.WarningRow(
+    warning: SimulatorWarning(
+      id: "preview-warning",
+      severity: .warning,
+      category: .device,
+      message: "Preview warning for simulator inventory.",
+      relatedID: "PREVIEW-DEVICE-1"
+    )
+  )
+  .padding(20)
+  .frame(width: 320)
+}
+
+#endif

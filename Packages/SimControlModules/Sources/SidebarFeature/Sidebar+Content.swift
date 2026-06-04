@@ -47,3 +47,19 @@ extension Sidebar {
     }
   }
 }
+
+// MARK: - Sidebar.Content Preview
+
+#if DEBUG
+
+#Preview {
+  Sidebar.Content(
+    snapshot: nil,
+    refreshState: .idle,
+    filters: SimulatorFilters(),
+    onScopeSelected: { _ in }
+  )
+  .frame(width: 240, height: 520)
+}
+
+#endif

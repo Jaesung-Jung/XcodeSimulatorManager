@@ -59,6 +59,8 @@ extension EmptyStateView {
 
 // MARK: - EmptyStateView Preview
 
+#if DEBUG
+
 #Preview {
   EmptyStateView(
     title: "Title",
@@ -66,3 +68,5 @@ extension EmptyStateView {
     systemImage: "apple.logo",
     action: .action("Action") {})
 }
+
+#endif

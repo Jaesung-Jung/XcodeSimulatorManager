@@ -27,7 +27,7 @@ public struct Sidebar: View {
   }
 }
 
-// MARK: - SidebarView Preview
+// MARK: - Sidebar Preview
 
 #if DEBUG
 

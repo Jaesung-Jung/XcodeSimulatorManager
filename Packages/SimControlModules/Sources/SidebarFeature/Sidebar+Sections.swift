@@ -40,6 +40,38 @@ extension Sidebar {
   }
 }
 
+// MARK: - Sidebar.InventorySection Preview
+
+#if DEBUG
+
+#Preview {
+  List {
+    Sidebar.InventorySection(
+      snapshot: nil,
+      filters: SimulatorFilters()
+    )
+
+    Sidebar.PlatformsSection(
+      platformCounts: [
+        Sidebar.PlatformCount(
+          platform: .iOS,
+          title: "iOS",
+          systemImage: "iphone",
+          count: 3
+        )
+      ]
+    )
+
+    Sidebar.RuntimesSection(runtimeCounts: [])
+    Sidebar.DeviceStateSection(stateCounts: [])
+    Sidebar.EnvironmentSection(snapshot: nil, refreshState: .idle)
+  }
+  .listStyle(.sidebar)
+  .frame(width: 240, height: 520)
+}
+
+#endif
+
 // MARK: - Sidebar.PlatformsSection
 
 extension Sidebar {

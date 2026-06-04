@@ -152,3 +152,37 @@ extension DeveloperToolsView {
     }
   }
 }
+
+// MARK: - ToolPanel Preview
+
+#if DEBUG
+
+#Preview {
+  VStack(alignment: .leading, spacing: 12) {
+    DeveloperToolsView.ToolPanel(title: "Preview Tool", systemImage: "wrench") {
+      DeveloperToolsView.BundleIDRow(
+        bundleID: .constant("com.example.preview"),
+        bundleIDOptions: ["com.example.preview"],
+        selectedAppBundleID: "com.example.preview",
+        onUseSelectedApp: {}
+      )
+
+      DeveloperToolsView.ServiceMenu(
+        selectedService: .location,
+        onServiceSelected: { _ in }
+      )
+
+      DeveloperToolsView.ToolButtonLabel(
+        title: "Run",
+        systemImage: "play.fill",
+        isRunning: false
+      )
+
+      DeveloperToolsView.ToolStatusText("Ready")
+    }
+  }
+  .padding(20)
+  .frame(width: 420)
+}
+
+#endif

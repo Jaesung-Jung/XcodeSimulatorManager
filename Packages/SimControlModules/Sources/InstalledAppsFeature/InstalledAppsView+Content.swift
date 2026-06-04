@@ -101,3 +101,19 @@ extension InstalledAppsView {
     }
   }
 }
+
+// MARK: - InstalledAppsView.InstalledAppsContent Preview
+
+#if DEBUG
+
+#Preview {
+  InstalledAppsView.InstalledAppsContent(
+    store: Store(initialState: InstalledAppsFeature.State(availability: .loaded)) {
+      InstalledAppsFeature()
+    }
+  )
+  .padding(20)
+  .frame(width: 420)
+}
+
+#endif

@@ -40,6 +40,34 @@ extension InstalledAppsView {
   }
 }
 
+// MARK: - InstalledAppsView.InstalledAppsHeader Preview
+
+#if DEBUG
+
+#Preview {
+  VStack(alignment: .leading, spacing: 12) {
+    InstalledAppsView.InstalledAppsHeader(
+      isLoaded: true,
+      visibleAppCount: 2,
+      allAppsCount: 5,
+      systemFilter: .constant(.user),
+      appGroupFilter: .constant(.all),
+      databaseFilter: .constant(.present),
+      sort: .constant(.name),
+      direction: .constant(.ascending)
+    )
+
+    InstalledAppsView.ActiveAppFilters(
+      filters: SimulatorFilters(appDatabaseFilter: .present),
+      onClear: {}
+    )
+  }
+  .padding(20)
+  .frame(width: 460)
+}
+
+#endif
+
 extension InstalledAppsView {
   struct AppFilterMenu: View {
     @Binding var systemFilter: SimulatorFilters.AppSystemFilter

@@ -55,3 +55,18 @@ extension InspectorView {
     }
   }
 }
+
+// MARK: - InspectorView.Content Preview
+
+#if DEBUG
+
+#Preview {
+  InspectorView.Content(
+    store: Store(initialState: InspectorFeature.State()) {
+      InspectorFeature()
+    }
+  )
+  .frame(width: 320, height: 640)
+}
+
+#endif

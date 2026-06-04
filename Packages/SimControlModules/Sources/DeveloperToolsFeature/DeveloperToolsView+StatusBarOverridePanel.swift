@@ -123,3 +123,32 @@ extension DeveloperToolsView {
     }
   }
 }
+
+// MARK: - StatusBarOverridePanel Preview
+
+#if DEBUG
+
+#Preview {
+  DeveloperToolsView.StatusBarOverridePanel(
+    time: .constant("9:41"),
+    dataNetwork: .constant(.wifi),
+    wifiMode: .constant(.active),
+    wifiBars: .constant("3"),
+    cellularMode: .constant(.active),
+    cellularBars: .constant("4"),
+    operatorNameIncluded: .constant(true),
+    operatorName: .constant("Preview"),
+    batteryState: .constant(.charged),
+    batteryLevel: .constant("100"),
+    disabledReason: nil,
+    clearDisabledReason: nil,
+    isApplyRunning: false,
+    isClearRunning: false,
+    onApply: {},
+    onClear: {}
+  )
+  .padding(20)
+  .frame(width: 480)
+}
+
+#endif

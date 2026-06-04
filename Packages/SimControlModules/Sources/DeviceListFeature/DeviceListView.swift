@@ -16,3 +16,18 @@ public struct DeviceListView: View {
     }
   }
 }
+
+// MARK: - DeviceListView Preview
+
+#if DEBUG
+
+#Preview {
+  DeviceListView(
+    store: Store(initialState: DeviceListFeature.State()) {
+      DeviceListFeature()
+    }
+  )
+  .frame(width: 360, height: 720)
+}
+
+#endif

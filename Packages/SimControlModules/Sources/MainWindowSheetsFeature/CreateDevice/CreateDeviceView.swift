@@ -162,3 +162,37 @@ public struct CreateDeviceView: View {
     return deviceTypes.filter { supportedDeviceTypeIDs.contains($0.id) }
   }
 }
+
+// MARK: - CreateDeviceView Preview
+
+#if DEBUG
+
+#Preview("Create Simulator Sheet") {
+  let runtime = SimulatorRuntime(
+    id: "com.apple.CoreSimulator.SimRuntime.iOS-26-4",
+    name: "iOS 26.4",
+    version: "26.4",
+    buildVersion: "23E244",
+    platform: .iOS,
+    isAvailable: true,
+    supportedDeviceTypeIDs: ["com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro"]
+  )
+  let deviceType = SimulatorDeviceType(
+    id: "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+    name: "iPhone 17 Pro",
+    productFamily: "iPhone",
+    modelIdentifier: "iPhone18,1"
+  )
+
+  CreateDeviceView(
+    formState: CreateDeviceFormState(
+      name: "Preview iPhone",
+      runtimeID: runtime.id,
+      deviceTypeID: deviceType.id
+    ),
+    runtimes: [runtime],
+    deviceTypes: [deviceType]
+  ) { _ in }
+}
+
+#endif

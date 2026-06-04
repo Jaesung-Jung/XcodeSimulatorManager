@@ -48,3 +48,25 @@ extension DeveloperToolsView {
     }
   }
 }
+
+// MARK: - DeepLinkPanel Preview
+
+#if DEBUG
+
+#Preview {
+  DeveloperToolsView.DeepLinkPanel(
+    urlString: .constant("simcontrol://open/device"),
+    recentURLs: [
+      "simcontrol://open/device",
+      "myapp://preview"
+    ],
+    disabledReason: nil,
+    isRunning: false,
+    onRecentSelected: { _ in },
+    onOpen: {}
+  )
+  .padding(20)
+  .frame(width: 360)
+}
+
+#endif

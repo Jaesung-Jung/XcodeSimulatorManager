@@ -33,8 +33,12 @@ public struct StatusBadge: View {
 
 // MARK: - StatusBadge Preview
 
+#if DEBUG
+
 #Preview {
   StatusBadge(title: "Title", systemImage: "apple.logo")
     .tint(.green)
     .padding(20)
 }
+
+#endif

@@ -1,5 +1,6 @@
 import MainWindowDisplaySupport
 import SimControlLocalization
+import SimControlDomain
 import SwiftUI
 
 /// Sheet view for installing an app bundle on a selected simulator device.
@@ -104,3 +105,41 @@ public struct InstallAppOnSimulatorView: View {
     .frame(width: 520, height: 420)
   }
 }
+
+// MARK: - InstallAppOnSimulatorView Preview
+
+#if DEBUG
+
+#Preview("Install App Sheet") {
+  let device = SimulatorDevice(
+    id: "PREVIEW-DEVICE-1",
+    udid: "PREVIEW-DEVICE-1",
+    name: "iPhone 17 Pro",
+    runtimeID: "com.apple.CoreSimulator.SimRuntime.iOS-26-4",
+    deviceTypeID: "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+    platform: .iOS,
+    state: .booted,
+    isAvailable: true,
+    dataPath: nil,
+    logPath: nil,
+    lastBootedAt: nil,
+    dataPathSize: nil
+  )
+
+  InstallAppOnSimulatorView(
+    formState: InstallAppTargetFormState(
+      sourceAppID: "PREVIEW-DEVICE-1:com.example.preview",
+      sourceDeviceID: device.id,
+      appName: "Preview App",
+      bundleID: "com.example.preview",
+      appBundlePath: URL(fileURLWithPath: "/tmp/Preview.app"),
+      targetDeviceID: device.id,
+      launchAfterInstall: true
+    ),
+    targetCandidates: [
+      InstallAppTargetCandidate(device: device)
+    ]
+  ) { _ in }
+}
+
+#endif

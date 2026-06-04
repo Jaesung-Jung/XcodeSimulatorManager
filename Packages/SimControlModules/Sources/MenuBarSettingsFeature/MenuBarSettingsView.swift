@@ -27,3 +27,21 @@ public struct MenuBarSettingsView: View {
     }
   }
 }
+
+// MARK: - MenuBarSettingsView Preview
+
+#if DEBUG
+
+#Preview("Menu Bar Settings") {
+  Form {
+    MenuBarSettingsView(
+      store: Store(initialState: MenuBarSettingsFeature.State(showsMenuBarExtra: true)) {
+        MenuBarSettingsFeature()
+      }
+    )
+  }
+  .formStyle(.grouped)
+  .frame(width: 520)
+}
+
+#endif

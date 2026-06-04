@@ -62,3 +62,26 @@ extension MainWindowView {
     }
   }
 }
+
+// MARK: - SidebarColumn Preview
+
+#if DEBUG
+
+#Preview {
+  let store = Store(initialState: MainWindowFeature.State.initial) {
+    MainWindowFeature()
+  }
+
+  HStack(spacing: 0) {
+    MainWindowView.SidebarColumn(store: store)
+    Divider()
+    MainWindowView.DeviceListColumn(store: store)
+    Divider()
+    MainWindowView.WorkspaceDetail(store: store)
+    Divider()
+    MainWindowView.InspectorPane(store: store)
+  }
+  .frame(width: 1_120, height: 720)
+}
+
+#endif

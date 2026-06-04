@@ -27,3 +27,21 @@ extension Sidebar {
     }
   }
 }
+
+// MARK: - Sidebar.BarItem Preview
+
+#if DEBUG
+
+#Preview {
+  List {
+    Sidebar.BarItem(
+      title: "Booted",
+      systemImage: "circle.fill",
+      value: "3"
+    )
+  }
+  .listStyle(.sidebar)
+  .frame(width: 240)
+}
+
+#endif

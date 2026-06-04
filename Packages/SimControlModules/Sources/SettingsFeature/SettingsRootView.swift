@@ -4,6 +4,7 @@ import GeneralSettingsFeature
 import LinkFolderSettingsFeature
 import MenuBarSettingsFeature
 import SafetySettingsFeature
+import SimControlClients
 import SwiftUI
 import XcodeSettingsFeature
 
@@ -62,10 +63,28 @@ public struct SettingsRootView: View {
   }
 }
 
+// MARK: - SettingsRootView Preview
+
 #if DEBUG
 
 #Preview {
-  SettingsRootView(store: .settingsRootPreview)
+  let settings = SimControlUserSettings(
+    launchesAtLogin: true,
+    showsMenuBarExtra: true,
+    confirmsDestructiveActions: true,
+    preferredXcodeDeveloperPath: "/Applications/Xcode.app/Contents/Developer",
+    linkFolderPath: "~/Library/Application Support/SimControl/Links",
+    enablesDiagnostics: true
+  )
+
+  SettingsRootView(
+    store: Store(initialState: SettingsFeature.State(settings: settings)) {
+      SettingsFeature()
+    } withDependencies: {
+      $0.userSettings.load = { settings }
+      $0.userSettings.save = { _ in }
+    }
+  )
 }
 
 #endif

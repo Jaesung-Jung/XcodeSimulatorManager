@@ -46,6 +46,52 @@ extension InspectorView {
   }
 }
 
+// MARK: - InspectorView.SelectedAppSection Preview
+
+#if DEBUG
+
+#Preview {
+  let app = InstalledApp(
+    id: "PREVIEW-DEVICE-1:com.example.preview",
+    bundleID: "com.example.preview",
+    displayName: "Preview App",
+    version: "1.0",
+    build: "100",
+    deviceID: "PREVIEW-DEVICE-1",
+    bundleContainer: URL(fileURLWithPath: "/tmp/PreviewApp/Bundle"),
+    dataContainer: URL(fileURLWithPath: "/tmp/PreviewApp/Data"),
+    appBundlePath: URL(fileURLWithPath: "/tmp/PreviewApp/Bundle/Preview.app"),
+    appGroups: [
+      AppGroupContainer(
+        id: "group.com.example.preview",
+        groupID: "group.com.example.preview",
+        path: URL(fileURLWithPath: "/tmp/PreviewApp/Groups/group.com.example.preview")
+      )
+    ],
+    iconPath: nil
+  )
+
+  VStack(alignment: .leading, spacing: 18) {
+    InspectorView.SelectedAppSection(
+      store: Store(initialState: InspectorFeature.State(selectedApp: app)) {
+        InspectorFeature()
+      },
+      selectedApp: app
+    )
+
+    InspectorView.AppGroupsSection(
+      store: Store(initialState: InspectorFeature.State(selectedApp: app)) {
+        InspectorFeature()
+      },
+      selectedApp: app
+    )
+  }
+  .padding(20)
+  .frame(width: 360)
+}
+
+#endif
+
 // MARK: - InspectorView.AppGroupsSection
 
 extension InspectorView {

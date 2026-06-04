@@ -101,3 +101,27 @@ public struct AppDestructiveConfirmationView: View {
     .frame(width: 500, height: confirmationState.dataContainerPath == nil ? 340 : 420)
   }
 }
+
+// MARK: - AppDestructiveConfirmationView Preview
+
+#if DEBUG
+
+#Preview("Reset Sandbox Confirmation") {
+  AppDestructiveConfirmationView(
+    titleKey: "main_window.reset_sandbox.title",
+    messageKey: "main_window.reset_sandbox.message",
+    actionTitleKey: "main_window.reset_sandbox.action",
+    systemImage: "folder.badge.minus",
+    confirmationState: AppDestructiveConfirmationState(
+      appID: "PREVIEW-DEVICE-1:com.example.preview",
+      appName: "Preview App",
+      bundleID: "com.example.preview",
+      deviceID: "PREVIEW-DEVICE-1",
+      deviceName: "iPhone 17 Pro",
+      deviceUDID: "PREVIEW-DEVICE-1",
+      dataContainerPath: "/tmp/PreviewApp/Data"
+    )
+  ) { _ in }
+}
+
+#endif
