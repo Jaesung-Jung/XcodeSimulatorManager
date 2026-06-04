@@ -1,9 +1,9 @@
 import ComposableArchitecture
 import Foundation
-import InstalledAppsFeature
 import MainWindowFeatureSupport
 import SimControlDomain
 import Testing
+@testable import InstalledAppsFeature
 
 @Suite
 @MainActor
@@ -44,5 +44,10 @@ struct InstalledAppsFeatureTests {
     await store.send(.selectionChanged("app-1")) {
       $0.selectedAppID = "app-1"
     }
+  }
+
+  @Test func appIconViewCanBeConstructedForRealAndFallbackIcons() {
+    _ = InstalledAppsView.AppIconView(iconPath: URL(fileURLWithPath: "/tmp/AppIcon.png"))
+    _ = InstalledAppsView.AppIconView(iconPath: nil)
   }
 }

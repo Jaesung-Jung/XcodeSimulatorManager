@@ -111,9 +111,7 @@ extension InstalledAppsView {
 
     var body: some View {
       HStack(spacing: 8) {
-        Image(systemName: "app")
-          .foregroundStyle(.secondary)
-          .accessibilityHidden(true)
+        AppIconView(iconPath: app.iconPath)
 
         VStack(alignment: .leading, spacing: 2) {
           Text(app.displayName)
