@@ -1,25 +1,61 @@
 import Foundation
+import SimControlDomain
 
 extension AppContainerScanner {
-  func readHomeScreenAppIDs(in dataPath: URL) -> Set<String>? {
-    let iconStateURL = dataPath.appendingPathComponent("Library/SpringBoard/IconState.plist")
-    guard fileManager.fileExists(atPath: iconStateURL.path),
-          let data = try? Data(contentsOf: iconStateURL),
-          let propertyList = try? PropertyListSerialization.propertyList(
-            from: data,
-            options: [],
-            format: nil
-          ),
-          let iconState = propertyList as? [String: Any]
+  func readDefaultHomeScreenAppIDs(in runtimeRoot: URL?, for device: SimulatorDevice) -> Set<String>? {
+    guard device.platform == .iOS,
+          let springBoardBundle = runtimeRoot?.appendingPathComponent(
+            "System/Library/CoreServices/SpringBoard.app",
+            isDirectory: true
+          )
     else {
       return nil
     }
 
-    var appIDs = Set<String>()
-    collectHomeScreenAppIDs(from: iconState["buttonBar"], into: &appIDs)
-    collectHomeScreenAppIDs(from: iconState["iconLists"], into: &appIDs)
+    for fileName in defaultIconStateFileNames(for: device) {
+      let iconStateURL = springBoardBundle.appendingPathComponent(fileName)
+      guard fileManager.fileExists(atPath: iconStateURL.path),
+            let data = try? Data(contentsOf: iconStateURL),
+            let propertyList = try? PropertyListSerialization.propertyList(
+              from: data,
+              options: [],
+              format: nil
+            )
+      else {
+        continue
+      }
 
-    return appIDs.isEmpty ? nil : appIDs
+      var appIDs = Set<String>()
+      collectHomeScreenAppIDs(from: propertyList, into: &appIDs)
+      if !appIDs.isEmpty {
+        return appIDs
+      }
+    }
+
+    return nil
+  }
+
+  func defaultIconStateFileNames(for device: SimulatorDevice) -> [String] {
+    let deviceTypeID = device.deviceTypeID.lowercased()
+
+    if deviceTypeID.contains("ipad") {
+      return [
+        "DefaultIconState~ipad.plist",
+        "DefaultIconState.plist"
+      ]
+    }
+
+    if deviceTypeID.contains("ipod") {
+      return [
+        "DefaultIconState-568h~ipod.plist",
+        "DefaultIconState.plist"
+      ]
+    }
+
+    return [
+      "DefaultIconState~iphone.plist",
+      "DefaultIconState.plist"
+    ]
   }
 
   func collectHomeScreenAppIDs(from value: Any?, into appIDs: inout Set<String>) {
@@ -41,6 +77,8 @@ extension AppContainerScanner {
         appIDs.insert(bundleID)
       }
 
+      collectHomeScreenAppIDs(from: dictionary["buttonBar"], into: &appIDs)
+      collectHomeScreenAppIDs(from: dictionary["dockUtilities"], into: &appIDs)
       collectHomeScreenAppIDs(from: dictionary["iconLists"], into: &appIDs)
       collectHomeScreenAppIDs(from: dictionary["elements"], into: &appIDs)
 

@@ -148,19 +148,27 @@ struct AppContainerScannerTests {
     #expect(app.isSystemApp)
   }
 
-  @Test func marksRuntimeSystemAppsMissingFromHomeScreenAsHidden() throws {
+  @Test func marksRuntimeSystemAppsMissingFromDefaultIPhoneHomeScreenAsHidden() throws {
     let temporaryDirectory = try TemporaryDirectory()
     let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
     let runtimeRoot = temporaryDirectory.url.appendingPathComponent("RuntimeRoot", isDirectory: true)
+    let springBoardBundle = runtimeRoot.appendingPathComponent(
+      "System/Library/CoreServices/SpringBoard.app",
+      isDirectory: true
+    )
     let settingsBundle = runtimeRoot.appendingPathComponent("Applications/Preferences.app", isDirectory: true)
     let emojiBundle = runtimeRoot.appendingPathComponent("Applications/EmojiPoster.app", isDirectory: true)
+    let gradientBundle = runtimeRoot.appendingPathComponent("Applications/GradientPoster.app", isDirectory: true)
+    let kaleidoscopeBundle = runtimeRoot.appendingPathComponent("Applications/KaleidoscopePosterApp.app", isDirectory: true)
 
+    try createDirectory(springBoardBundle)
     try createDirectory(settingsBundle)
     try createDirectory(emojiBundle)
+    try createDirectory(gradientBundle)
+    try createDirectory(kaleidoscopeBundle)
     try createDirectory(dataPath.appendingPathComponent("Containers/Bundle/Application", isDirectory: true))
     try createDirectory(dataPath.appendingPathComponent("Containers/Data/Application", isDirectory: true))
     try createDirectory(dataPath.appendingPathComponent("Containers/Shared/AppGroup", isDirectory: true))
-    try createDirectory(dataPath.appendingPathComponent("Library/SpringBoard", isDirectory: true))
     try writeInfoPlist(
       [
         "CFBundleIdentifier": "com.apple.Preferences",
@@ -175,6 +183,21 @@ struct AppContainerScannerTests {
         "CFBundleName": "EmojiPoster"
       ],
       to: emojiBundle
+    )
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.GradientPoster",
+        "CFBundleDisplayName": "Color",
+        "CFBundleName": "GradientPoster"
+      ],
+      to: gradientBundle
+    )
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.Posters.KaleidoscopePosterApp",
+        "CFBundleName": "KaleidoscopePosterApp"
+      ],
+      to: kaleidoscopeBundle
     )
     try writePropertyList(
       [
@@ -194,7 +217,7 @@ struct AppContainerScannerTests {
           ]
         ]
       ],
-      to: dataPath.appendingPathComponent("Library/SpringBoard/IconState.plist")
+      to: springBoardBundle.appendingPathComponent("DefaultIconState~iphone.plist")
     )
 
     let scanner = AppContainerScanner()
@@ -203,8 +226,92 @@ struct AppContainerScannerTests {
     let appsByBundleID = Dictionary(uniqueKeysWithValues: result.apps.map { ($0.bundleID, $0) })
     let settings = try #require(appsByBundleID["com.apple.Preferences"])
     let emoji = try #require(appsByBundleID["com.apple.EmojiPoster"])
+    let gradient = try #require(appsByBundleID["com.apple.GradientPoster"])
+    let kaleidoscope = try #require(appsByBundleID["com.apple.Posters.KaleidoscopePosterApp"])
     #expect(!settings.isHiddenSystemApp)
     #expect(emoji.isHiddenSystemApp)
+    #expect(gradient.isHiddenSystemApp)
+    #expect(kaleidoscope.isHiddenSystemApp)
+  }
+
+  @Test func marksRuntimeSystemAppsMissingFromDefaultIPadHomeScreenAsHidden() throws {
+    let temporaryDirectory = try TemporaryDirectory()
+    let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
+    let runtimeRoot = temporaryDirectory.url.appendingPathComponent("RuntimeRoot", isDirectory: true)
+    let springBoardBundle = runtimeRoot.appendingPathComponent(
+      "System/Library/CoreServices/SpringBoard.app",
+      isDirectory: true
+    )
+    let settingsBundle = runtimeRoot.appendingPathComponent("Applications/Preferences.app", isDirectory: true)
+    let emojiBundle = runtimeRoot.appendingPathComponent("Applications/EmojiPoster.app", isDirectory: true)
+    let gradientBundle = runtimeRoot.appendingPathComponent("Applications/GradientPoster.app", isDirectory: true)
+    let kaleidoscopeBundle = runtimeRoot.appendingPathComponent("Applications/KaleidoscopePosterApp.app", isDirectory: true)
+
+    try createDirectory(springBoardBundle)
+    try createDirectory(settingsBundle)
+    try createDirectory(emojiBundle)
+    try createDirectory(gradientBundle)
+    try createDirectory(kaleidoscopeBundle)
+    try createDirectory(dataPath.appendingPathComponent("Containers/Bundle/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Data/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Shared/AppGroup", isDirectory: true))
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.Preferences",
+        "CFBundleName": "Settings"
+      ],
+      to: settingsBundle
+    )
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.EmojiPoster",
+        "CFBundleDisplayName": "Emoji",
+        "CFBundleName": "EmojiPoster"
+      ],
+      to: emojiBundle
+    )
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.GradientPoster",
+        "CFBundleDisplayName": "Color",
+        "CFBundleName": "GradientPoster"
+      ],
+      to: gradientBundle
+    )
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.Posters.KaleidoscopePosterApp",
+        "CFBundleName": "KaleidoscopePosterApp"
+      ],
+      to: kaleidoscopeBundle
+    )
+    try writePropertyList(
+      [
+        "buttonBar": ["com.apple.mobilesafari"],
+        "iconLists": [
+          [
+            "com.apple.Preferences"
+          ]
+        ]
+      ],
+      to: springBoardBundle.appendingPathComponent("DefaultIconState~ipad.plist")
+    )
+
+    let scanner = AppContainerScanner()
+    let result = scanner.scanInstalledApps(
+      for: makeDevice(dataPath: dataPath, deviceTypeID: "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M5-12GB"),
+      runtimeRoot: runtimeRoot
+    )
+
+    let appsByBundleID = Dictionary(uniqueKeysWithValues: result.apps.map { ($0.bundleID, $0) })
+    let settings = try #require(appsByBundleID["com.apple.Preferences"])
+    let emoji = try #require(appsByBundleID["com.apple.EmojiPoster"])
+    let gradient = try #require(appsByBundleID["com.apple.GradientPoster"])
+    let kaleidoscope = try #require(appsByBundleID["com.apple.Posters.KaleidoscopePosterApp"])
+    #expect(!settings.isHiddenSystemApp)
+    #expect(emoji.isHiddenSystemApp)
+    #expect(gradient.isHiddenSystemApp)
+    #expect(kaleidoscope.isHiddenSystemApp)
   }
 
   @Test func marksHiddenRuntimeSystemApps() throws {
@@ -354,14 +461,15 @@ struct AppContainerScannerTests {
 
   private func makeDevice(
     dataPath: URL,
-    state: SimulatorDevice.State = .booted
+    state: SimulatorDevice.State = .booted,
+    deviceTypeID: String = "device-type-iphone"
   ) -> SimulatorDevice {
     SimulatorDevice(
       id: "DEVICE-1",
       udid: "DEVICE-1",
       name: "iPhone 17 Pro",
       runtimeID: "runtime-ios",
-      deviceTypeID: "device-type-iphone",
+      deviceTypeID: deviceTypeID,
       platform: .iOS,
       state: state,
       isAvailable: true,

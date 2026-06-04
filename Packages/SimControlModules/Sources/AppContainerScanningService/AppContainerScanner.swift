@@ -54,7 +54,7 @@ public struct AppContainerScanner {
       device: device,
       warnings: &warnings
     )
-    let homeScreenAppIDs = readHomeScreenAppIDs(in: dataPath)
+    let homeScreenAppIDs = readDefaultHomeScreenAppIDs(in: runtimeRoot, for: device)
     let appGroupsByID = scanAppGroups(
       in: dataPath,
       device: device,
