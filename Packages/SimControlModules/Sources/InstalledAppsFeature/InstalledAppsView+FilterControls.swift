@@ -5,8 +5,6 @@ import SwiftUI
 extension InstalledAppsView {
   struct InstalledAppsHeader: View {
     let isLoaded: Bool
-    let visibleAppCount: Int
-    let allAppsCount: Int
     @Binding var systemFilter: SimulatorFilters.AppSystemFilter
     @Binding var appGroupFilter: SimulatorFilters.PresenceFilter
     @Binding var databaseFilter: SimulatorFilters.PresenceFilter
@@ -20,10 +18,6 @@ extension InstalledAppsView {
         Spacer()
 
         if isLoaded {
-          Text("\(visibleAppCount) of \(allAppsCount)")
-            .font(.caption)
-            .foregroundStyle(.secondary)
-
           AppFilterMenu(
             systemFilter: $systemFilter,
             appGroupFilter: $appGroupFilter,
@@ -39,34 +33,6 @@ extension InstalledAppsView {
     }
   }
 }
-
-// MARK: - InstalledAppsView.InstalledAppsHeader Preview
-
-#if DEBUG
-
-#Preview {
-  VStack(alignment: .leading, spacing: 12) {
-    InstalledAppsView.InstalledAppsHeader(
-      isLoaded: true,
-      visibleAppCount: 2,
-      allAppsCount: 5,
-      systemFilter: .constant(.user),
-      appGroupFilter: .constant(.all),
-      databaseFilter: .constant(.present),
-      sort: .constant(.name),
-      direction: .constant(.ascending)
-    )
-
-    InstalledAppsView.ActiveAppFilters(
-      filters: SimulatorFilters(appDatabaseFilter: .present),
-      onClear: {}
-    )
-  }
-  .padding(20)
-  .frame(width: 460)
-}
-
-#endif
 
 extension InstalledAppsView {
   struct AppFilterMenu: View {
@@ -188,3 +154,29 @@ extension InstalledAppsView {
     }
   }
 }
+
+// MARK: - InstalledAppsView.InstalledAppsHeader Preview
+
+#if DEBUG
+
+#Preview {
+  VStack(alignment: .leading, spacing: 12) {
+    InstalledAppsView.InstalledAppsHeader(
+      isLoaded: true,
+      systemFilter: .constant(.user),
+      appGroupFilter: .constant(.all),
+      databaseFilter: .constant(.present),
+      sort: .constant(.name),
+      direction: .constant(.ascending)
+    )
+
+    InstalledAppsView.ActiveAppFilters(
+      filters: SimulatorFilters(appDatabaseFilter: .present),
+      onClear: {}
+    )
+  }
+  .padding(20)
+  .frame(width: 460)
+}
+
+#endif

@@ -16,7 +16,7 @@ extension DeveloperToolsView {
     let onClear: () -> Void
 
     var body: some View {
-      ToolPanel(title: "Location", systemImage: "location") {
+      ToolPanel {
         HStack(spacing: 8) {
           Picker("Preset", selection: $preset) {
             ForEach(DeveloperToolsFeature.LocationPreset.allCases) { preset in

@@ -13,7 +13,7 @@ extension DeveloperToolsView {
     let onSend: () -> Void
 
     var body: some View {
-      ToolPanel(title: "Push Notification", systemImage: "bell.badge") {
+      ToolPanel {
         BundleIDRow(
           bundleID: $bundleID,
           bundleIDOptions: bundleIDOptions,

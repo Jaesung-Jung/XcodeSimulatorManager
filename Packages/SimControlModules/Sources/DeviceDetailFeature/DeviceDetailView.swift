@@ -1,6 +1,9 @@
 import ComposableArchitecture
 import DeveloperToolsFeature
+import Foundation
 import InstalledAppsFeature
+import MainWindowFeatureSupport
+import SimControlDomain
 import SwiftUI
 
 public struct DeviceDetailView: View {
@@ -8,15 +11,6 @@ public struct DeviceDetailView: View {
 
   public init(store: StoreOf<DeviceDetailFeature>) {
     self.store = store
-  }
-
-  private var appMetricValue: String {
-    switch store.installedApps.availability {
-    case .notLoaded:
-      "Not loaded"
-    case .loaded:
-      "\(store.installedApps.apps.count)"
-    }
   }
 
   public var body: some View {
@@ -77,8 +71,7 @@ public struct DeviceDetailView: View {
 
           MetricsGrid(
             device: device,
-            runtimeName: store.runtime?.name ?? device.runtimeID,
-            appMetricValue: appMetricValue
+            runtimeName: store.runtime?.name ?? device.runtimeID
           )
 
           InstalledAppsView(
@@ -103,8 +96,100 @@ public struct DeviceDetailView: View {
 #if DEBUG
 
 #Preview {
+  let runtime = SimulatorRuntime(
+    id: "com.apple.CoreSimulator.SimRuntime.iOS-26-4",
+    name: "iOS 26.4",
+    version: "26.4",
+    buildVersion: "23E244",
+    platform: .iOS,
+    isAvailable: true,
+    supportedDeviceTypeIDs: ["com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro"]
+  )
+  let deviceType = SimulatorDeviceType(
+    id: "com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro",
+    name: "iPhone 17 Pro",
+    productFamily: "iPhone",
+    modelIdentifier: "iPhone18,1"
+  )
+  let device = SimulatorDevice(
+    id: "PREVIEW-DEVICE-1",
+    udid: "9A83C4C2-B8D2-4F51-9244-0C8A8E3F7C11",
+    name: "iPhone 17 Pro",
+    runtimeID: runtime.id,
+    deviceTypeID: deviceType.id,
+    platform: .iOS,
+    state: .booted,
+    isAvailable: true,
+    dataPath: URL(fileURLWithPath: "/Users/preview/Library/Developer/CoreSimulator/Devices/PREVIEW-DEVICE-1/data"),
+    logPath: URL(fileURLWithPath: "/Users/preview/Library/Logs/CoreSimulator/PREVIEW-DEVICE-1"),
+    lastBootedAt: Date(timeIntervalSince1970: 1_778_008_400),
+    dataPathSize: 5_243_912_704
+  )
+  let readingApp = InstalledApp(
+    id: "PREVIEW-DEVICE-1-com.example.reading",
+    bundleID: "com.example.reading",
+    displayName: "Reading Notes",
+    version: "2.4.1",
+    build: "184",
+    deviceID: device.id,
+    bundleContainer: URL(fileURLWithPath: "/Users/preview/Containers/Bundle/Application/ReadingNotes"),
+    dataContainer: URL(fileURLWithPath: "/Users/preview/Containers/Data/Application/ReadingNotes"),
+    appBundlePath: URL(fileURLWithPath: "/Users/preview/Containers/Bundle/Application/ReadingNotes/Reading Notes.app"),
+    appGroups: [
+      AppGroupContainer(
+        id: "PREVIEW-GROUP-READING",
+        groupID: "group.com.example.reading.shared",
+        path: URL(fileURLWithPath: "/Users/preview/Containers/Shared/AppGroup/ReadingNotes")
+      )
+    ],
+    iconPath: nil,
+    databaseFiles: [
+      URL(fileURLWithPath: "/Users/preview/Containers/Data/Application/ReadingNotes/Documents/notes.sqlite")
+    ],
+    dataContainerSize: 184_320_000
+  )
+  let settingsApp = InstalledApp(
+    id: "PREVIEW-DEVICE-1-com.example.settings",
+    bundleID: "com.example.settings",
+    displayName: "Settings Lab",
+    version: "1.0",
+    build: "42",
+    deviceID: device.id,
+    bundleContainer: URL(fileURLWithPath: "/Users/preview/Containers/Bundle/Application/SettingsLab"),
+    dataContainer: URL(fileURLWithPath: "/Users/preview/Containers/Data/Application/SettingsLab"),
+    appBundlePath: URL(fileURLWithPath: "/Users/preview/Containers/Bundle/Application/SettingsLab/Settings Lab.app"),
+    appGroups: [],
+    iconPath: nil,
+    databaseFiles: [],
+    dataContainerSize: 42_800_000
+  )
+  let commandResult = CommandResult(
+    id: "PREVIEW-COMMAND-1",
+    executable: "xcrun",
+    arguments: ["simctl", "launch", device.id, readingApp.bundleID],
+    stdout: "\(readingApp.bundleID): 42810\n",
+    stderr: "",
+    exitCode: 0,
+    duration: 0.38,
+    startedAt: Date(timeIntervalSince1970: 1_778_008_760)
+  )
+
   DeviceDetailView(
-    store: Store(initialState: DeviceDetailFeature.State()) {
+    store: Store(
+      initialState: DeviceDetailFeature.State(
+        device: device,
+        runtime: runtime,
+        deviceType: deviceType,
+        installedApps: InstalledAppsFeature.State(
+          apps: [readingApp, settingsApp],
+          availability: .loaded,
+          device: device,
+          selectedAppID: readingApp.id,
+          compatibleInstallTargetCount: 2
+        ),
+        commandResults: [commandResult]
+      )
+    ) {
       DeviceDetailFeature()
     }
   )

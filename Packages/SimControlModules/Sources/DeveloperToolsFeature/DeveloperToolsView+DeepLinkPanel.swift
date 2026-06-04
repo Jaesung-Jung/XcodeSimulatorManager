@@ -11,7 +11,7 @@ extension DeveloperToolsView {
     let onOpen: () -> Void
 
     var body: some View {
-      ToolPanel(title: "Deep Link", systemImage: "link") {
+      ToolPanel {
         TextField("myapp://path", text: $urlString)
           .textFieldStyle(.roundedBorder)
 

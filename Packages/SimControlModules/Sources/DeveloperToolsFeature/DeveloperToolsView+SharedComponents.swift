@@ -1,7 +1,8 @@
+import SimControlSharedUI
 import SwiftUI
 
 extension DeveloperToolsView {
-  struct ToolPanel<Content: View>: View {
+  struct ToolSection<Content: View>: View {
     let title: LocalizedStringKey
     let systemImage: String
     let content: () -> Content
@@ -17,11 +18,26 @@ extension DeveloperToolsView {
     }
 
     var body: some View {
-      VStack(alignment: .leading, spacing: 8) {
-        Label(title, systemImage: systemImage)
-          .font(.subheadline.weight(.medium))
-          .lineLimit(1)
+      VStack(alignment: .leading, spacing: 10) {
+        SectionHeader(title: title, systemImage: systemImage)
 
+        content()
+      }
+      .frame(maxWidth: .infinity, alignment: .topLeading)
+    }
+  }
+}
+
+extension DeveloperToolsView {
+  struct ToolPanel<Content: View>: View {
+    let content: () -> Content
+
+    init(@ViewBuilder content: @escaping () -> Content) {
+      self.content = content
+    }
+
+    var body: some View {
+      VStack(alignment: .leading, spacing: 8) {
         content()
       }
       .padding(10)
@@ -159,26 +175,28 @@ extension DeveloperToolsView {
 
 #Preview {
   VStack(alignment: .leading, spacing: 12) {
-    DeveloperToolsView.ToolPanel(title: "Preview Tool", systemImage: "wrench") {
-      DeveloperToolsView.BundleIDRow(
-        bundleID: .constant("com.example.preview"),
-        bundleIDOptions: ["com.example.preview"],
-        selectedAppBundleID: "com.example.preview",
-        onUseSelectedApp: {}
-      )
+    DeveloperToolsView.ToolSection(title: "Preview Tool", systemImage: "wrench") {
+      DeveloperToolsView.ToolPanel {
+        DeveloperToolsView.BundleIDRow(
+          bundleID: .constant("com.example.preview"),
+          bundleIDOptions: ["com.example.preview"],
+          selectedAppBundleID: "com.example.preview",
+          onUseSelectedApp: {}
+        )
 
-      DeveloperToolsView.ServiceMenu(
-        selectedService: .location,
-        onServiceSelected: { _ in }
-      )
+        DeveloperToolsView.ServiceMenu(
+          selectedService: .location,
+          onServiceSelected: { _ in }
+        )
 
-      DeveloperToolsView.ToolButtonLabel(
-        title: "Run",
-        systemImage: "play.fill",
-        isRunning: false
-      )
+        DeveloperToolsView.ToolButtonLabel(
+          title: "Run",
+          systemImage: "play.fill",
+          isRunning: false
+        )
 
-      DeveloperToolsView.ToolStatusText("Ready")
+        DeveloperToolsView.ToolStatusText("Ready")
+      }
     }
   }
   .padding(20)

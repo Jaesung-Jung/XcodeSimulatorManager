@@ -21,7 +21,7 @@ extension DeveloperToolsView {
     let onClear: () -> Void
 
     var body: some View {
-      ToolPanel(title: "Status Bar Override", systemImage: "rectangle.topthird.inset.filled") {
+      ToolPanel {
         TextField("Time or ISO Date", text: $time)
           .textFieldStyle(.roundedBorder)
 

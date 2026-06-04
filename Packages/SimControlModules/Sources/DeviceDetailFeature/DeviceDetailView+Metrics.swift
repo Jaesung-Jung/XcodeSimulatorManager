@@ -7,12 +7,13 @@ extension DeviceDetailView {
   struct MetricsGrid: View {
     let device: SimulatorDevice
     let runtimeName: String
-    let appMetricValue: String
 
     var body: some View {
       LazyVGrid(
         columns: [
-          GridItem(.adaptive(minimum: 150), spacing: 10)
+          GridItem(.flexible(), spacing: 10),
+          GridItem(.flexible(), spacing: 10),
+          GridItem(.flexible(), spacing: 10)
         ],
         alignment: .leading,
         spacing: 10
@@ -28,24 +29,9 @@ extension DeviceDetailView {
           systemImage: "shippingbox"
         )
         MetricTile(
-          title: "Apps",
-          value: appMetricValue,
-          systemImage: "app"
-        )
-        MetricTile(
-          title: "Data Size",
+          title: "Size",
           value: device.dataPathSizeTitle,
           systemImage: "internaldrive"
-        )
-        MetricTile(
-          title: "Availability",
-          value: device.availabilityTitle,
-          systemImage: device.isAvailable ? "checkmark.circle" : "exclamationmark.triangle"
-        )
-        MetricTile(
-          title: "Last Booted",
-          value: device.lastBootedAt?.formatted(date: .abbreviated, time: .shortened) ?? "Unknown",
-          systemImage: "clock"
         )
       }
     }
@@ -74,8 +60,7 @@ extension DeviceDetailView {
 
   DeviceDetailView.MetricsGrid(
     device: device,
-    runtimeName: "iOS 26.4",
-    appMetricValue: "3"
+    runtimeName: "iOS 26.4"
   )
   .padding(20)
   .frame(width: 560)

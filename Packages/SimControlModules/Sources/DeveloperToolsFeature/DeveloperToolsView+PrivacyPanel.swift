@@ -15,7 +15,7 @@ extension DeveloperToolsView {
     let onApply: () -> Void
 
     var body: some View {
-      ToolPanel(title: "Privacy Permission", systemImage: "hand.raised") {
+      ToolPanel {
         Picker("Action", selection: $action) {
           ForEach(DeveloperToolsFeature.PrivacyAction.allCases) { action in
             Text(action.displayTitle)

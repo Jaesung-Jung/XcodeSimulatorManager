@@ -1,6 +1,5 @@
 import ComposableArchitecture
 import MainWindowFeatureSupport
-import SimControlSharedUI
 import SwiftUI
 
 public struct DeveloperToolsView: View {
@@ -11,16 +10,8 @@ public struct DeveloperToolsView: View {
   }
 
   public var body: some View {
-    VStack(alignment: .leading, spacing: 10) {
-      SectionHeader(title: "Developer Tools", systemImage: "wrench.and.screwdriver")
-
-      LazyVGrid(
-        columns: [
-          GridItem(.adaptive(minimum: 280), spacing: 10)
-        ],
-        alignment: .leading,
-        spacing: 10
-      ) {
+    LazyVStack(alignment: .leading, spacing: 16) {
+      ToolSection(title: "Deep Link", systemImage: "link") {
         DeepLinkPanel(
           urlString: deepLinkURLString,
           recentURLs: store.recentDeepLinkURLs,
@@ -33,7 +24,9 @@ public struct DeveloperToolsView: View {
             store.send(.openDeepLinkButtonTapped)
           }
         )
+      }
 
+      ToolSection(title: "Push Notification", systemImage: "bell.badge") {
         PushPanel(
           bundleID: pushBundleID,
           payloadJSON: pushPayloadJSON,
@@ -48,7 +41,9 @@ public struct DeveloperToolsView: View {
             store.send(.sendPushButtonTapped)
           }
         )
+      }
 
+      ToolSection(title: "Privacy Permission", systemImage: "hand.raised") {
         PrivacyPanel(
           action: privacyAction,
           bundleID: privacyBundleID,
@@ -67,7 +62,9 @@ public struct DeveloperToolsView: View {
             store.send(.applyPrivacyButtonTapped)
           }
         )
+      }
 
+      ToolSection(title: "Location", systemImage: "location") {
         LocationPanel(
           preset: locationPreset,
           customLatitude: customLatitude,
@@ -87,7 +84,9 @@ public struct DeveloperToolsView: View {
             store.send(.clearLocationButtonTapped)
           }
         )
+      }
 
+      ToolSection(title: "Status Bar Override", systemImage: "rectangle.topthird.inset.filled") {
         StatusBarOverridePanel(
           time: statusBarTime,
           dataNetwork: statusBarDataNetwork,

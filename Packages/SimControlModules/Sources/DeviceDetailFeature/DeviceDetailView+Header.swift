@@ -30,12 +30,6 @@ extension DeviceDetailView {
     let onCopyRuntimeIdentifier: () -> Void
     let onCopyDeviceTypeIdentifier: () -> Void
 
-    private var subtitle: String {
-      let runtimeName = runtime?.name ?? device.runtimeID
-      let typeName = deviceType?.name ?? device.deviceTypeID
-      return "\(runtimeName) - \(typeName)"
-    }
-
     var body: some View {
       VStack(alignment: .leading, spacing: 10) {
         HStack(alignment: .top, spacing: 12) {
@@ -56,11 +50,6 @@ extension DeviceDetailView {
               )
               .tint(device.state.statusTint)
             }
-
-            Text(subtitle)
-              .font(.subheadline)
-              .foregroundStyle(.secondary)
-              .lineLimit(1)
 
             Text(device.udid)
               .font(.caption.monospaced())

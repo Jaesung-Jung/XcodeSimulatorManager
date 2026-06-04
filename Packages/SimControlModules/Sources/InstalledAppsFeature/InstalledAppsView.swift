@@ -12,8 +12,6 @@ public struct InstalledAppsView: View {
     VStack(alignment: .leading, spacing: 10) {
       InstalledAppsHeader(
         isLoaded: store.availability == .loaded,
-        visibleAppCount: store.apps.count,
-        allAppsCount: store.allAppsCount,
         systemFilter: appSystemFilter,
         appGroupFilter: appGroupFilter,
         databaseFilter: appDatabaseFilter,
