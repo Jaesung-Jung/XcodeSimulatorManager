@@ -79,6 +79,7 @@ extension InstalledAppsView {
       InstalledAppList(
         apps: apps,
         platform: store.device?.platform,
+        deviceTypeID: store.device?.deviceTypeID,
         selectedAppID: store.selectedAppID,
         pinnedAppIDs: store.filters.pinnedAppIDs,
         selectedAppActions: { app in

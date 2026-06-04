@@ -9,20 +9,46 @@ extension InstalledAppsView {
     }
 
     let iconPath: URL?
+    let appBundlePath: URL?
+    let bundleID: String
+    let displayName: String
     let platform: SimulatorPlatform?
+    let deviceTypeID: String?
     @State private var iconImage: NSImage?
 
-    init(iconPath: URL?, platform: SimulatorPlatform? = nil) {
+    init(
+      iconPath: URL?,
+      appBundlePath: URL? = nil,
+      bundleID: String = "",
+      displayName: String = "",
+      platform: SimulatorPlatform? = nil,
+      deviceTypeID: String? = nil
+    ) {
       self.iconPath = iconPath
+      self.appBundlePath = appBundlePath
+      self.bundleID = bundleID
+      self.displayName = displayName
       self.platform = platform
+      self.deviceTypeID = deviceTypeID
     }
 
     var body: some View {
       clippedImage
       .accessibilityHidden(true)
-      .task(id: iconPath) {
+      .task(id: iconRequest) {
         await loadIcon()
       }
+    }
+
+    private var iconRequest: AppIconImageLoader.Request {
+      AppIconImageLoader.Request(
+        iconPath: iconPath,
+        appBundlePath: appBundlePath,
+        bundleID: bundleID,
+        displayName: displayName,
+        platform: platform,
+        deviceTypeID: deviceTypeID
+      )
     }
 
     @ViewBuilder private var clippedImage: some View {
@@ -62,7 +88,7 @@ extension InstalledAppsView {
 
     @MainActor private func loadIcon() async {
       iconImage = nil
-      iconImage = await AppIconImageLoader.shared.image(for: iconPath)
+      iconImage = await AppIconImageLoader.shared.image(for: iconRequest)
     }
   }
 }

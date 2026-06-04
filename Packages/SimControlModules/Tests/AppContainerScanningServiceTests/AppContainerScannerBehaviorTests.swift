@@ -92,7 +92,7 @@ struct AppContainerScannerTests {
     ])
   }
 
-  @Test func resolvesAssetCatalogIconIntoCachePath() throws {
+  @Test func resolvesAssetCatalogIconIntoCachePathOnDemand() throws {
     let temporaryDirectory = try TemporaryDirectory()
     let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
     let iconCacheRoot = temporaryDirectory.url.appendingPathComponent("IconCache", isDirectory: true)
@@ -119,8 +119,8 @@ struct AppContainerScannerTests {
     try writeAssetCatalog(named: "Settings-ATV-Icon", to: appBundle)
 
     let expectedImage = try #require(makeIconImage())
-    let previousLoaderOverride = AppContainerScanner.assetCatalogIconLoaderOverride
-    AppContainerScanner.assetCatalogIconLoaderOverride = { assetsURL, explicitNames, preferredTerms, deviceIdiom in
+    let previousLoaderOverride = AppIconAssetResolver.assetCatalogIconLoaderOverride
+    AppIconAssetResolver.assetCatalogIconLoaderOverride = { assetsURL, explicitNames, preferredTerms, deviceIdiom in
       #expect(
         assetsURL.resolvingSymlinksInPath()
           == appBundle.appendingPathComponent("Assets.car").resolvingSymlinksInPath()
@@ -131,16 +131,64 @@ struct AppContainerScannerTests {
       return ("Settings-ATV-Icon", expectedImage)
     }
     defer {
-      AppContainerScanner.assetCatalogIconLoaderOverride = previousLoaderOverride
+      AppIconAssetResolver.assetCatalogIconLoaderOverride = previousLoaderOverride
     }
-    let scanner = AppContainerScanner(iconCacheRoot: iconCacheRoot)
-    let result = scanner.scanInstalledApps(for: makeDevice(dataPath: dataPath))
 
-    let app = try #require(result.apps.first)
-    let resolvedIconPath = try #require(app.iconPath)
+    let resolver = AppIconAssetResolver(iconCacheRoot: iconCacheRoot)
+    let resolvedIconPath = try #require(resolver.iconPath(
+      in: appBundle,
+      platform: .iOS,
+      deviceTypeID: "device-type-iphone",
+      bundleID: "com.apple.TVSettings",
+      displayName: "TVSettings"
+    ))
     #expect(resolvedIconPath.path.hasPrefix(iconCacheRoot.path))
     #expect(resolvedIconPath.pathExtension == "png")
     #expect(FileManager.default.fileExists(atPath: resolvedIconPath.path))
+  }
+
+  @Test func doesNotExtractAssetCatalogIconsDuringInventoryScan() throws {
+    let temporaryDirectory = try TemporaryDirectory()
+    let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
+    let bundleContainer = dataPath.appendingPathComponent(
+      "Containers/Bundle/Application/BUNDLE-1",
+      isDirectory: true
+    )
+    let appBundle = bundleContainer.appendingPathComponent("LazyIcon.app", isDirectory: true)
+
+    try createDirectory(appBundle)
+    try createDirectory(dataPath.appendingPathComponent("Containers/Data/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Shared/AppGroup", isDirectory: true))
+    try writeMetadata(bundleID: "com.example.lazy-icon", to: bundleContainer)
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.example.lazy-icon",
+        "CFBundleDisplayName": "Lazy Icon",
+        "CFBundleIcons": [
+          "CFBundlePrimaryIcon": [
+            "CFBundleIconName": "AppIcon"
+          ]
+        ]
+      ],
+      to: appBundle
+    )
+    try writeAssetCatalog(named: "AppIcon", to: appBundle)
+
+    var loaderCallCount = 0
+    let previousLoaderOverride = AppIconAssetResolver.assetCatalogIconLoaderOverride
+    AppIconAssetResolver.assetCatalogIconLoaderOverride = { _, _, _, _ in
+      loaderCallCount += 1
+      return nil
+    }
+    defer {
+      AppIconAssetResolver.assetCatalogIconLoaderOverride = previousLoaderOverride
+    }
+    let scanner = AppContainerScanner()
+    let result = scanner.scanInstalledApps(for: makeDevice(dataPath: dataPath))
+
+    let app = try #require(result.apps.first)
+    #expect(app.iconPath == nil)
+    #expect(loaderCallCount == 0)
   }
 
   @Test func includesSystemAppsAndMarksThemByDefault() throws {

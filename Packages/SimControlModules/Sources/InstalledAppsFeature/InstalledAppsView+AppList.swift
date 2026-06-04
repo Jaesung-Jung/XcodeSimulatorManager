@@ -6,7 +6,8 @@ import SwiftUI
 extension InstalledAppsView {
   struct InstalledAppList<SelectedAppActions: View>: View {
     let apps: [InstalledApp]
-    var platform: SimulatorPlatform?
+    var platform: SimulatorPlatform? = nil
+    var deviceTypeID: String? = nil
     let selectedAppID: String?
     let pinnedAppIDs: Set<String>
     let selectedAppActions: (InstalledApp) -> SelectedAppActions
@@ -22,6 +23,7 @@ extension InstalledAppsView {
             AppRow(
               app: app,
               platform: platform,
+              deviceTypeID: deviceTypeID,
               isSelected: app.id == selectedAppID,
               isPinned: pinnedAppIDs.contains(app.id),
               onPin: {
@@ -51,6 +53,7 @@ extension InstalledAppsView.InstalledAppList where SelectedAppActions == EmptyVi
   init(
     apps: [InstalledApp],
     platform: SimulatorPlatform? = nil,
+    deviceTypeID: String? = nil,
     selectedAppID: String?,
     pinnedAppIDs: Set<String>,
     onSelection: @escaping (String) -> Void,
@@ -58,6 +61,7 @@ extension InstalledAppsView.InstalledAppList where SelectedAppActions == EmptyVi
   ) {
     self.apps = apps
     self.platform = platform
+    self.deviceTypeID = deviceTypeID
     self.selectedAppID = selectedAppID
     self.pinnedAppIDs = pinnedAppIDs
     self.selectedAppActions = { _ in EmptyView() }
@@ -109,7 +113,8 @@ extension InstalledAppsView.InstalledAppList where SelectedAppActions == EmptyVi
 extension InstalledAppsView {
   struct AppRow: View {
     let app: InstalledApp
-    var platform: SimulatorPlatform?
+    var platform: SimulatorPlatform? = nil
+    var deviceTypeID: String? = nil
     let isSelected: Bool
     let isPinned: Bool
     let onPin: () -> Void
@@ -129,7 +134,14 @@ extension InstalledAppsView {
 
     var body: some View {
       HStack(spacing: 10) {
-        AppIconView(iconPath: app.iconPath, platform: platform)
+        AppIconView(
+          iconPath: app.iconPath,
+          appBundlePath: app.appBundlePath,
+          bundleID: app.bundleID,
+          displayName: app.displayName,
+          platform: platform,
+          deviceTypeID: deviceTypeID
+        )
 
         VStack(alignment: .leading, spacing: 3) {
           Text(app.displayName)

@@ -177,14 +177,21 @@ struct InstalledAppsFeatureTests {
   }
 
   @Test func appIconImageLoaderCachesLoadedImages() async {
-    let url = URL(fileURLWithPath: "/tmp/AppIcon.png")
+    let request = AppIconImageLoader.Request(
+      iconPath: URL(fileURLWithPath: "/tmp/AppIcon.png"),
+      appBundlePath: nil,
+      bundleID: "com.example.app",
+      displayName: "Example",
+      platform: .iOS,
+      deviceTypeID: "device-type-iphone"
+    )
     let probe = AppIconImageLoadProbe()
-    let loader = AppIconImageLoader { url in
-      await probe.loadImage(url)
+    let loader = AppIconImageLoader { request in
+      await probe.loadImage(request)
     }
 
-    let firstImage = await loader.image(for: url)
-    let secondImage = await loader.image(for: url)
+    let firstImage = await loader.image(for: request)
+    let secondImage = await loader.image(for: request)
     let expectedImage = await probe.image()
 
     #expect(firstImage === expectedImage)
@@ -202,7 +209,7 @@ extension InstalledAppsFeatureTests {
       loadedImage
     }
 
-    func loadImage(_: URL) -> NSImage? {
+    func loadImage(_: AppIconImageLoader.Request) -> NSImage? {
       loads += 1
       return loadedImage
     }

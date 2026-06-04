@@ -162,6 +162,7 @@ let package = Package(
     .target(
       name: "InstalledAppsFeature",
       dependencies: [
+        "AppContainerScanningService",
         "MainWindowDisplaySupport",
         "MainWindowFeatureSupport",
         "SimControlDomain",

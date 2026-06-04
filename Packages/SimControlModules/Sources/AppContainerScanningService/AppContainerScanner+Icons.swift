@@ -1,6 +1,5 @@
 import CoreGraphics
 import Foundation
-import ImageIO
 import ObjectiveC.runtime
 import SimControlDomain
 
@@ -23,7 +22,6 @@ extension AppContainerScanner {
       .filter { $0.pathExtension == "png" && $0.lastPathComponent.hasPrefix("AppIcon") }
       .sorted { $0.lastPathComponent > $1.lastPathComponent }
       .first
-      ?? assetCatalogIconPath(in: appBundle, info: info, device: device, iconNames: iconNames)
   }
 
   func iconNames(from info: [String: Any]) -> [String] {
@@ -85,43 +83,6 @@ extension AppContainerScanner {
       }
       .sorted { $0.lastPathComponent > $1.lastPathComponent }
       .first
-  }
-
-  func assetCatalogIconPath(in appBundle: URL, info: [String: Any], device: SimulatorDevice, iconNames: [String]) -> URL? {
-    guard let iconCacheRootPath else {
-      return nil
-    }
-    let iconCacheRoot = URL(fileURLWithPath: iconCacheRootPath, isDirectory: true)
-
-    let assetsURL = appBundle.appendingPathComponent("Assets.car")
-    guard fileManager.fileExists(atPath: assetsURL.path) else {
-      return nil
-    }
-
-    let preferredTerms = assetCatalogPreferredTerms(info: info, appBundle: appBundle)
-    let deviceIdiom = coreUIDeviceIdiom(for: device)
-    let loadedIcon = Self.assetCatalogIconLoaderOverride?(
-      assetsURL,
-      iconNames,
-      preferredTerms,
-      deviceIdiom
-    ) ?? CoreUIAssetCatalog.loadIcon(
-      in: assetsURL,
-      explicitNames: iconNames,
-      preferredTerms: preferredTerms,
-      deviceIdiom: deviceIdiom
-    )
-    guard let loadedIcon else {
-      return nil
-    }
-
-    let cacheURL = cachedIconURL(
-      in: iconCacheRoot,
-      bundleID: info["CFBundleIdentifier"] as? String,
-      appBundle: appBundle,
-      assetName: loadedIcon.name
-    )
-    return writePNG(loadedIcon.image, to: cacheURL) ? cacheURL : nil
   }
 
   static func assetCatalogIconCandidates(
@@ -189,49 +150,6 @@ extension AppContainerScanner {
     .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
     .filter { $0.count > 2 }
   }
-
-  func coreUIDeviceIdiom(for device: SimulatorDevice) -> Int {
-    switch device.platform {
-    case .iOS:
-      return device.deviceTypeID.lowercased().contains("ipad") ? 2 : 1
-    case .tvOS:
-      return 3
-    case .watchOS:
-      return 5
-    case .visionOS:
-      return 7
-    case .unknown:
-      return 0
-    }
-  }
-
-  func cachedIconURL(in iconCacheRoot: URL, bundleID: String?, appBundle: URL, assetName: String) -> URL {
-    let cacheKey = "\(nonEmpty(bundleID) ?? appBundle.deletingPathExtension().lastPathComponent)-\(assetName)"
-    let sanitizedCacheKey = String(cacheKey.map { character in
-      character.isLetter || character.isNumber || character == "." || character == "-" || character == "_" ? character : "-"
-    })
-    return iconCacheRoot.appendingPathComponent("\(sanitizedCacheKey).png")
-  }
-
-  func writePNG(_ image: CGImage, to url: URL) -> Bool {
-    do {
-      try fileManager.createDirectory(
-        at: url.deletingLastPathComponent(),
-        withIntermediateDirectories: true
-      )
-      guard let destination = CGImageDestinationCreateWithURL(url as CFURL, "public.png" as CFString, 1, nil) else {
-        return false
-      }
-      CGImageDestinationAddImage(destination, image, nil)
-      return CGImageDestinationFinalize(destination)
-    } catch {
-      return false
-    }
-  }
-}
-
-extension AppContainerScanner {
-  static var assetCatalogIconLoaderOverride: ((URL, [String], [String], Int) -> (name: String, image: CGImage)?)?
 }
 
 struct CoreUIAssetCatalog {
