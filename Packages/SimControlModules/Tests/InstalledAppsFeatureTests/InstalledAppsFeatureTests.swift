@@ -1,3 +1,4 @@
+import AppKit
 import ComposableArchitecture
 import Foundation
 import MainWindowFeatureSupport
@@ -96,5 +97,39 @@ struct InstalledAppsFeatureTests {
   @Test func appIconViewCanBeConstructedForRealAndFallbackIcons() {
     _ = InstalledAppsView.AppIconView(iconPath: URL(fileURLWithPath: "/tmp/AppIcon.png"))
     _ = InstalledAppsView.AppIconView(iconPath: nil)
+  }
+
+  @Test func appIconImageLoaderCachesLoadedImages() async {
+    let url = URL(fileURLWithPath: "/tmp/AppIcon.png")
+    let probe = AppIconImageLoadProbe()
+    let loader = AppIconImageLoader { url in
+      await probe.loadImage(url)
+    }
+
+    let firstImage = await loader.image(for: url)
+    let secondImage = await loader.image(for: url)
+    let expectedImage = await probe.image()
+
+    #expect(firstImage === expectedImage)
+    #expect(secondImage === expectedImage)
+    #expect(await probe.loadCount() == 1)
+  }
+}
+
+private actor AppIconImageLoadProbe {
+  private let loadedImage = NSImage(size: NSSize(width: 2, height: 2))
+  private var loads = 0
+
+  func image() -> NSImage {
+    loadedImage
+  }
+
+  func loadImage(_: URL) -> NSImage? {
+    loads += 1
+    return loadedImage
+  }
+
+  func loadCount() -> Int {
+    loads
   }
 }

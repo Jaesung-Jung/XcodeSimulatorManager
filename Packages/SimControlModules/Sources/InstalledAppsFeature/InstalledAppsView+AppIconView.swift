@@ -3,14 +3,7 @@ import SwiftUI
 extension InstalledAppsView {
   struct AppIconView: View {
     let iconPath: URL?
-
-    private var iconImage: NSImage? {
-      guard let iconPath else {
-        return nil
-      }
-
-      return NSImage(contentsOf: iconPath)
-    }
+    @State private var iconImage: NSImage?
 
     var body: some View {
       image
@@ -19,6 +12,9 @@ extension InstalledAppsView {
       .frame(width: 48, height: 48)
       .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
       .accessibilityHidden(true)
+      .task(id: iconPath) {
+        await loadIcon()
+      }
     }
 
     private var image: Image {
@@ -27,6 +23,11 @@ extension InstalledAppsView {
       } else {
         Image("AppIconTemplate", bundle: .module)
       }
+    }
+
+    @MainActor private func loadIcon() async {
+      iconImage = nil
+      iconImage = await AppIconImageLoader.shared.image(for: iconPath)
     }
   }
 }

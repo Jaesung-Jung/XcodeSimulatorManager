@@ -12,7 +12,7 @@ extension InstalledAppsView {
     let onPin: (String) -> Void
 
     var body: some View {
-      VStack(spacing: 0) {
+      LazyVStack(spacing: 0) {
         ForEach(apps) { app in
           Button {
             onSelection(app.id)
