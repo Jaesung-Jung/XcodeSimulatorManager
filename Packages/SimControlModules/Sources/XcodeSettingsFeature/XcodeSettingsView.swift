@@ -20,12 +20,12 @@ public struct XcodeSettingsView: View {
     Section {
       TextField(
         text: preferredXcodeDeveloperPath,
-        prompt: Text(.settingsXcodeDeveloperDirectoryPrompt)
+        prompt: Text(LocalizedStringResource.settingsXcodeDeveloperDirectoryPrompt)
       ) {
-        Text(.settingsXcodeDeveloperDirectory)
+        Text(LocalizedStringResource.settingsXcodeDeveloperDirectory)
       }
     } header: {
-      Text(.settingsXcodeSection)
+      Text(LocalizedStringResource.settingsXcodeSection)
     }
   }
 }

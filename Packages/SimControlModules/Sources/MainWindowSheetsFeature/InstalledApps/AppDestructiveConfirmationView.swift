@@ -35,38 +35,38 @@ public struct AppDestructiveConfirmationView: View {
 
         Section {
           LabeledContent(
-            String(localized: .mainWindowCommonName),
+            String(localized: LocalizedStringResource.mainWindowCommonName),
             value: confirmationState.appName
           )
           LabeledContent(
-            String(localized: .mainWindowCommonBundleId),
+            String(localized: LocalizedStringResource.mainWindowCommonBundleId),
             value: confirmationState.bundleID
           )
         } header: {
-          Text(.mainWindowCommonApp)
+          Text(LocalizedStringResource.mainWindowCommonApp)
         }
 
         Section {
           LabeledContent(
-            String(localized: .mainWindowCommonName),
+            String(localized: LocalizedStringResource.mainWindowCommonName),
             value: confirmationState.deviceName
           )
           LabeledContent(
-            String(localized: .mainWindowCommonUdid),
+            String(localized: LocalizedStringResource.mainWindowCommonUdid),
             value: confirmationState.deviceUDID
           )
         } header: {
-          Text(.mainWindowCommonDevice)
+          Text(LocalizedStringResource.mainWindowCommonDevice)
         }
 
         if let dataContainerPath = confirmationState.dataContainerPath {
           Section {
             LabeledContent(
-              String(localized: .mainWindowCommonPath),
+              String(localized: LocalizedStringResource.mainWindowCommonPath),
               value: dataContainerPath
             )
           } header: {
-            Text(.mainWindowCommonSandbox)
+            Text(LocalizedStringResource.mainWindowCommonSandbox)
           }
         }
       }
@@ -77,7 +77,7 @@ public struct AppDestructiveConfirmationView: View {
           Button {
             dismiss()
           } label: {
-            Text(.mainWindowCommonCancel)
+            Text(LocalizedStringResource.mainWindowCommonCancel)
           }
         }
 

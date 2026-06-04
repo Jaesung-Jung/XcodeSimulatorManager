@@ -21,7 +21,7 @@ public struct UnpairDeviceConfirmationView: View {
       Form {
         Section {
           Label {
-            Text(.mainWindowUnpairMessage)
+            Text(LocalizedStringResource.mainWindowUnpairMessage)
           } icon: {
             Image(systemName: "link.badge.minus")
           }
@@ -29,38 +29,38 @@ public struct UnpairDeviceConfirmationView: View {
 
         Section {
           LabeledContent(
-            String(localized: .mainWindowCommonName),
+            String(localized: LocalizedStringResource.mainWindowCommonName),
             value: confirmationState.phoneName
           )
           LabeledContent(
-            String(localized: .mainWindowCommonUdid),
+            String(localized: LocalizedStringResource.mainWindowCommonUdid),
             value: confirmationState.phoneUDID
           )
         } header: {
-          Text(.mainWindowCommonPhone)
+          Text(LocalizedStringResource.mainWindowCommonPhone)
         }
 
         Section {
           LabeledContent(
-            String(localized: .mainWindowCommonName),
+            String(localized: LocalizedStringResource.mainWindowCommonName),
             value: confirmationState.watchName
           )
           LabeledContent(
-            String(localized: .mainWindowCommonUdid),
+            String(localized: LocalizedStringResource.mainWindowCommonUdid),
             value: confirmationState.watchUDID
           )
         } header: {
-          Text(.mainWindowCommonWatch)
+          Text(LocalizedStringResource.mainWindowCommonWatch)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String(localized: .mainWindowUnpairTitle))
+      .navigationTitle(String(localized: LocalizedStringResource.mainWindowUnpairTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.mainWindowCommonCancel)
+            Text(LocalizedStringResource.mainWindowCommonCancel)
           }
         }
 
@@ -69,7 +69,7 @@ public struct UnpairDeviceConfirmationView: View {
             onConfirm(confirmationState)
             dismiss()
           } label: {
-            Text(.mainWindowUnpairAction)
+            Text(LocalizedStringResource.mainWindowUnpairAction)
           }
         }
       }

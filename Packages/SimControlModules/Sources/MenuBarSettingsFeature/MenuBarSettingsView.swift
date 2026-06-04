@@ -19,10 +19,10 @@ public struct MenuBarSettingsView: View {
   public var body: some View {
     Section {
       Toggle(isOn: showsMenuBarExtra) {
-        Text(.settingsMenuBarShowMenuBarExtra)
+        Text(LocalizedStringResource.settingsMenuBarShowMenuBarExtra)
       }
     } header: {
-      Text(.settingsMenuBarSection)
+      Text(LocalizedStringResource.settingsMenuBarSection)
     }
   }
 }

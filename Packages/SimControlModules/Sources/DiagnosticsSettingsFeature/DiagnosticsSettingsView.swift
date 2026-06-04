@@ -19,10 +19,10 @@ public struct DiagnosticsSettingsView: View {
   public var body: some View {
     Section {
       Toggle(isOn: enablesDiagnostics) {
-        Text(.settingsDiagnosticsEnableDiagnostics)
+        Text(LocalizedStringResource.settingsDiagnosticsEnableDiagnostics)
       }
     } header: {
-      Text(.settingsDiagnosticsSection)
+      Text(LocalizedStringResource.settingsDiagnosticsSection)
     }
   }
 }

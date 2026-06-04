@@ -38,14 +38,14 @@ public struct CreateDeviceView: View {
 
   private var compatibilityMessage: Text {
     guard let selectedRuntime else {
-      return Text(.mainWindowCreateNoRuntime)
+      return Text(LocalizedStringResource.mainWindowCreateNoRuntime)
     }
 
     guard !selectedRuntime.supportedDeviceTypeIDs.isEmpty else {
-      return Text(.mainWindowCreateUnreportedCompatibility)
+      return Text(LocalizedStringResource.mainWindowCreateUnreportedCompatibility)
     }
 
-    return Text(.mainWindowCreateCompatibleDeviceTypesCount(count: compatibleDeviceTypes.count))
+    return Text(LocalizedStringResource.mainWindowCreateCompatibleDeviceTypesCount(count: compatibleDeviceTypes.count))
   }
 
   private var canSubmit: Bool {
@@ -82,13 +82,13 @@ public struct CreateDeviceView: View {
         )
       }
       .formStyle(.grouped)
-      .navigationTitle(String(localized: .mainWindowCreateTitle))
+      .navigationTitle(String(localized: LocalizedStringResource.mainWindowCreateTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.mainWindowCommonCancel)
+            Text(LocalizedStringResource.mainWindowCommonCancel)
           }
         }
 
@@ -97,7 +97,7 @@ public struct CreateDeviceView: View {
             onSubmit(formState)
             dismiss()
           } label: {
-            Text(.mainWindowCreateAction)
+            Text(LocalizedStringResource.mainWindowCreateAction)
           }
           .disabled(!canSubmit)
         }

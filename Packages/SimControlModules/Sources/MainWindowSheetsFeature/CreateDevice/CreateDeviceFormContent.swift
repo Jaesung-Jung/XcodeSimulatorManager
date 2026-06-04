@@ -11,7 +11,7 @@ struct CreateDeviceFormContent: View {
   var body: some View {
     Section {
       TextField(text: $formState.name) {
-        Text(.mainWindowCommonName)
+        Text(LocalizedStringResource.mainWindowCommonName)
       }
         .textFieldStyle(.roundedBorder)
 
@@ -21,7 +21,7 @@ struct CreateDeviceFormContent: View {
             .tag(runtime.id)
         }
       } label: {
-        Text(.mainWindowCreateRuntime)
+        Text(LocalizedStringResource.mainWindowCreateRuntime)
       }
 
       Picker(selection: $formState.deviceTypeID) {
@@ -30,7 +30,7 @@ struct CreateDeviceFormContent: View {
             .tag(deviceType.id)
         }
       } label: {
-        Text(.mainWindowCreateDeviceType)
+        Text(LocalizedStringResource.mainWindowCreateDeviceType)
       }
 
       compatibilityMessage

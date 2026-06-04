@@ -20,12 +20,12 @@ public struct LinkFolderSettingsView: View {
     Section {
       TextField(
         text: linkFolderPath,
-        prompt: Text(.settingsLinkFolderPathPrompt)
+        prompt: Text(LocalizedStringResource.settingsLinkFolderPathPrompt)
       ) {
-        Text(.settingsLinkFolderPath)
+        Text(LocalizedStringResource.settingsLinkFolderPath)
       }
     } header: {
-      Text(.settingsLinkFolderSection)
+      Text(LocalizedStringResource.settingsLinkFolderSection)
     }
   }
 }

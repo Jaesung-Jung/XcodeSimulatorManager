@@ -19,10 +19,10 @@ public struct SafetySettingsView: View {
   public var body: some View {
     Section {
       Toggle(isOn: confirmsDestructiveActions) {
-        Text(.settingsSafetyConfirmDestructiveActions)
+        Text(LocalizedStringResource.settingsSafetyConfirmDestructiveActions)
       }
     } header: {
-      Text(.settingsSafetySection)
+      Text(LocalizedStringResource.settingsSafetySection)
     }
   }
 }

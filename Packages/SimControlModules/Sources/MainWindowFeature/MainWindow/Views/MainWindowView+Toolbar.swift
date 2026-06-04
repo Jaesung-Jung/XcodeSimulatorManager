@@ -30,13 +30,13 @@ extension MainWindowView {
         store.send(.createSimulatorButtonTapped)
       } label: {
         Label {
-          Text(.mainWindowToolbarCreateSimulator)
+          Text(LocalizedStringResource.mainWindowToolbarCreateSimulator)
         } icon: {
           Image(systemName: "plus")
         }
       }
       .disabled(!store.canCreateDevice)
-      .help(String(localized: .mainWindowToolbarCreateSimulatorHelp))
+      .help(String(localized: LocalizedStringResource.mainWindowToolbarCreateSimulatorHelp))
     }
 
     private var cloneButton: some View {
@@ -44,13 +44,13 @@ extension MainWindowView {
         store.send(.cloneSelectedSimulatorButtonTapped)
       } label: {
         Label {
-          Text(.mainWindowToolbarCloneSimulator)
+          Text(LocalizedStringResource.mainWindowToolbarCloneSimulator)
         } icon: {
           Image(systemName: "plus.square.on.square")
         }
       }
       .disabled(!store.canCloneSelectedDevice)
-      .help(String(localized: .mainWindowToolbarCloneSimulatorHelp))
+      .help(String(localized: LocalizedStringResource.mainWindowToolbarCloneSimulatorHelp))
     }
 
     private var pairButton: some View {
@@ -58,13 +58,13 @@ extension MainWindowView {
         store.send(.pairDevicesButtonTapped)
       } label: {
         Label {
-          Text(.mainWindowToolbarPairSimulators)
+          Text(LocalizedStringResource.mainWindowToolbarPairSimulators)
         } icon: {
           Image(systemName: "link")
         }
       }
       .disabled(!store.canPairDevices)
-      .help(String(localized: .mainWindowToolbarPairSimulatorsHelp))
+      .help(String(localized: LocalizedStringResource.mainWindowToolbarPairSimulatorsHelp))
     }
 
     private var refreshButton: some View {
@@ -77,14 +77,14 @@ extension MainWindowView {
             .frame(width: 18, height: 18)
         } else {
           Label {
-            Text(.mainWindowToolbarRefresh)
+            Text(LocalizedStringResource.mainWindowToolbarRefresh)
           } icon: {
             Image(systemName: "arrow.clockwise")
           }
         }
       }
       .disabled(isRefreshing)
-      .help(String(localized: .mainWindowToolbarRefreshHelp))
+      .help(String(localized: LocalizedStringResource.mainWindowToolbarRefreshHelp))
       .keyboardShortcut("r", modifiers: .command)
     }
 
@@ -93,13 +93,17 @@ extension MainWindowView {
         isInspectorPresented.toggle()
       } label: {
         Label {
-          Text(.mainWindowToolbarInspector)
+          Text(LocalizedStringResource.mainWindowToolbarInspector)
         } icon: {
           Image(systemName: "sidebar.trailing")
         }
       }
       .help(
-        String(localized: isInspectorPresented ? .mainWindowToolbarHideInspectorHelp : .mainWindowToolbarShowInspectorHelp)
+        String(
+          localized: isInspectorPresented
+            ? LocalizedStringResource.mainWindowToolbarHideInspectorHelp
+            : LocalizedStringResource.mainWindowToolbarShowInspectorHelp
+        )
       )
     }
   }

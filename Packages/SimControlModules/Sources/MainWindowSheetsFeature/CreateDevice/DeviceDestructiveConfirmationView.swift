@@ -35,15 +35,15 @@ public struct DeviceDestructiveConfirmationView: View {
 
         Section {
           LabeledContent(
-            String(localized: .mainWindowCommonName),
+            String(localized: LocalizedStringResource.mainWindowCommonName),
             value: confirmationState.deviceName
           )
           LabeledContent(
-            String(localized: .mainWindowCommonUdid),
+            String(localized: LocalizedStringResource.mainWindowCommonUdid),
             value: confirmationState.deviceUDID
           )
         } header: {
-          Text(.mainWindowCommonDevice)
+          Text(LocalizedStringResource.mainWindowCommonDevice)
         }
       }
       .formStyle(.grouped)
@@ -53,7 +53,7 @@ public struct DeviceDestructiveConfirmationView: View {
           Button {
             dismiss()
           } label: {
-            Text(.mainWindowCommonCancel)
+            Text(LocalizedStringResource.mainWindowCommonCancel)
           }
         }
 

@@ -35,19 +35,19 @@ public struct InstallAppOnSimulatorView: View {
       Form {
         Section {
           LabeledContent(
-            String(localized: .mainWindowCommonName),
+            String(localized: LocalizedStringResource.mainWindowCommonName),
             value: formState.appName
           )
           LabeledContent(
-            String(localized: .mainWindowCommonBundleId),
+            String(localized: LocalizedStringResource.mainWindowCommonBundleId),
             value: formState.bundleID
           )
           LabeledContent(
-            String(localized: .mainWindowCommonBundle),
+            String(localized: LocalizedStringResource.mainWindowCommonBundle),
             value: formState.appBundlePath.path
           )
         } header: {
-          Text(.mainWindowCommonApp)
+          Text(LocalizedStringResource.mainWindowCommonApp)
         }
 
         Section {
@@ -57,33 +57,33 @@ public struct InstallAppOnSimulatorView: View {
                 .tag(candidate.id)
             }
           } label: {
-            Text(.mainWindowCommonSimulator)
+            Text(LocalizedStringResource.mainWindowCommonSimulator)
           }
 
           Toggle(isOn: $formState.launchAfterInstall) {
-            Text(.mainWindowInstallAppLaunchAfterInstall)
+            Text(LocalizedStringResource.mainWindowInstallAppLaunchAfterInstall)
           }
 
           LabeledContent(
-            String(localized: .mainWindowCommonState),
-            value: selectedTarget?.state.displayTitle ?? String(localized: .mainWindowCommonNotAvailable)
+            String(localized: LocalizedStringResource.mainWindowCommonState),
+            value: selectedTarget?.state.displayTitle ?? String(localized: LocalizedStringResource.mainWindowCommonNotAvailable)
           )
           LabeledContent(
-            String(localized: .mainWindowCommonUdid),
-            value: selectedTarget?.udid ?? String(localized: .mainWindowCommonNotAvailable)
+            String(localized: LocalizedStringResource.mainWindowCommonUdid),
+            value: selectedTarget?.udid ?? String(localized: LocalizedStringResource.mainWindowCommonNotAvailable)
           )
         } header: {
-          Text(.mainWindowCommonTarget)
+          Text(LocalizedStringResource.mainWindowCommonTarget)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String(localized: .mainWindowInstallAppTitle))
+      .navigationTitle(String(localized: LocalizedStringResource.mainWindowInstallAppTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.mainWindowCommonCancel)
+            Text(LocalizedStringResource.mainWindowCommonCancel)
           }
         }
 
@@ -92,7 +92,7 @@ public struct InstallAppOnSimulatorView: View {
             onSubmit(formState)
             dismiss()
           } label: {
-            Text(.mainWindowInstallAppAction)
+            Text(LocalizedStringResource.mainWindowInstallAppAction)
           }
           .disabled(!canSubmit)
         }

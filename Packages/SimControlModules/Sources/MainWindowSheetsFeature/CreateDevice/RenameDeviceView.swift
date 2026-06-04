@@ -31,19 +31,19 @@ public struct RenameDeviceView: View {
             .foregroundStyle(.secondary)
 
           TextField(text: $formState.name) {
-            Text(.mainWindowCommonName)
+            Text(LocalizedStringResource.mainWindowCommonName)
           }
             .textFieldStyle(.roundedBorder)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String(localized: .mainWindowRenameTitle))
+      .navigationTitle(String(localized: LocalizedStringResource.mainWindowRenameTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.mainWindowCommonCancel)
+            Text(LocalizedStringResource.mainWindowCommonCancel)
           }
         }
 
@@ -52,7 +52,7 @@ public struct RenameDeviceView: View {
             onSubmit(formState)
             dismiss()
           } label: {
-            Text(.mainWindowRenameAction)
+            Text(LocalizedStringResource.mainWindowRenameAction)
           }
           .disabled(!canSubmit)
         }

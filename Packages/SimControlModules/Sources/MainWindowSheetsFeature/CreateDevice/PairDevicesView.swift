@@ -46,7 +46,7 @@ public struct PairDevicesView: View {
                 .tag(candidate.id)
             }
           } label: {
-            Text(.mainWindowCommonPhone)
+            Text(LocalizedStringResource.mainWindowCommonPhone)
           }
 
           Picker(selection: $formState.watchDeviceID) {
@@ -55,31 +55,31 @@ public struct PairDevicesView: View {
                 .tag(candidate.id)
             }
           } label: {
-            Text(.mainWindowCommonWatch)
+            Text(LocalizedStringResource.mainWindowCommonWatch)
           }
         }
 
         Section {
           LabeledContent(
-            String(localized: .mainWindowPairPhoneUdid),
-            value: selectedPhone?.udid ?? String(localized: .mainWindowCommonNotAvailable)
+            String(localized: LocalizedStringResource.mainWindowPairPhoneUdid),
+            value: selectedPhone?.udid ?? String(localized: LocalizedStringResource.mainWindowCommonNotAvailable)
           )
           LabeledContent(
-            String(localized: .mainWindowPairWatchUdid),
-            value: selectedWatch?.udid ?? String(localized: .mainWindowCommonNotAvailable)
+            String(localized: LocalizedStringResource.mainWindowPairWatchUdid),
+            value: selectedWatch?.udid ?? String(localized: LocalizedStringResource.mainWindowCommonNotAvailable)
           )
         } header: {
-          Text(.mainWindowPairSelectedDevices)
+          Text(LocalizedStringResource.mainWindowPairSelectedDevices)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String(localized: .mainWindowPairTitle))
+      .navigationTitle(String(localized: LocalizedStringResource.mainWindowPairTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.mainWindowCommonCancel)
+            Text(LocalizedStringResource.mainWindowCommonCancel)
           }
         }
 
@@ -88,7 +88,7 @@ public struct PairDevicesView: View {
             onSubmit(formState)
             dismiss()
           } label: {
-            Text(.mainWindowPairAction)
+            Text(LocalizedStringResource.mainWindowPairAction)
           }
           .disabled(!canSubmit)
         }

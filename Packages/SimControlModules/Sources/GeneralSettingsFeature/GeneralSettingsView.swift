@@ -19,10 +19,10 @@ public struct GeneralSettingsView: View {
   public var body: some View {
     Section {
       Toggle(isOn: launchesAtLogin) {
-        Text(.settingsGeneralLaunchAtLogin)
+        Text(LocalizedStringResource.settingsGeneralLaunchAtLogin)
       }
     } header: {
-      Text(.settingsGeneralSection)
+      Text(LocalizedStringResource.settingsGeneralSection)
     }
   }
 }

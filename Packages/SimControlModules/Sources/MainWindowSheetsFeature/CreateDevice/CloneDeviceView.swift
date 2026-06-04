@@ -30,19 +30,19 @@ public struct CloneDeviceView: View {
             .foregroundStyle(.secondary)
 
           TextField(text: $formState.name) {
-            Text(.mainWindowCloneNewName)
+            Text(LocalizedStringResource.mainWindowCloneNewName)
           }
             .textFieldStyle(.roundedBorder)
         }
       }
       .formStyle(.grouped)
-      .navigationTitle(String(localized: .mainWindowCloneTitle))
+      .navigationTitle(String(localized: LocalizedStringResource.mainWindowCloneTitle))
       .toolbar {
         ToolbarItem(placement: .cancellationAction) {
           Button {
             dismiss()
           } label: {
-            Text(.mainWindowCommonCancel)
+            Text(LocalizedStringResource.mainWindowCommonCancel)
           }
         }
 
@@ -51,7 +51,7 @@ public struct CloneDeviceView: View {
             onSubmit(formState)
             dismiss()
           } label: {
-            Text(.mainWindowCloneAction)
+            Text(LocalizedStringResource.mainWindowCloneAction)
           }
           .disabled(!canSubmit)
         }
