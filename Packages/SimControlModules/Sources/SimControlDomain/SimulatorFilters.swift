@@ -57,6 +57,7 @@ public struct SimulatorFilters: Equatable {
   public var deviceSort: DeviceSort
   public var deviceSortDirection: SortDirection
   public var appSystemFilter: AppSystemFilter
+  public var showsHiddenSystemApps: Bool
   public var appGroupFilter: PresenceFilter
   public var appDatabaseFilter: PresenceFilter
   public var appSort: AppSort
@@ -71,7 +72,8 @@ public struct SimulatorFilters: Equatable {
     sidebarScope: SidebarScope = .all,
     deviceSort: DeviceSort = .name,
     deviceSortDirection: SortDirection = .ascending,
-    appSystemFilter: AppSystemFilter = .user,
+    appSystemFilter: AppSystemFilter = .all,
+    showsHiddenSystemApps: Bool = false,
     appGroupFilter: PresenceFilter = .all,
     appDatabaseFilter: PresenceFilter = .all,
     appSort: AppSort = .name,
@@ -85,6 +87,7 @@ public struct SimulatorFilters: Equatable {
     self.deviceSort = deviceSort
     self.deviceSortDirection = deviceSortDirection
     self.appSystemFilter = appSystemFilter
+    self.showsHiddenSystemApps = showsHiddenSystemApps
     self.appGroupFilter = appGroupFilter
     self.appDatabaseFilter = appDatabaseFilter
     self.appSort = appSort
@@ -106,7 +109,8 @@ public struct SimulatorFilters: Equatable {
 
   /// Whether app-specific filters differ from the default user-app view.
   public var hasActiveAppFilters: Bool {
-    appSystemFilter != .user
+    appSystemFilter != .all
+      || showsHiddenSystemApps
       || appGroupFilter != .all
       || appDatabaseFilter != .all
   }

@@ -5,6 +5,7 @@ extension AppContainerScanner {
   func scanBundleContainers(
     in dataPath: URL,
     device: SimulatorDevice,
+    homeScreenAppIDs: Set<String>?,
     dataContainersByBundleID: [String: URL],
     appGroupsByID: [String: AppGroupContainer],
     warnings: inout [SimulatorWarning]
@@ -81,6 +82,11 @@ extension AppContainerScanner {
         appGroups: appGroups,
         iconPath: bundleMetadata.iconPath,
         isSystemApp: isSystemBundleID(bundleID),
+        isHiddenSystemApp: isHiddenSystemApp(
+          bundleID: bundleID,
+          metadata: bundleMetadata,
+          homeScreenAppIDs: homeScreenAppIDs
+        ),
         databaseFiles: dataContainerDetails.databaseFiles,
         dataContainerSize: dataContainerDetails.size
       )
@@ -93,6 +99,7 @@ extension AppContainerScanner {
   func scanRuntimeSystemApps(
     in runtimeRoot: URL?,
     device: SimulatorDevice,
+    homeScreenAppIDs: Set<String>?,
     warnings: inout [SimulatorWarning]
   ) -> [InstalledApp] {
     guard !hidesSystemApps,
@@ -107,13 +114,19 @@ extension AppContainerScanner {
     ]
 
     return roots.flatMap { root in
-      systemApps(in: root, device: device, warnings: &warnings)
+      systemApps(
+        in: root,
+        device: device,
+        homeScreenAppIDs: homeScreenAppIDs,
+        warnings: &warnings
+      )
     }
   }
 
   func systemApps(
     in root: URL,
     device: SimulatorDevice,
+    homeScreenAppIDs: Set<String>?,
     warnings: inout [SimulatorWarning]
   ) -> [InstalledApp] {
     guard directoryExists(at: root) else {
@@ -163,8 +176,29 @@ extension AppContainerScanner {
         appBundlePath: appBundle,
         appGroups: [],
         iconPath: bundleMetadata.iconPath,
-        isSystemApp: true
+        isSystemApp: true,
+        isHiddenSystemApp: isHiddenSystemApp(
+          bundleID: bundleID,
+          metadata: bundleMetadata,
+          homeScreenAppIDs: homeScreenAppIDs
+        )
       )
     }
+  }
+
+  func isHiddenSystemApp(
+    bundleID: String,
+    metadata: BundleMetadata,
+    homeScreenAppIDs: Set<String>?
+  ) -> Bool {
+    guard isSystemBundleID(bundleID) else {
+      return false
+    }
+
+    if let homeScreenAppIDs {
+      return metadata.isHiddenSystemApp || !homeScreenAppIDs.contains(bundleID)
+    }
+
+    return metadata.isHiddenSystemApp
   }
 }

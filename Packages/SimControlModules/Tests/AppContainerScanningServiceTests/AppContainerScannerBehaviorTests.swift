@@ -148,6 +148,93 @@ struct AppContainerScannerTests {
     #expect(app.isSystemApp)
   }
 
+  @Test func marksRuntimeSystemAppsMissingFromHomeScreenAsHidden() throws {
+    let temporaryDirectory = try TemporaryDirectory()
+    let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
+    let runtimeRoot = temporaryDirectory.url.appendingPathComponent("RuntimeRoot", isDirectory: true)
+    let settingsBundle = runtimeRoot.appendingPathComponent("Applications/Preferences.app", isDirectory: true)
+    let emojiBundle = runtimeRoot.appendingPathComponent("Applications/EmojiPoster.app", isDirectory: true)
+
+    try createDirectory(settingsBundle)
+    try createDirectory(emojiBundle)
+    try createDirectory(dataPath.appendingPathComponent("Containers/Bundle/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Data/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Shared/AppGroup", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Library/SpringBoard", isDirectory: true))
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.Preferences",
+        "CFBundleName": "Settings"
+      ],
+      to: settingsBundle
+    )
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.EmojiPoster",
+        "CFBundleDisplayName": "Emoji",
+        "CFBundleName": "EmojiPoster"
+      ],
+      to: emojiBundle
+    )
+    try writePropertyList(
+      [
+        "buttonBar": ["com.apple.mobilesafari"],
+        "iconLists": [
+          [
+            "com.apple.Preferences",
+            [
+              "displayName": "Utilities",
+              "iconLists": [
+                [
+                  "com.apple.Passwords"
+                ]
+              ],
+              "listType": "folder"
+            ]
+          ]
+        ]
+      ],
+      to: dataPath.appendingPathComponent("Library/SpringBoard/IconState.plist")
+    )
+
+    let scanner = AppContainerScanner()
+    let result = scanner.scanInstalledApps(for: makeDevice(dataPath: dataPath), runtimeRoot: runtimeRoot)
+
+    let appsByBundleID = Dictionary(uniqueKeysWithValues: result.apps.map { ($0.bundleID, $0) })
+    let settings = try #require(appsByBundleID["com.apple.Preferences"])
+    let emoji = try #require(appsByBundleID["com.apple.EmojiPoster"])
+    #expect(!settings.isHiddenSystemApp)
+    #expect(emoji.isHiddenSystemApp)
+  }
+
+  @Test func marksHiddenRuntimeSystemApps() throws {
+    let temporaryDirectory = try TemporaryDirectory()
+    let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
+    let runtimeRoot = temporaryDirectory.url.appendingPathComponent("RuntimeRoot", isDirectory: true)
+    let appBundle = runtimeRoot.appendingPathComponent("Applications/HiddenService.app", isDirectory: true)
+
+    try createDirectory(appBundle)
+    try createDirectory(dataPath.appendingPathComponent("Containers/Bundle/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Data/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Shared/AppGroup", isDirectory: true))
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.HiddenService",
+        "CFBundleName": "Hidden Service",
+        "SBAppTags": ["hidden"]
+      ],
+      to: appBundle
+    )
+
+    let scanner = AppContainerScanner()
+    let result = scanner.scanInstalledApps(for: makeDevice(dataPath: dataPath), runtimeRoot: runtimeRoot)
+
+    let app = try #require(result.apps.first)
+    #expect(app.bundleID == "com.apple.HiddenService")
+    #expect(app.isSystemApp)
+    #expect(app.isHiddenSystemApp)
+  }
+
   @Test func hidesSystemAppsWhenConfigured() throws {
     let temporaryDirectory = try TemporaryDirectory()
     let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)

@@ -17,6 +17,13 @@ extension InstalledAppsView {
     )
   }
 
+  var showsHiddenSystemApps: Binding<Bool> {
+    Binding(
+      get: { store.filters.showsHiddenSystemApps },
+      set: { store.send(.showHiddenSystemAppsChanged($0)) }
+    )
+  }
+
   var appDatabaseFilter: Binding<SimulatorFilters.PresenceFilter> {
     Binding(
       get: { store.filters.appDatabaseFilter },

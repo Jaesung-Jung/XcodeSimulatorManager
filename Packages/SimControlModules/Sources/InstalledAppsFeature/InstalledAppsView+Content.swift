@@ -1,4 +1,5 @@
 import ComposableArchitecture
+import SimControlDomain
 import SimControlSharedUI
 import SwiftUI
 
@@ -27,7 +28,7 @@ extension InstalledAppsView {
           systemImage: "app"
         )
         .frame(maxWidth: .infinity)
-      } else if store.apps.isEmpty {
+      } else if store.apps.isEmpty && !store.hasSystemApps {
         EmptyStateView(
           title: "No Matching Apps",
           message: "No installed apps match the current search and filters.",
@@ -36,17 +37,21 @@ extension InstalledAppsView {
         .frame(maxWidth: .infinity)
       } else {
         VStack(alignment: .leading, spacing: 10) {
-          InstalledAppList(
-            apps: store.apps,
-            selectedAppID: store.selectedAppID,
-            pinnedAppIDs: store.filters.pinnedAppIDs,
-            onSelection: { id in
-              store.send(.selectionChanged(id))
-            },
-            onPin: { id in
-              store.send(.pinButtonTapped(id))
+          if !store.userApps.isEmpty {
+            AppListSection(title: "User Apps") {
+              appList(store.userApps)
             }
-          )
+          }
+
+          if store.hasSystemApps {
+            AppListSection {
+              systemAppsHeader
+            } content: {
+              if !store.systemApps.isEmpty {
+                appList(store.systemApps)
+              }
+            }
+          }
 
           if let selectedApp = store.selectedApp {
             SelectedAppActions(
@@ -97,6 +102,72 @@ extension InstalledAppsView {
             )
           }
         }
+      }
+    }
+
+    private var systemAppsHeader: some View {
+      HStack(spacing: 8) {
+        Text("System Apps")
+          .font(.caption.weight(.semibold))
+          .foregroundStyle(.secondary)
+
+        Spacer()
+
+        Toggle(isOn: Binding(
+          get: { store.filters.showsHiddenSystemApps },
+          set: { store.send(.showHiddenSystemAppsChanged($0)) }
+        )) {
+          Text("Show Hidden System Apps")
+            .font(.caption)
+        }
+        .toggleStyle(.checkbox)
+      }
+    }
+
+    private func appList(_ apps: [InstalledApp]) -> some View {
+      InstalledAppList(
+        apps: apps,
+        selectedAppID: store.selectedAppID,
+        pinnedAppIDs: store.filters.pinnedAppIDs,
+        onSelection: { id in
+          store.send(.selectionChanged(id))
+        },
+        onPin: { id in
+          store.send(.pinButtonTapped(id))
+        }
+      )
+    }
+  }
+}
+
+extension InstalledAppsView {
+  struct AppListSection<Header: View, Content: View>: View {
+    let header: Header
+    let content: Content
+
+    init(
+      @ViewBuilder header: () -> Header,
+      @ViewBuilder content: () -> Content
+    ) {
+      self.header = header()
+      self.content = content()
+    }
+
+    init(
+      title: LocalizedStringKey,
+      @ViewBuilder content: () -> Content
+    ) where Header == Text {
+      self.header = Text(title)
+      self.content = content()
+    }
+
+    var body: some View {
+      VStack(alignment: .leading, spacing: 6) {
+        header
+          .font(.caption.weight(.semibold))
+          .foregroundStyle(.secondary)
+
+        content
       }
     }
   }

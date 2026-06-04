@@ -96,9 +96,17 @@ struct SimulatorInventoryQueryTests {
       displayName: "Settings",
       isSystemApp: true
     )
+    let hiddenSystemApp = InventoryQueryFixtures.makeInstalledApp(
+      deviceID: device.id,
+      bundleID: "com.apple.HiddenService",
+      displayName: "Hidden Service",
+      isSystemApp: true,
+      isHiddenSystemApp: true
+    )
     let snapshot = InventoryQueryFixtures.makeSnapshot(
       installedAppsByDeviceID: [
         device.id: [
+          hiddenSystemApp,
           systemApp,
           groupApp,
           databaseApp,
@@ -109,7 +117,12 @@ struct SimulatorInventoryQueryTests {
 
     var filters = SimulatorFilters()
     var query = SimulatorInventoryQuery(snapshot: snapshot, filters: filters)
-    #expect(query.visibleApps(for: device.id).map(\.id).contains(systemApp.id) == false)
+    #expect(query.visibleApps(for: device.id).map(\.id).contains(systemApp.id))
+    #expect(query.visibleApps(for: device.id).map(\.id).contains(hiddenSystemApp.id) == false)
+
+    filters = SimulatorFilters(showsHiddenSystemApps: true)
+    query = SimulatorInventoryQuery(snapshot: snapshot, filters: filters)
+    #expect(query.visibleApps(for: device.id).map(\.id).contains(hiddenSystemApp.id))
 
     filters = SimulatorFilters(appSystemFilter: .all, appGroupFilter: .present)
     query = SimulatorInventoryQuery(snapshot: snapshot, filters: filters)
@@ -359,6 +372,7 @@ private enum InventoryQueryFixtures {
     displayName: String = "Example",
     appGroups: [AppGroupContainer] = [],
     isSystemApp: Bool = false,
+    isHiddenSystemApp: Bool = false,
     databaseFiles: [URL] = [],
     dataContainerSize: Int64? = nil
   ) -> InstalledApp {
@@ -375,6 +389,7 @@ private enum InventoryQueryFixtures {
       appGroups: appGroups,
       iconPath: nil,
       isSystemApp: isSystemApp,
+      isHiddenSystemApp: isHiddenSystemApp,
       databaseFiles: databaseFiles,
       dataContainerSize: dataContainerSize
     )

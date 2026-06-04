@@ -42,6 +42,9 @@ public struct InstalledApp: Identifiable, Equatable, Hashable {
   /// Indicates whether the bundle identifier belongs to an Apple/system app.
   public let isSystemApp: Bool
 
+  /// Indicates whether a system app is hidden from the simulator home screen.
+  public let isHiddenSystemApp: Bool
+
   /// Detected database files inside the app data container.
   public let databaseFiles: [URL]
 
@@ -62,6 +65,7 @@ public struct InstalledApp: Identifiable, Equatable, Hashable {
     appGroups: [AppGroupContainer],
     iconPath: URL?,
     isSystemApp: Bool = false,
+    isHiddenSystemApp: Bool = false,
     databaseFiles: [URL] = [],
     dataContainerSize: Int64? = nil
   ) {
@@ -77,6 +81,7 @@ public struct InstalledApp: Identifiable, Equatable, Hashable {
     self.appGroups = appGroups
     self.iconPath = iconPath
     self.isSystemApp = isSystemApp
+    self.isHiddenSystemApp = isHiddenSystemApp
     self.databaseFiles = databaseFiles
     self.dataContainerSize = dataContainerSize
   }

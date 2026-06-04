@@ -9,6 +9,7 @@ extension AppContainerScanner {
     let version: String?
     let build: String?
     let iconPath: URL?
+    let isHiddenSystemApp: Bool
     let appGroupIDs: [String]
   }
 }

@@ -13,19 +13,20 @@ extension InstalledAppsView {
     }
 
     var body: some View {
-      Group {
-        if let iconImage {
-          Image(nsImage: iconImage)
-            .resizable()
-        } else {
-          Image(.appIconTemplate)
-            .resizable()
-        }
-      }
+      image
+      .resizable()
       .scaledToFit()
       .frame(width: 48, height: 48)
       .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
       .accessibilityHidden(true)
+    }
+
+    private var image: Image {
+      if let iconImage {
+        Image(nsImage: iconImage)
+      } else {
+        Image("AppIconTemplate", bundle: .module)
+      }
     }
   }
 }

@@ -142,6 +142,7 @@ enum MainWindowTestFixtures {
     appBundlePath: URL? = nil,
     appGroups: [AppGroupContainer] = [],
     isSystemApp: Bool = false,
+    isHiddenSystemApp: Bool = false,
     databaseFiles: [URL] = [],
     dataContainerSize: Int64? = nil
   ) -> InstalledApp {
@@ -158,6 +159,7 @@ enum MainWindowTestFixtures {
       appGroups: appGroups,
       iconPath: nil,
       isSystemApp: isSystemApp,
+      isHiddenSystemApp: isHiddenSystemApp,
       databaseFiles: databaseFiles,
       dataContainerSize: dataContainerSize
     )

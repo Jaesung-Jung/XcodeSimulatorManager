@@ -72,6 +72,7 @@ extension AppContainerScanner {
         version: nil,
         build: nil,
         iconPath: nil,
+        isHiddenSystemApp: false,
         appGroupIDs: appGroupIDs(in: appBundle, device: device, warnings: &warnings)
       )
     }
@@ -82,8 +83,16 @@ extension AppContainerScanner {
       version: info["CFBundleShortVersionString"] as? String,
       build: info["CFBundleVersion"] as? String,
       iconPath: iconPath(in: appBundle, info: info),
+      isHiddenSystemApp: isHiddenSystemApp(info: info),
       appGroupIDs: appGroupIDs(in: appBundle, device: device, warnings: &warnings)
     )
+  }
+
+  func isHiddenSystemApp(info: [String: Any]) -> Bool {
+    let appTags = info["SBAppTags"] as? [String] ?? []
+    return appTags.contains("hidden")
+      || (info["LSApplicationLaunchProhibited"] as? Bool) == true
+      || (info["SBIconVisibilityDefaultVisible"] as? Bool) == false
   }
 
   func appGroupIDs(

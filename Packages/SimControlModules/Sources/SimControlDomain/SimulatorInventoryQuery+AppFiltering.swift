@@ -4,6 +4,7 @@ extension SimulatorInventoryQuery {
   func filteredApps(_ apps: [InstalledApp]) -> [InstalledApp] {
     apps.filter { app in
       appMatchesSystemFilter(app)
+        && appMatchesHiddenSystemFilter(app)
         && presence(app.appGroups.isEmpty, matches: filters.appGroupFilter)
         && presence(app.databaseFiles.isEmpty, matches: filters.appDatabaseFilter)
         && appMatchesSearch(app)
@@ -19,6 +20,10 @@ extension SimulatorInventoryQuery {
     case .all:
       true
     }
+  }
+
+  func appMatchesHiddenSystemFilter(_ app: InstalledApp) -> Bool {
+    !app.isHiddenSystemApp || filters.showsHiddenSystemApps
   }
 
   func presence(

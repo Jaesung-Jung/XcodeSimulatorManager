@@ -148,6 +148,11 @@ public struct WorkspaceFeature {
       rebuildAfterFilterChange()
     }
 
+    public mutating func setShowsHiddenSystemApps(_ showsHiddenSystemApps: Bool) {
+      filters.showsHiddenSystemApps = showsHiddenSystemApps
+      rebuildAfterFilterChange()
+    }
+
     public mutating func setAppGroupFilter(_ filter: SimulatorFilters.PresenceFilter) {
       filters.appGroupFilter = filter
       rebuildAfterFilterChange()
@@ -169,7 +174,8 @@ public struct WorkspaceFeature {
     }
 
     public mutating func clearAppFilters() {
-      filters.appSystemFilter = .user
+      filters.appSystemFilter = .all
+      filters.showsHiddenSystemApps = false
       filters.appGroupFilter = .all
       filters.appDatabaseFilter = .all
       rebuildAfterFilterChange()
@@ -311,7 +317,8 @@ public struct WorkspaceFeature {
           isDeviceCommandRunning: deviceCommandState != nil,
           compatibleInstallTargetCount: inventoryQuery?.compatibleInstallTargetCount(for: selectedDevice) ?? 0,
           filters: filters,
-          allAppsCount: allInstalledApps.count
+          allAppsCount: allInstalledApps.count,
+          allSystemAppsCount: allInstalledApps.filter(\.isSystemApp).count
         ),
         commandResults: commandResults,
         deviceCommandState: deviceCommandState,
@@ -397,6 +404,10 @@ public struct WorkspaceFeature {
 
       case .deviceDetail(.installedApps(.appSystemFilterChanged(let filter))):
         state.setAppSystemFilter(filter)
+        return .none
+
+      case .deviceDetail(.installedApps(.showHiddenSystemAppsChanged(let showsHiddenSystemApps))):
+        state.setShowsHiddenSystemApps(showsHiddenSystemApps)
         return .none
 
       case .deviceDetail(.installedApps(.appGroupFilterChanged(let filter))):

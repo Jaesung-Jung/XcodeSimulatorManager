@@ -17,6 +17,7 @@ public struct InstalledAppsFeature {
     public var compatibleInstallTargetCount: Int
     public var filters: SimulatorFilters
     public var allAppsCount: Int
+    public var allSystemAppsCount: Int
 
     public init(
       apps: [InstalledApp] = [],
@@ -27,7 +28,8 @@ public struct InstalledAppsFeature {
       isDeviceCommandRunning: Bool = false,
       compatibleInstallTargetCount: Int = 0,
       filters: SimulatorFilters = SimulatorFilters(),
-      allAppsCount: Int? = nil
+      allAppsCount: Int? = nil,
+      allSystemAppsCount: Int? = nil
     ) {
       self.apps = apps
       self.availability = availability
@@ -38,6 +40,7 @@ public struct InstalledAppsFeature {
       self.compatibleInstallTargetCount = compatibleInstallTargetCount
       self.filters = filters
       self.allAppsCount = allAppsCount ?? apps.count
+      self.allSystemAppsCount = allSystemAppsCount ?? apps.filter(\.isSystemApp).count
       validateSelection()
     }
 
@@ -47,6 +50,18 @@ public struct InstalledAppsFeature {
       }
 
       return apps.first { $0.id == selectedAppID }
+    }
+
+    public var userApps: [InstalledApp] {
+      apps.filter { !$0.isSystemApp }
+    }
+
+    public var systemApps: [InstalledApp] {
+      apps.filter(\.isSystemApp)
+    }
+
+    public var hasSystemApps: Bool {
+      allSystemAppsCount > 0
     }
 
     public var isActionRunning: Bool {
@@ -132,6 +147,7 @@ public struct InstalledAppsFeature {
     case copyAppGroupContainerButtonTapped(String, String)
     case pinButtonTapped(String)
     case appSystemFilterChanged(SimulatorFilters.AppSystemFilter)
+    case showHiddenSystemAppsChanged(Bool)
     case appGroupFilterChanged(SimulatorFilters.PresenceFilter)
     case appDatabaseFilterChanged(SimulatorFilters.PresenceFilter)
     case appSortChanged(SimulatorFilters.AppSort)
@@ -165,6 +181,10 @@ public struct InstalledAppsFeature {
            .appSortChanged,
            .appSortDirectionChanged,
            .clearAppFiltersButtonTapped:
+        return .none
+
+      case .showHiddenSystemAppsChanged(let showsHiddenSystemApps):
+        state.filters.showsHiddenSystemApps = showsHiddenSystemApps
         return .none
       }
     }

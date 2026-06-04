@@ -362,9 +362,6 @@ struct WorkspaceFeatureTests {
       installedAppsAvailability: .loaded
     )
 
-    #expect(state.deviceDetail.installedApps.apps.map(\.id).contains(systemApp.id) == false)
-
-    state.setAppSystemFilter(.all)
     #expect(state.deviceDetail.installedApps.apps.map(\.id).contains(systemApp.id))
 
     state.setAppDatabaseFilter(.present)
@@ -378,6 +375,43 @@ struct WorkspaceFeatureTests {
     state.setAppSort(.bundleID)
     state.setAppSortDirection(.descending)
     #expect(state.deviceDetail.installedApps.apps.map(\.bundleID).first == "com.example.group")
+  }
+
+  @Test
+  func showHiddenSystemAppsProjectsHiddenSystemApps() {
+    let visibleSystemApp = MainWindowTestFixtures.makeInstalledApp(
+      deviceID: MainWindowTestFixtures.device.id,
+      bundleID: "com.apple.Preferences",
+      isSystemApp: true
+    )
+    let hiddenSystemApp = MainWindowTestFixtures.makeInstalledApp(
+      deviceID: MainWindowTestFixtures.device.id,
+      bundleID: "com.apple.HiddenService",
+      isSystemApp: true,
+      isHiddenSystemApp: true
+    )
+    let snapshot = MainWindowTestFixtures.makeSnapshot(
+      installedAppsByDeviceID: [
+        MainWindowTestFixtures.device.id: [
+          MainWindowTestFixtures.app,
+          visibleSystemApp,
+          hiddenSystemApp
+        ]
+      ]
+    )
+    var state = WorkspaceFeature.State(
+      snapshot: snapshot,
+      selectedDeviceID: MainWindowTestFixtures.device.id,
+      installedAppsAvailability: .loaded
+    )
+
+    #expect(state.deviceDetail.installedApps.apps.map(\.id).contains(visibleSystemApp.id))
+    #expect(state.deviceDetail.installedApps.apps.map(\.id).contains(hiddenSystemApp.id) == false)
+
+    state.setShowsHiddenSystemApps(true)
+
+    #expect(state.deviceDetail.installedApps.apps.map(\.id).contains(hiddenSystemApp.id))
+    #expect(state.deviceDetail.installedApps.filters.showsHiddenSystemApps)
   }
 
   @Test
