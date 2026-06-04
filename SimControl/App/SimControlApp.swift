@@ -1,3 +1,8 @@
+import ComposableArchitecture
+import MainWindowFeature
+import MainWindowFeatureSupport
+import MenuBarFeature
+import SettingsFeature
 import SwiftUI
 
 @main
@@ -7,16 +12,21 @@ struct SimControlApp: App {
   @State private var appContainer = AppContainer()
 
   var body: some Scene {
-    WindowGroup("SimControl", id: AppSceneID.mainWindow) {
+    WindowGroup("SimControl", id: MainWindowSceneID.mainWindow) {
       MainWindowView(store: appContainer.mainWindowStore)
     }
 
     MenuBarExtra("SimControl", systemImage: "iphone.gen1") {
-      MenuBarRootView(store: appContainer.mainWindowStore)
+      MenuBarRootView(
+        store: appContainer.mainWindowStore.scope(
+          state: \.menuBar,
+          action: \.menuBar
+        )
+      )
     }
 
     Settings {
-      SettingsRootView()
+      SettingsRootView(store: appContainer.settingsStore)
     }
   }
 }

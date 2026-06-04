@@ -1,0 +1,127 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "main_window.toolbar.clone_simulator": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clone Simulator"
+          }
+        }
+      }
+    },
+    "main_window.toolbar.clone_simulator.help": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clone selected simulator"
+          }
+        }
+      }
+    },
+    "main_window.toolbar.create_simulator": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create Simulator"
+          }
+        }
+      }
+    },
+    "main_window.toolbar.create_simulator.help": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create simulator"
+          }
+        }
+      }
+    },
+    "main_window.toolbar.hide_inspector.help": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide inspector"
+          }
+        }
+      }
+    },
+    "main_window.toolbar.inspector": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inspector"
+          }
+        }
+      }
+    },
+    "main_window.toolbar.pair_simulators": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pair Simulators"
+          }
+        }
+      }
+    },
+    "main_window.toolbar.pair_simulators.help": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pair watch and phone simulators"
+          }
+        }
+      }
+    },
+    "main_window.toolbar.refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh"
+          }
+        }
+      }
+    },
+    "main_window.toolbar.refresh.help": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh simulator inventory"
+          }
+        }
+      }
+    },
+    "main_window.toolbar.show_inspector.help": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show inspector"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.1"
+}
