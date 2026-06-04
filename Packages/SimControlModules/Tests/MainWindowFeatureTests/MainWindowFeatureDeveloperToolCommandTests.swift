@@ -18,7 +18,7 @@ struct MainWindowFeatureDeveloperToolCommandTests {
     )
     let recorder = MainWindowDeveloperToolCommandRecorder(
       openURLResult: openResult,
-      pushResult: openResult,
+      remoteNotificationResult: openResult,
       privacyResult: openResult,
       setLocationResult: openResult,
       clearLocationResult: openResult
@@ -95,7 +95,7 @@ struct MainWindowFeatureDeveloperToolCommandTests {
     let refreshResult = MainWindowTestFixtures.makeRefreshResult(snapshot: refreshedSnapshot)
     let recorder = MainWindowDeveloperToolCommandRecorder(
       openURLResult: setLocationResult,
-      pushResult: setLocationResult,
+      remoteNotificationResult: setLocationResult,
       privacyResult: setLocationResult,
       setLocationResult: setLocationResult,
       clearLocationResult: setLocationResult
@@ -193,7 +193,7 @@ struct MainWindowFeatureDeveloperToolCommandTests {
     )
     let recorder = MainWindowDeveloperToolCommandRecorder(
       openURLResult: commandResult,
-      pushResult: commandResult,
+      remoteNotificationResult: commandResult,
       privacyResult: commandResult,
       setLocationResult: commandResult,
       clearLocationResult: commandResult,
@@ -255,7 +255,7 @@ struct MainWindowFeatureDeveloperToolCommandTests {
     )
     let recorder = MainWindowDeveloperToolCommandRecorder(
       openURLResult: commandResult,
-      pushResult: commandResult,
+      remoteNotificationResult: commandResult,
       privacyResult: commandResult,
       setLocationResult: commandResult,
       clearLocationResult: commandResult,
@@ -312,7 +312,7 @@ struct MainWindowFeatureDeveloperToolCommandTests {
     let bootRecorder = MainWindowAppCommandRecorder()
     let recorder = MainWindowDeveloperToolCommandRecorder(
       openURLResult: commandResult,
-      pushResult: commandResult,
+      remoteNotificationResult: commandResult,
       privacyResult: commandResult,
       setLocationResult: commandResult,
       clearLocationResult: commandResult,
@@ -348,16 +348,16 @@ struct MainWindowFeatureDeveloperToolCommandTests {
   }
 
   @Test
-  func invalidPushPayloadDoesNotRunCommand() async {
+  func invalidRemoteNotificationPayloadDoesNotRunCommand() async {
     let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
     let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
     let commandResult = MainWindowTestFixtures.makeCommandResult(
-      id: "unexpected-push",
+      id: "unexpected-remote-notification",
       arguments: ["simctl", "push", device.id]
     )
     let recorder = MainWindowDeveloperToolCommandRecorder(
       openURLResult: commandResult,
-      pushResult: commandResult,
+      remoteNotificationResult: commandResult,
       privacyResult: commandResult,
       setLocationResult: commandResult,
       clearLocationResult: commandResult
@@ -372,7 +372,7 @@ struct MainWindowFeatureDeveloperToolCommandTests {
       MainWindowFeature()
     } withDependencies: {
       $0.coreSimulatorService.pushNotification = { deviceID, bundleID, payloadJSON in
-        await recorder.pushNotification(
+        await recorder.remoteNotification(
           deviceID: deviceID,
           bundleID: bundleID,
           payloadJSON: payloadJSON
@@ -381,13 +381,13 @@ struct MainWindowFeatureDeveloperToolCommandTests {
     }
 
     await store.send(
-      .workspace(.deviceDetail(.developerTools(.pushPayloadJSONChanged(#"{"alert":"Hello"}"#))))
+      .workspace(.deviceDetail(.developerTools(.remoteNotificationPayloadJSONChanged(#"{"alert":"Hello"}"#))))
     ) {
-      $0.workspace.deviceDetail.developerTools.pushPayloadJSON = #"{"alert":"Hello"}"#
+      $0.workspace.deviceDetail.developerTools.remoteNotificationPayloadJSON = #"{"alert":"Hello"}"#
     }
 
-    await store.send(.workspace(.deviceDetail(.developerTools(.sendPushButtonTapped))))
+    await store.send(.workspace(.deviceDetail(.developerTools(.sendRemoteNotificationButtonTapped))))
 
-    #expect(await recorder.pushCalls() == [])
+    #expect(await recorder.remoteNotificationCalls() == [])
   }
 }

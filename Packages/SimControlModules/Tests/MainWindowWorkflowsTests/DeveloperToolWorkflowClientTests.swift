@@ -94,14 +94,14 @@ struct DeveloperToolWorkflowClientTests {
     ])
   }
 
-  @Test("push notification on booted device runs command without refresh")
-  func pushNotificationOnBootedDeviceRunsCommandWithoutRefresh() async {
+  @Test("remote notification on booted device runs command without refresh")
+  func sendRemoteNotificationOnBootedDeviceRunsCommandWithoutRefresh() async {
     let recorder = DeveloperToolWorkflowRecorder()
-    let pushResult = makeCommandResult(id: "push")
+    let remoteNotificationResult = makeCommandResult(id: "remote-notification")
     var coreSimulator = CoreSimulatorClient.testValue
     coreSimulator.pushNotification = { deviceID, bundleID, payloadJSON in
-      await recorder.record(.pushNotification(deviceID, bundleID, payloadJSON))
-      return pushResult
+      await recorder.record(.remoteNotification(deviceID, bundleID, payloadJSON))
+      return remoteNotificationResult
     }
     var repository = SimulatorRepositoryClient.testValue
     repository.refresh = {
@@ -113,7 +113,7 @@ struct DeveloperToolWorkflowClientTests {
       simulatorRepository: repository
     )
 
-    let result = await workflow.pushNotification(
+    let result = await workflow.sendRemoteNotification(
       "DEVICE-1",
       .booted,
       "com.example.app",
@@ -121,12 +121,12 @@ struct DeveloperToolWorkflowClientTests {
     )
 
     #expect(result == DeveloperToolWorkflowResult(
-      commandResults: [pushResult],
+      commandResults: [remoteNotificationResult],
       refreshResult: nil,
       preferredSelectedDeviceID: nil
     ))
     #expect(await recorder.operations() == [
-      .pushNotification(
+      .remoteNotification(
         "DEVICE-1",
         "com.example.app",
         #"{"aps":{"alert":"Hello"}}"#
@@ -168,7 +168,7 @@ struct DeveloperToolWorkflowClientTests {
 private enum DeveloperToolWorkflowOperation: Equatable, Sendable {
   case boot(String)
   case openURL(String, String)
-  case pushNotification(String, String?, String)
+  case remoteNotification(String, String?, String)
   case setLocation(String, String)
   case statusBarOverride(String, [String])
   case refresh

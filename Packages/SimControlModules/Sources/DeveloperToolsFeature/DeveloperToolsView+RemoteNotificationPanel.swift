@@ -1,7 +1,7 @@
 import SwiftUI
 
 extension DeveloperToolsView {
-  struct PushPanel: View {
+  struct RemoteNotificationPanel: View {
     @Binding var bundleID: String
     @Binding var payloadJSON: String
 
@@ -38,13 +38,13 @@ extension DeveloperToolsView {
             onSend()
           } label: {
             ToolButtonLabel(
-              title: isRunning ? "Sending" : "Send Push",
+              title: isRunning ? "Sending" : "Send Notification",
               systemImage: "paperplane",
               isRunning: isRunning
             )
           }
           .disabled(disabledReason != nil)
-          .help(disabledReason ?? "Send simulated push notification")
+          .help(disabledReason ?? "Send simulated remote notification")
         }
 
         ToolStatusText(disabledReason)
@@ -53,12 +53,12 @@ extension DeveloperToolsView {
   }
 }
 
-// MARK: - PushPanel Preview
+// MARK: - RemoteNotificationPanel Preview
 
 #if DEBUG
 
 #Preview {
-  DeveloperToolsView.PushPanel(
+  DeveloperToolsView.RemoteNotificationPanel(
     bundleID: .constant("com.example.preview"),
     payloadJSON: .constant("{\n  \"aps\": {\n    \"alert\": \"Preview\"\n  }\n}"),
     bundleIDOptions: ["com.example.preview"],

@@ -32,16 +32,16 @@ extension CoreSimulatorService {
     )
   }
 
-  @usableFromInline static func defaultPushPayloadURL() -> URL {
+  @usableFromInline static func defaultRemoteNotificationPayloadURL() -> URL {
     FileManager.default.temporaryDirectory
-      .appendingPathComponent("SimControl-PushPayload-\(UUID().uuidString).json")
+      .appendingPathComponent("SimControl-RemoteNotificationPayload-\(UUID().uuidString).json")
   }
 
-  @usableFromInline static func defaultWritePushPayload(_ payloadJSON: String, to url: URL) throws {
+  @usableFromInline static func defaultWriteRemoteNotificationPayload(_ payloadJSON: String, to url: URL) throws {
     try payloadJSON.write(to: url, atomically: true, encoding: .utf8)
   }
 
-  @usableFromInline static func defaultRemovePushPayload(_ url: URL) {
+  @usableFromInline static func defaultRemoveRemoteNotificationPayload(_ url: URL) {
     try? FileManager.default.removeItem(at: url)
   }
 }

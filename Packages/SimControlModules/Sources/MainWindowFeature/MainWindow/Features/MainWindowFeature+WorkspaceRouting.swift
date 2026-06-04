@@ -355,8 +355,8 @@ extension MainWindowFeature {
     case .deviceDetail(.developerTools(.openDeepLinkButtonTapped)):
       return runOpenDeepLinkCommand(&state)
 
-    case .deviceDetail(.developerTools(.sendPushButtonTapped)):
-      return runPushNotificationCommand(&state)
+    case .deviceDetail(.developerTools(.sendRemoteNotificationButtonTapped)):
+      return runRemoteNotificationCommand(&state)
 
     case .deviceDetail(.developerTools(.applyPrivacyButtonTapped)):
       return runPrivacyPermissionCommand(&state)

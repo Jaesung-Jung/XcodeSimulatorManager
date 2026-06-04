@@ -25,20 +25,20 @@ extension MainWindowFeature {
     }
   }
 
-  func runPushNotificationCommand(_ state: inout State) -> Effect<Action> {
+  func runRemoteNotificationCommand(_ state: inout State) -> Effect<Action> {
     let tools = state.workspace.deviceDetail.developerTools
-    guard tools.sendPushDisabledReason == nil else {
+    guard tools.sendRemoteNotificationDisabledReason == nil else {
       return .none
     }
 
-    let bundleID = nonEmpty(tools.pushBundleID)
-    let payloadJSON = tools.pushPayloadJSON
+    let bundleID = nonEmpty(tools.remoteNotificationBundleID)
+    let payloadJSON = tools.remoteNotificationPayloadJSON
 
     return runDeveloperToolCommand(
       &state,
-      command: .pushNotification
+      command: .remoteNotification
     ) { workflow, deviceID, deviceState in
-      await workflow.pushNotification(
+      await workflow.sendRemoteNotification(
         deviceID,
         deviceState,
         bundleID,

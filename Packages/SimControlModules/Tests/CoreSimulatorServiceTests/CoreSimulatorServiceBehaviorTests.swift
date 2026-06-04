@@ -500,7 +500,7 @@ struct CoreSimulatorServiceTests {
   }
 
   @Test func developerToolCommandsRunExpectedSimctlCommandsAndReturnResults() async {
-    let payloadURL = URL(fileURLWithPath: "/tmp/SimControlTests-PushPayload.json")
+    let payloadURL = URL(fileURLWithPath: "/tmp/SimControlTests-RemoteNotificationPayload.json")
     let payloadJSON = #"{"aps":{"alert":"Hello"}}"#
     let statusBarArguments = ["--time", "09:41", "--batteryLevel", "100"]
     let results = [
@@ -541,7 +541,7 @@ struct CoreSimulatorServiceTests {
     ]
     let recorder = CommandRecorder(results: results)
     let service = CoreSimulatorService(
-      makePushPayloadURL: { payloadURL },
+      makeRemoteNotificationPayloadURL: { payloadURL },
       runCommand: { executable, arguments, timeout in
         await recorder.run(executable, arguments, timeout)
       }
@@ -630,7 +630,7 @@ struct CoreSimulatorServiceTests {
   }
 
   @Test func customTimeoutsAreForwardedToCommands() async {
-    let payloadURL = URL(fileURLWithPath: "/tmp/SimControlTests-PushPayload.json")
+    let payloadURL = URL(fileURLWithPath: "/tmp/SimControlTests-RemoteNotificationPayload.json")
     let recorder = CommandRecorder(results: [
       makeCommandResult(executable: "xcode-select", arguments: ["-p"]),
       makeCommandResult(executable: "xcrun", arguments: ["simctl", "list", "-j"]),
@@ -682,7 +682,7 @@ struct CoreSimulatorServiceTests {
       listTimeout: 2,
       openSimulatorAppTimeout: 3,
       deviceCommandTimeout: 4,
-      makePushPayloadURL: { payloadURL }
+      makeRemoteNotificationPayloadURL: { payloadURL }
     )
 
     _ = await service.selectedXcodePath()
@@ -878,8 +878,8 @@ struct CoreSimulatorServiceTests {
     listTimeout: TimeInterval?,
     openSimulatorAppTimeout: TimeInterval?,
     deviceCommandTimeout: TimeInterval?,
-    makePushPayloadURL: @escaping () -> URL = {
-      URL(fileURLWithPath: "/tmp/SimControlTests-PushPayload.json")
+    makeRemoteNotificationPayloadURL: @escaping () -> URL = {
+      URL(fileURLWithPath: "/tmp/SimControlTests-RemoteNotificationPayload.json")
     }
   ) -> CoreSimulatorService {
     CoreSimulatorService(
@@ -887,7 +887,7 @@ struct CoreSimulatorServiceTests {
       listTimeout: listTimeout,
       openSimulatorAppTimeout: openSimulatorAppTimeout,
       deviceCommandTimeout: deviceCommandTimeout,
-      makePushPayloadURL: makePushPayloadURL
+      makeRemoteNotificationPayloadURL: makeRemoteNotificationPayloadURL
     ) { executable, arguments, timeout in
       await recorder.run(executable, arguments, timeout)
     }

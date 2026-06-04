@@ -8,7 +8,7 @@ public struct DeveloperToolWorkflowClient: Sendable {
     _ deviceState: SimulatorDevice.State,
     _ urlString: String
   ) async -> DeveloperToolWorkflowResult
-  public var pushNotification: @Sendable (
+  public var sendRemoteNotification: @Sendable (
     _ deviceID: SimulatorDevice.ID,
     _ deviceState: SimulatorDevice.State,
     _ bundleID: String?,
@@ -45,7 +45,7 @@ public struct DeveloperToolWorkflowClient: Sendable {
       _ deviceState: SimulatorDevice.State,
       _ urlString: String
     ) async -> DeveloperToolWorkflowResult,
-    pushNotification: @escaping @Sendable (
+    sendRemoteNotification: @escaping @Sendable (
       _ deviceID: SimulatorDevice.ID,
       _ deviceState: SimulatorDevice.State,
       _ bundleID: String?,
@@ -76,7 +76,7 @@ public struct DeveloperToolWorkflowClient: Sendable {
     ) async -> DeveloperToolWorkflowResult
   ) {
     self.openURL = openURL
-    self.pushNotification = pushNotification
+    self.sendRemoteNotification = sendRemoteNotification
     self.setPrivacyPermission = setPrivacyPermission
     self.setLocation = setLocation
     self.clearLocation = clearLocation
@@ -102,7 +102,7 @@ public extension DeveloperToolWorkflowClient {
           await coreSimulatorService.openURL(deviceID, urlString)
         }
       },
-      pushNotification: { deviceID, deviceState, bundleID, payloadJSON in
+      sendRemoteNotification: { deviceID, deviceState, bundleID, payloadJSON in
         await runBootableDeveloperToolCommand(
           deviceID: deviceID,
           deviceState: deviceState,

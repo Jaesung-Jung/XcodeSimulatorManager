@@ -9,17 +9,17 @@ extension DeveloperToolsView {
     )
   }
 
-  var pushBundleID: Binding<String> {
+  var remoteNotificationBundleID: Binding<String> {
     Binding(
-      get: { store.pushBundleID },
-      set: { store.send(.pushBundleIDChanged($0)) }
+      get: { store.remoteNotificationBundleID },
+      set: { store.send(.remoteNotificationBundleIDChanged($0)) }
     )
   }
 
-  var pushPayloadJSON: Binding<String> {
+  var remoteNotificationPayloadJSON: Binding<String> {
     Binding(
-      get: { store.pushPayloadJSON },
-      set: { store.send(.pushPayloadJSONChanged($0)) }
+      get: { store.remoteNotificationPayloadJSON },
+      set: { store.send(.remoteNotificationPayloadJSONChanged($0)) }
     )
   }
 

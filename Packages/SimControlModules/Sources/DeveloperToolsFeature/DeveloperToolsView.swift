@@ -26,19 +26,19 @@ public struct DeveloperToolsView: View {
         )
       }
 
-      ToolSection(title: "Push Notification", systemImage: "bell.badge") {
-        PushPanel(
-          bundleID: pushBundleID,
-          payloadJSON: pushPayloadJSON,
+      ToolSection(title: "Remote Notification", systemImage: "bell.badge") {
+        RemoteNotificationPanel(
+          bundleID: remoteNotificationBundleID,
+          payloadJSON: remoteNotificationPayloadJSON,
           bundleIDOptions: store.appBundleIDOptions,
           selectedAppBundleID: store.selectedAppBundleID,
-          disabledReason: store.sendPushDisabledReason,
-          isRunning: isRunning(.pushNotification),
+          disabledReason: store.sendRemoteNotificationDisabledReason,
+          isRunning: isRunning(.remoteNotification),
           onUseSelectedApp: {
             store.send(.useSelectedAppBundleButtonTapped)
           },
           onSend: {
-            store.send(.sendPushButtonTapped)
+            store.send(.sendRemoteNotificationButtonTapped)
           }
         )
       }

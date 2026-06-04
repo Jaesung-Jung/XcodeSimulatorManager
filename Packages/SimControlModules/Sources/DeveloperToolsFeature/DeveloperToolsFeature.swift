@@ -16,8 +16,8 @@ public struct DeveloperToolsFeature {
     public var appCommandState: AppCommandState?
     public var deepLinkURLString: String
     public var recentDeepLinkURLs: [String]
-    public var pushBundleID: String
-    public var pushPayloadJSON: String
+    public var remoteNotificationBundleID: String
+    public var remoteNotificationPayloadJSON: String
     public var privacyAction: PrivacyAction
     public var privacyService: PrivacyService
     public var privacyBundleID: String
@@ -44,8 +44,8 @@ public struct DeveloperToolsFeature {
       appCommandState: AppCommandState? = nil,
       deepLinkURLString: String = "",
       recentDeepLinkURLs: [String] = [],
-      pushBundleID: String = "",
-      pushPayloadJSON: String = Self.defaultPushPayloadJSON,
+      remoteNotificationBundleID: String = "",
+      remoteNotificationPayloadJSON: String = Self.defaultRemoteNotificationPayloadJSON,
       privacyAction: PrivacyAction = .grant,
       privacyService: PrivacyService = .location,
       privacyBundleID: String = "",
@@ -71,8 +71,8 @@ public struct DeveloperToolsFeature {
       self.appCommandState = appCommandState
       self.deepLinkURLString = deepLinkURLString
       self.recentDeepLinkURLs = recentDeepLinkURLs
-      self.pushBundleID = pushBundleID
-      self.pushPayloadJSON = pushPayloadJSON
+      self.remoteNotificationBundleID = remoteNotificationBundleID
+      self.remoteNotificationPayloadJSON = remoteNotificationPayloadJSON
       self.privacyAction = privacyAction
       self.privacyService = privacyService
       self.privacyBundleID = privacyBundleID
@@ -115,11 +115,11 @@ public struct DeveloperToolsFeature {
         ?? Self.urlValidationError(deepLinkURLString)
     }
 
-    public var sendPushDisabledReason: String? {
+    public var sendRemoteNotificationDisabledReason: String? {
       runnableDeviceDisabledReason
-        ?? Self.pushPayloadValidationError(
-          pushPayloadJSON,
-          bundleID: pushBundleID
+        ?? Self.remoteNotificationPayloadValidationError(
+          remoteNotificationPayloadJSON,
+          bundleID: remoteNotificationBundleID
         )
     }
 
@@ -314,7 +314,7 @@ public struct DeveloperToolsFeature {
       self.appCommandState = appCommandState
 
       if previousDeviceID != device?.id {
-        pushBundleID = selectedApp?.bundleID ?? ""
+        remoteNotificationBundleID = selectedApp?.bundleID ?? ""
         privacyBundleID = selectedApp?.bundleID ?? ""
       } else {
         applySelectedAppBundleIfNeeded()
@@ -326,7 +326,7 @@ public struct DeveloperToolsFeature {
         return
       }
 
-      pushBundleID = selectedAppBundleID
+      remoteNotificationBundleID = selectedAppBundleID
       privacyBundleID = selectedAppBundleID
     }
 
@@ -359,8 +359,8 @@ public struct DeveloperToolsFeature {
         return
       }
 
-      if Self.trimmed(pushBundleID).isEmpty {
-        pushBundleID = selectedAppBundleID
+      if Self.trimmed(remoteNotificationBundleID).isEmpty {
+        remoteNotificationBundleID = selectedAppBundleID
       }
 
       if Self.trimmed(privacyBundleID).isEmpty {
@@ -394,34 +394,34 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
-    public static func pushPayloadValidationError(
+    public static func remoteNotificationPayloadValidationError(
       _ payloadJSON: String,
       bundleID: String
     ) -> String? {
       let payloadJSON = Self.trimmed(payloadJSON)
 
       guard !payloadJSON.isEmpty else {
-        return "Enter a push payload."
+        return "Enter a remote notification payload."
       }
 
       let data = Data(payloadJSON.utf8)
       guard data.count <= 4_096 else {
-        return "Push payload must be 4096 bytes or less."
+        return "Remote notification payload must be 4096 bytes or less."
       }
 
       let object: Any
       do {
         object = try JSONSerialization.jsonObject(with: data)
       } catch {
-        return "Push payload must be valid JSON."
+        return "Remote notification payload must be valid JSON."
       }
 
       guard let payload = object as? [String: Any] else {
-        return "Push payload must be a JSON object."
+        return "Remote notification payload must be a JSON object."
       }
 
       guard payload["aps"] is [String: Any] else {
-        return "Push payload must contain an aps object."
+        return "Remote notification payload must contain an aps object."
       }
 
       if Self.trimmed(bundleID).isEmpty,
@@ -478,7 +478,7 @@ public struct DeveloperToolsFeature {
       value.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    public static let defaultPushPayloadJSON = """
+    public static let defaultRemoteNotificationPayloadJSON = """
     {
       "aps": {
         "alert": "Hello from SimControl"
@@ -491,9 +491,9 @@ public struct DeveloperToolsFeature {
     case deepLinkURLChanged(String)
     case recentDeepLinkURLSelected(String)
     case openDeepLinkButtonTapped
-    case pushBundleIDChanged(String)
-    case pushPayloadJSONChanged(String)
-    case sendPushButtonTapped
+    case remoteNotificationBundleIDChanged(String)
+    case remoteNotificationPayloadJSONChanged(String)
+    case sendRemoteNotificationButtonTapped
     case privacyActionChanged(PrivacyAction)
     case privacyServiceChanged(PrivacyService)
     case privacyBundleIDChanged(String)
@@ -530,12 +530,12 @@ public struct DeveloperToolsFeature {
         state.deepLinkURLString = urlString
         return .none
 
-      case .pushBundleIDChanged(let bundleID):
-        state.pushBundleID = bundleID
+      case .remoteNotificationBundleIDChanged(let bundleID):
+        state.remoteNotificationBundleID = bundleID
         return .none
 
-      case .pushPayloadJSONChanged(let payloadJSON):
-        state.pushPayloadJSON = payloadJSON
+      case .remoteNotificationPayloadJSONChanged(let payloadJSON):
+        state.remoteNotificationPayloadJSON = payloadJSON
         return .none
 
       case .privacyActionChanged(let privacyAction):
@@ -613,7 +613,7 @@ public struct DeveloperToolsFeature {
         return .none
 
       case .openDeepLinkButtonTapped,
-           .sendPushButtonTapped,
+           .sendRemoteNotificationButtonTapped,
            .applyPrivacyButtonTapped,
            .setLocationButtonTapped,
            .clearLocationButtonTapped,

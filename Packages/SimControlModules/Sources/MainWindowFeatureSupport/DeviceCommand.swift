@@ -9,7 +9,7 @@ public enum DeviceCommand {
   case pair
   case unpair
   case openURL
-  case pushNotification
+  case remoteNotification
   case privacyPermission
   case setLocation
   case clearLocation

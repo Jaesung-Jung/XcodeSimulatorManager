@@ -5,7 +5,7 @@ struct MainWindowOpenURLCall: Equatable {
   let urlString: String
 }
 
-struct MainWindowPushCall: Equatable {
+struct MainWindowRemoteNotificationCall: Equatable {
   let deviceID: String
   let bundleID: String?
   let payloadJSON: String
@@ -30,14 +30,14 @@ struct MainWindowStatusBarOverrideCall: Equatable {
 
 actor MainWindowDeveloperToolCommandRecorder {
   private let openURLResult: CommandResult
-  private let pushResult: CommandResult
+  private let remoteNotificationResult: CommandResult
   private let privacyResult: CommandResult
   private let setLocationResult: CommandResult
   private let clearLocationResult: CommandResult
   private let statusBarResult: CommandResult
   private let clearStatusBarResult: CommandResult
   private var recordedOpenURLCalls: [MainWindowOpenURLCall] = []
-  private var recordedPushCalls: [MainWindowPushCall] = []
+  private var recordedRemoteNotificationCalls: [MainWindowRemoteNotificationCall] = []
   private var recordedPrivacyCalls: [MainWindowPrivacyCall] = []
   private var recordedSetLocationCalls: [MainWindowSetLocationCall] = []
   private var recordedClearLocationCalls: [String] = []
@@ -46,7 +46,7 @@ actor MainWindowDeveloperToolCommandRecorder {
 
   init(
     openURLResult: CommandResult,
-    pushResult: CommandResult,
+    remoteNotificationResult: CommandResult,
     privacyResult: CommandResult,
     setLocationResult: CommandResult,
     clearLocationResult: CommandResult,
@@ -60,7 +60,7 @@ actor MainWindowDeveloperToolCommandRecorder {
     )
   ) {
     self.openURLResult = openURLResult
-    self.pushResult = pushResult
+    self.remoteNotificationResult = remoteNotificationResult
     self.privacyResult = privacyResult
     self.setLocationResult = setLocationResult
     self.clearLocationResult = clearLocationResult
@@ -75,19 +75,19 @@ actor MainWindowDeveloperToolCommandRecorder {
     return openURLResult
   }
 
-  func pushNotification(
+  func remoteNotification(
     deviceID: String,
     bundleID: String?,
     payloadJSON: String
   ) -> CommandResult {
-    recordedPushCalls.append(
-      MainWindowPushCall(
+    recordedRemoteNotificationCalls.append(
+      MainWindowRemoteNotificationCall(
         deviceID: deviceID,
         bundleID: bundleID,
         payloadJSON: payloadJSON
       )
     )
-    return pushResult
+    return remoteNotificationResult
   }
 
   func setPrivacyPermission(
@@ -135,8 +135,8 @@ actor MainWindowDeveloperToolCommandRecorder {
     recordedOpenURLCalls
   }
 
-  func pushCalls() -> [MainWindowPushCall] {
-    recordedPushCalls
+  func remoteNotificationCalls() -> [MainWindowRemoteNotificationCall] {
+    recordedRemoteNotificationCalls
   }
 
   func privacyCalls() -> [MainWindowPrivacyCall] {

@@ -28,36 +28,36 @@ struct DeveloperToolsFeatureTests {
   }
 
   @Test
-  func pushPayloadValidationRequiresJSONObjectApsAndBundleTarget() {
+  func remoteNotificationPayloadValidationRequiresJSONObjectApsAndBundleTarget() {
     let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
     let validState = DeveloperToolsFeature.State(
       device: device,
-      pushBundleID: "com.example.app",
-      pushPayloadJSON: #"{"aps":{"alert":"Hello"}}"#
+      remoteNotificationBundleID: "com.example.app",
+      remoteNotificationPayloadJSON: #"{"aps":{"alert":"Hello"}}"#
     )
     let missingApsState = DeveloperToolsFeature.State(
       device: device,
-      pushBundleID: "com.example.app",
-      pushPayloadJSON: #"{"alert":"Hello"}"#
+      remoteNotificationBundleID: "com.example.app",
+      remoteNotificationPayloadJSON: #"{"alert":"Hello"}"#
     )
     let missingBundleState = DeveloperToolsFeature.State(
       device: device,
-      pushBundleID: "",
-      pushPayloadJSON: #"{"aps":{"alert":"Hello"}}"#
+      remoteNotificationBundleID: "",
+      remoteNotificationPayloadJSON: #"{"aps":{"alert":"Hello"}}"#
     )
     let payloadTargetState = DeveloperToolsFeature.State(
       device: device,
-      pushBundleID: "",
-      pushPayloadJSON: #"{"Simulator Target Bundle":"com.example.app","aps":{"alert":"Hello"}}"#
+      remoteNotificationBundleID: "",
+      remoteNotificationPayloadJSON: #"{"Simulator Target Bundle":"com.example.app","aps":{"alert":"Hello"}}"#
     )
 
-    #expect(validState.sendPushDisabledReason == nil)
-    #expect(missingApsState.sendPushDisabledReason == "Push payload must contain an aps object.")
+    #expect(validState.sendRemoteNotificationDisabledReason == nil)
+    #expect(missingApsState.sendRemoteNotificationDisabledReason == "Remote notification payload must contain an aps object.")
     #expect(
-      missingBundleState.sendPushDisabledReason
+      missingBundleState.sendRemoteNotificationDisabledReason
         == "Select a bundle identifier or include Simulator Target Bundle."
     )
-    #expect(payloadTargetState.sendPushDisabledReason == nil)
+    #expect(payloadTargetState.sendRemoteNotificationDisabledReason == nil)
   }
 
   @Test
@@ -233,7 +233,7 @@ struct DeveloperToolsFeatureTests {
         device: MainWindowTestFixtures.device,
         installedApps: [MainWindowTestFixtures.app],
         selectedAppID: MainWindowTestFixtures.app.id,
-        pushBundleID: "manual.push",
+        remoteNotificationBundleID: "manual.remote",
         privacyBundleID: "manual.privacy"
       )
     ) {
@@ -241,7 +241,7 @@ struct DeveloperToolsFeatureTests {
     }
 
     await store.send(.useSelectedAppBundleButtonTapped) {
-      $0.pushBundleID = MainWindowTestFixtures.app.bundleID
+      $0.remoteNotificationBundleID = MainWindowTestFixtures.app.bundleID
       $0.privacyBundleID = MainWindowTestFixtures.app.bundleID
     }
   }

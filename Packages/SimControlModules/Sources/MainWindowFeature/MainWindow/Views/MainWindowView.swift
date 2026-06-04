@@ -137,7 +137,7 @@ public struct MainWindowView: View {
 
   let developerToolWorkflow = DeveloperToolWorkflowClient(
     openURL: { _, _, _ in developerToolResult },
-    pushNotification: { _, _, _, _ in developerToolResult },
+    sendRemoteNotification: { _, _, _, _ in developerToolResult },
     setPrivacyPermission: { _, _, _, _, _ in developerToolResult },
     setLocation: { _, _, _ in developerToolResult },
     clearLocation: { _, _ in developerToolResult },

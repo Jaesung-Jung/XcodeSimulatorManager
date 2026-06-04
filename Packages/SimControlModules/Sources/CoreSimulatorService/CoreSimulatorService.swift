@@ -66,9 +66,9 @@ public struct CoreSimulatorService {
   @usableFromInline static let defaultDeviceCommandTimeout: TimeInterval = 60
 
   let runCommand: CommandRunner
-  let makePushPayloadURL: () -> URL
-  let writePushPayload: (String, URL) throws -> Void
-  let removePushPayload: (URL) -> Void
+  let makeRemoteNotificationPayloadURL: () -> URL
+  let writeRemoteNotificationPayload: (String, URL) throws -> Void
+  let removeRemoteNotificationPayload: (URL) -> Void
   let now: () -> Date
   let makeID: () -> String
   let selectedXcodePathTimeout: TimeInterval?
@@ -83,9 +83,9 @@ public struct CoreSimulatorService {
     listTimeout: TimeInterval? = Self.defaultListTimeout,
     openSimulatorAppTimeout: TimeInterval? = Self.defaultOpenSimulatorAppTimeout,
     deviceCommandTimeout: TimeInterval? = Self.defaultDeviceCommandTimeout,
-    makePushPayloadURL: @escaping () -> URL = Self.defaultPushPayloadURL,
-    writePushPayload: @escaping (String, URL) throws -> Void = Self.defaultWritePushPayload,
-    removePushPayload: @escaping (URL) -> Void = Self.defaultRemovePushPayload,
+    makeRemoteNotificationPayloadURL: @escaping () -> URL = Self.defaultRemoteNotificationPayloadURL,
+    writeRemoteNotificationPayload: @escaping (String, URL) throws -> Void = Self.defaultWriteRemoteNotificationPayload,
+    removeRemoteNotificationPayload: @escaping (URL) -> Void = Self.defaultRemoveRemoteNotificationPayload,
     now: @escaping () -> Date = Date.init,
     makeID: @escaping () -> String = { UUID().uuidString }
   ) {
@@ -93,9 +93,9 @@ public struct CoreSimulatorService {
     self.listTimeout = listTimeout
     self.openSimulatorAppTimeout = openSimulatorAppTimeout
     self.deviceCommandTimeout = deviceCommandTimeout
-    self.makePushPayloadURL = makePushPayloadURL
-    self.writePushPayload = writePushPayload
-    self.removePushPayload = removePushPayload
+    self.makeRemoteNotificationPayloadURL = makeRemoteNotificationPayloadURL
+    self.writeRemoteNotificationPayload = writeRemoteNotificationPayload
+    self.removeRemoteNotificationPayload = removeRemoteNotificationPayload
     self.now = now
     self.makeID = makeID
     self.runCommand = { executable, arguments, timeout in
@@ -112,9 +112,9 @@ public struct CoreSimulatorService {
     listTimeout: TimeInterval? = Self.defaultListTimeout,
     openSimulatorAppTimeout: TimeInterval? = Self.defaultOpenSimulatorAppTimeout,
     deviceCommandTimeout: TimeInterval? = Self.defaultDeviceCommandTimeout,
-    makePushPayloadURL: @escaping () -> URL = Self.defaultPushPayloadURL,
-    writePushPayload: @escaping (String, URL) throws -> Void = Self.defaultWritePushPayload,
-    removePushPayload: @escaping (URL) -> Void = Self.defaultRemovePushPayload,
+    makeRemoteNotificationPayloadURL: @escaping () -> URL = Self.defaultRemoteNotificationPayloadURL,
+    writeRemoteNotificationPayload: @escaping (String, URL) throws -> Void = Self.defaultWriteRemoteNotificationPayload,
+    removeRemoteNotificationPayload: @escaping (URL) -> Void = Self.defaultRemoveRemoteNotificationPayload,
     now: @escaping () -> Date = Date.init,
     makeID: @escaping () -> String = { UUID().uuidString },
     runCommand: @escaping CommandRunner
@@ -123,9 +123,9 @@ public struct CoreSimulatorService {
     self.listTimeout = listTimeout
     self.openSimulatorAppTimeout = openSimulatorAppTimeout
     self.deviceCommandTimeout = deviceCommandTimeout
-    self.makePushPayloadURL = makePushPayloadURL
-    self.writePushPayload = writePushPayload
-    self.removePushPayload = removePushPayload
+    self.makeRemoteNotificationPayloadURL = makeRemoteNotificationPayloadURL
+    self.writeRemoteNotificationPayload = writeRemoteNotificationPayload
+    self.removeRemoteNotificationPayload = removeRemoteNotificationPayload
     self.now = now
     self.makeID = makeID
     self.runCommand = runCommand

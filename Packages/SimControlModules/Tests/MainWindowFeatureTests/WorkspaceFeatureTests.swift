@@ -97,7 +97,7 @@ struct WorkspaceFeatureTests {
       $0.deviceDetail.installedApps.selectedAppID = MainWindowTestFixtures.app.id
       $0.deviceDetail.installedApps.filters = $0.filters
       $0.deviceDetail.developerTools.selectedAppID = MainWindowTestFixtures.app.id
-      $0.deviceDetail.developerTools.pushBundleID = MainWindowTestFixtures.app.bundleID
+      $0.deviceDetail.developerTools.remoteNotificationBundleID = MainWindowTestFixtures.app.bundleID
       $0.deviceDetail.developerTools.privacyBundleID = MainWindowTestFixtures.app.bundleID
       $0.inspector.selectedApp = MainWindowTestFixtures.app
     }

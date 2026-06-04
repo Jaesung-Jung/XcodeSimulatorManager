@@ -11,13 +11,13 @@ extension CoreSimulatorService {
     )
   }
 
-  /// Sends a push notification payload to a simulator device.
+  /// Sends a remote notification payload to a simulator device.
   public func pushNotification(
     deviceID: String,
     bundleID: String?,
     payloadJSON: String
   ) async -> CommandResult {
-    let payloadURL = makePushPayloadURL()
+    let payloadURL = makeRemoteNotificationPayloadURL()
     let startedAt = now()
     var arguments = ["simctl", "push", deviceID]
 
@@ -28,19 +28,19 @@ extension CoreSimulatorService {
     arguments.append(payloadURL.path)
 
     do {
-      try writePushPayload(payloadJSON, payloadURL)
+      try writeRemoteNotificationPayload(payloadJSON, payloadURL)
     } catch {
       return commandResult(
         arguments: arguments,
         stdout: "",
-        stderr: "Push payload could not be written: \(error.localizedDescription)",
+        stderr: "Remote notification payload could not be written: \(error.localizedDescription)",
         exitCode: 1,
         startedAt: startedAt
       )
     }
 
     defer {
-      removePushPayload(payloadURL)
+      removeRemoteNotificationPayload(payloadURL)
     }
 
     return await runCommand(
