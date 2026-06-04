@@ -20,7 +20,7 @@ extension InspectorView {
           } else {
             EmptyStateView(
               title: "No Selection",
-              message: "Select a simulator to inspect identifiers, folders, environment, and warnings.",
+              message: "Select a simulator to inspect identifiers, folders, and environment.",
               systemImage: "info.circle"
             )
             .frame(maxWidth: .infinity)
@@ -41,12 +41,6 @@ extension InspectorView {
           Divider()
 
           EnvironmentSection(snapshot: store.snapshot)
-
-          if let snapshot = store.snapshot, !snapshot.warnings.isEmpty {
-            Divider()
-
-            WarningsSection(warnings: snapshot.warnings)
-          }
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .topLeading)

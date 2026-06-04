@@ -100,6 +100,8 @@ extension AppContainerScanner {
     in runtimeRoot: URL?,
     device: SimulatorDevice,
     homeScreenAppIDs: Set<String>?,
+    dataContainersByBundleID: [String: URL],
+    appGroupsByID: [String: AppGroupContainer],
     warnings: inout [SimulatorWarning]
   ) -> [InstalledApp] {
     guard !hidesSystemApps,
@@ -118,6 +120,8 @@ extension AppContainerScanner {
         in: root,
         device: device,
         homeScreenAppIDs: homeScreenAppIDs,
+        dataContainersByBundleID: dataContainersByBundleID,
+        appGroupsByID: appGroupsByID,
         warnings: &warnings
       )
     }
@@ -127,6 +131,8 @@ extension AppContainerScanner {
     in root: URL,
     device: SimulatorDevice,
     homeScreenAppIDs: Set<String>?,
+    dataContainersByBundleID: [String: URL],
+    appGroupsByID: [String: AppGroupContainer],
     warnings: inout [SimulatorWarning]
   ) -> [InstalledApp] {
     guard directoryExists(at: root) else {
@@ -164,6 +170,14 @@ extension AppContainerScanner {
         return nil
       }
 
+      let dataContainer = dataContainersByBundleID[bundleID]
+      let dataContainerDetails = dataContainerDetails(
+        at: dataContainer,
+        device: device,
+        warnings: &warnings
+      )
+      let appGroups = bundleMetadata.appGroupIDs.compactMap { appGroupsByID[$0] }
+
       return InstalledApp(
         id: "\(device.id):\(bundleID)",
         bundleID: bundleID,
@@ -172,16 +186,18 @@ extension AppContainerScanner {
         build: nonEmpty(bundleMetadata.build),
         deviceID: device.id,
         bundleContainer: nil,
-        dataContainer: nil,
+        dataContainer: dataContainer,
         appBundlePath: appBundle,
-        appGroups: [],
+        appGroups: appGroups,
         iconPath: bundleMetadata.iconPath,
         isSystemApp: true,
         isHiddenSystemApp: isHiddenSystemApp(
           bundleID: bundleID,
           metadata: bundleMetadata,
           homeScreenAppIDs: homeScreenAppIDs
-        )
+        ),
+        databaseFiles: dataContainerDetails.databaseFiles,
+        dataContainerSize: dataContainerDetails.size
       )
     }
   }

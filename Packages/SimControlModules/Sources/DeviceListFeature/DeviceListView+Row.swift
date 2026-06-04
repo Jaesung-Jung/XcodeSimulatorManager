@@ -11,6 +11,14 @@ extension DeviceListView {
     let isPinned: Bool
     let onPin: () -> Void
 
+    static func bookmarkIconName(isBookmarked: Bool) -> String {
+      isBookmarked ? "bookmark.fill" : "bookmark"
+    }
+
+    static func bookmarkHelpTitle(isBookmarked: Bool) -> String {
+      isBookmarked ? "Remove device bookmark" : "Bookmark device"
+    }
+
     private var subtitle: String {
       let runtimeName = runtime?.name ?? device.runtimeID
       let typeName = deviceType?.name ?? device.deviceTypeID
@@ -48,11 +56,11 @@ extension DeviceListView {
             Button {
               onPin()
             } label: {
-              Image(systemName: isPinned ? "pin.fill" : "pin")
+              Image(systemName: Self.bookmarkIconName(isBookmarked: isPinned))
                 .foregroundStyle(isPinned ? Color.accentColor : Color.secondary)
             }
             .buttonStyle(.plain)
-            .help(isPinned ? "Unpin device" : "Pin device")
+            .help(Self.bookmarkHelpTitle(isBookmarked: isPinned))
           }
         }
         .padding(.vertical, 5)

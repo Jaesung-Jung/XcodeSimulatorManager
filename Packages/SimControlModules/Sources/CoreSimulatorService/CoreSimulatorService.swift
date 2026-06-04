@@ -56,6 +56,60 @@ public struct CoreSimulatorService {
     public var succeeded: Bool { commandResult.succeeded && payload != nil && diagnostic == nil }
   }
 
+  /// An installed app entry decoded from `simctl listapps`.
+  public struct ListedApp: Equatable {
+    /// The app bundle identifier.
+    public let bundleID: String
+
+    /// The app bundle path, when reported.
+    public let appBundlePath: URL?
+
+    /// The app data container path, when reported.
+    public let dataContainer: URL?
+
+    /// App Group container paths keyed by group identifier.
+    public let groupContainers: [String: URL]
+
+    /// Creates a listed app entry.
+    public init(
+      bundleID: String,
+      appBundlePath: URL?,
+      dataContainer: URL?,
+      groupContainers: [String: URL]
+    ) {
+      self.bundleID = bundleID
+      self.appBundlePath = appBundlePath
+      self.dataContainer = dataContainer
+      self.groupContainers = groupContainers
+    }
+  }
+
+  /// The decoded `simctl listapps` result returned by CoreSimulatorService.
+  public struct ListAppsResult: Equatable {
+    /// App entries keyed by bundle identifier.
+    public let appsByBundleID: [String: ListedApp]
+
+    /// The command result produced by `xcrun simctl listapps`.
+    public let commandResult: CommandResult
+
+    /// Additional service-level context, such as a command failure or plist decode failure.
+    public let diagnostic: String?
+
+    /// Creates a list-apps result.
+    public init(
+      appsByBundleID: [String: ListedApp],
+      commandResult: CommandResult,
+      diagnostic: String?
+    ) {
+      self.appsByBundleID = appsByBundleID
+      self.commandResult = commandResult
+      self.diagnostic = diagnostic
+    }
+
+    /// Indicates whether the command produced decoded app entries.
+    public var succeeded: Bool { commandResult.succeeded && diagnostic == nil }
+  }
+
   typealias CommandRunner = (_ executable: String, _ arguments: [String], _ timeout: TimeInterval?) async -> CommandResult
 
   @usableFromInline static let defaultSelectedXcodePathTimeout: TimeInterval = 10

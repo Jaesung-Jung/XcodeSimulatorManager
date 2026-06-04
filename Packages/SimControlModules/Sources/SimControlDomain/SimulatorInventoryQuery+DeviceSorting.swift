@@ -3,12 +3,6 @@ import Foundation
 extension SimulatorInventoryQuery {
   func sortedDevices(_ devices: [SimulatorDevice]) -> [SimulatorDevice] {
     devices.sorted { first, second in
-      let firstPinned = filters.pinnedDeviceIDs.contains(first.id)
-      let secondPinned = filters.pinnedDeviceIDs.contains(second.id)
-      if firstPinned != secondPinned {
-        return firstPinned
-      }
-
       let comparison = deviceComparison(first, second)
       if comparison == .orderedSame {
         return first.id.localizedStandardCompare(second.id) == .orderedAscending

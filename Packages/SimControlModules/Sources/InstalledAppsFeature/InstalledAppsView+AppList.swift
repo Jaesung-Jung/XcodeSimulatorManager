@@ -185,6 +185,14 @@ extension InstalledAppsView {
     let isPinned: Bool
     let onPin: () -> Void
 
+    static func bookmarkIconName(isBookmarked: Bool) -> String {
+      isBookmarked ? "bookmark.fill" : "bookmark"
+    }
+
+    static func bookmarkHelpTitle(isBookmarked: Bool) -> String {
+      isBookmarked ? "Remove app bookmark" : "Bookmark app"
+    }
+
     var body: some View {
       VStack(alignment: .trailing, spacing: 6) {
         HStack(spacing: 8) {
@@ -197,11 +205,11 @@ extension InstalledAppsView {
           Button {
             onPin()
           } label: {
-            Image(systemName: isPinned ? "pin.fill" : "pin")
+            Image(systemName: Self.bookmarkIconName(isBookmarked: isPinned))
               .foregroundStyle(isPinned ? Color.accentColor : Color.secondary)
           }
           .buttonStyle(.plain)
-          .help(isPinned ? "Unpin app" : "Pin app")
+          .help(Self.bookmarkHelpTitle(isBookmarked: isPinned))
         }
 
         HStack(spacing: 4) {

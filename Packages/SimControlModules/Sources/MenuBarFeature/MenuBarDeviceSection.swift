@@ -36,7 +36,7 @@ struct MenuBarDeviceSection: View {
 
   var body: some View {
     if !pinnedDevices.isEmpty {
-      Section("Pinned Devices") {
+      Section("Bookmarked Devices") {
         ForEach(pinnedDevices) { device in
           DeviceButton(
             device: device,
@@ -50,7 +50,7 @@ struct MenuBarDeviceSection: View {
     }
 
     if !pinnedApps.isEmpty {
-      Section("Pinned Apps") {
+      Section("Bookmarked Apps") {
         ForEach(pinnedApps) { app in
           AppButton(app: app) {
             selectApp(app)

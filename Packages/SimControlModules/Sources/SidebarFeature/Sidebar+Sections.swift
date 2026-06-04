@@ -21,18 +21,12 @@ extension Sidebar {
         .tag(SimulatorFilters.SidebarScope.all)
 
         BarItem(
-          title: "Pinned",
-          systemImage: "pin",
+          title: "Bookmark",
+          systemImage: "bookmark",
           value: "\(visiblePinnedDeviceCount)"
         )
         .tag(SimulatorFilters.SidebarScope.pinned)
 
-        BarItem(
-          title: "Warnings",
-          systemImage: "exclamationmark.triangle",
-          value: "\(snapshot?.warnedDeviceCount ?? 0)"
-        )
-        .tag(SimulatorFilters.SidebarScope.warnings)
       }
     }
   }

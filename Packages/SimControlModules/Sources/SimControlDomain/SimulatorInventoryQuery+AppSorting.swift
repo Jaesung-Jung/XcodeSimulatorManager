@@ -3,12 +3,6 @@ import Foundation
 extension SimulatorInventoryQuery {
   func sortedApps(_ apps: [InstalledApp]) -> [InstalledApp] {
     apps.sorted { first, second in
-      let firstPinned = filters.pinnedAppIDs.contains(first.id)
-      let secondPinned = filters.pinnedAppIDs.contains(second.id)
-      if firstPinned != secondPinned {
-        return firstPinned
-      }
-
       let comparison = appComparison(first, second)
       if comparison == .orderedSame {
         return first.id.localizedStandardCompare(second.id) == .orderedAscending

@@ -91,13 +91,61 @@ extension SimulatorRepository {
 
     for device in devices {
       let scanResult = await installedApps(device, runtimeByID[device.runtimeID]?.runtimeRoot)
+      let listAppsResult = await listApps(device.id)
       warnings.append(contentsOf: scanResult.warnings)
+      let apps = mergedApps(
+        scanResult.apps,
+        listApps: listAppsResult.appsByBundleID,
+        deviceID: device.id
+      )
 
-      if !scanResult.apps.isEmpty {
-        installedAppsByDeviceID[device.id] = scanResult.apps
+      if !apps.isEmpty {
+        installedAppsByDeviceID[device.id] = apps
       }
     }
 
     return installedAppsByDeviceID
+  }
+
+  func mergedApps(
+    _ apps: [InstalledApp],
+    listApps: [String: CoreSimulatorService.ListedApp],
+    deviceID: String
+  ) -> [InstalledApp] {
+    apps.map { app in
+      guard let listedApp = listApps[app.bundleID] else {
+        return app
+      }
+
+      let knownGroupIDs = Set(app.appGroups.map(\.groupID))
+      let listedAppGroups = listedApp.groupContainers
+        .filter { !knownGroupIDs.contains($0.key) }
+        .map { groupID, path in
+          AppGroupContainer(
+            id: "\(deviceID):\(groupID)",
+            groupID: groupID,
+            path: path
+          )
+        }
+        .sorted { $0.groupID.localizedStandardCompare($1.groupID) == .orderedAscending }
+
+      return InstalledApp(
+        id: app.id,
+        bundleID: app.bundleID,
+        displayName: app.displayName,
+        version: app.version,
+        build: app.build,
+        deviceID: app.deviceID,
+        bundleContainer: app.bundleContainer,
+        dataContainer: app.dataContainer ?? listedApp.dataContainer,
+        appBundlePath: app.appBundlePath ?? listedApp.appBundlePath,
+        appGroups: app.appGroups + listedAppGroups,
+        iconPath: app.iconPath,
+        isSystemApp: app.isSystemApp,
+        isHiddenSystemApp: app.isHiddenSystemApp,
+        databaseFiles: app.databaseFiles,
+        dataContainerSize: app.dataContainerSize
+      )
+    }
   }
 }

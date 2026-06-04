@@ -40,39 +40,14 @@ extension InspectorView {
     devices: [],
     pairs: [],
     installedAppsByDeviceID: [:],
-    warnings: [
-      SimulatorWarning(
-        id: "preview-warning",
-        severity: .warning,
-        category: .device,
-        message: "Preview warning for simulator inventory.",
-        relatedID: "PREVIEW-DEVICE-1"
-      )
-    ]
+    warnings: []
   )
 
   VStack(alignment: .leading, spacing: 18) {
     InspectorView.EnvironmentSection(snapshot: snapshot)
-    InspectorView.WarningsSection(warnings: snapshot.warnings)
   }
   .padding(20)
   .frame(width: 360)
 }
 
 #endif
-
-// MARK: - InspectorView.WarningsSection
-
-extension InspectorView {
-  struct WarningsSection: View {
-    let warnings: [SimulatorWarning]
-
-    var body: some View {
-      InspectorSection("Warnings") {
-        ForEach(warnings) { warning in
-          WarningRow(warning: warning)
-        }
-      }
-    }
-  }
-}

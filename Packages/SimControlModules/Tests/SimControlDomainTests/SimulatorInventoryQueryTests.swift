@@ -4,7 +4,7 @@ import Testing
 
 struct SimulatorInventoryQueryTests {
   @Test
-  func visibleDevicesRespectSidebarSearchSortAndPins() {
+  func visibleDevicesRespectSidebarSearchSortAndBookmarks() {
     let alphaDevice = InventoryQueryFixtures.makeDevice(id: "DEVICE-A", name: "Alpha")
     let zedDevice = InventoryQueryFixtures.makeDevice(id: "DEVICE-Z", name: "Zed")
     let watchDevice = InventoryQueryFixtures.makeDevice(
@@ -59,14 +59,14 @@ struct SimulatorInventoryQueryTests {
     filters = SimulatorFilters(pinnedDeviceIDs: [zedDevice.id])
     query = SimulatorInventoryQuery(snapshot: snapshot, filters: filters)
     #expect(query.visibleDevices().map(\.id) == [
-      zedDevice.id,
       alphaDevice.id,
-      watchDevice.id
+      watchDevice.id,
+      zedDevice.id
     ])
   }
 
   @Test
-  func visibleAppsRespectSystemPresenceSearchSortAndPins() {
+  func visibleAppsRespectSystemPresenceSearchSortAndBookmarks() {
     let device = InventoryQueryFixtures.device
     let appGroup = AppGroupContainer(
       id: "\(device.id):group.com.example.shared",
@@ -145,9 +145,11 @@ struct SimulatorInventoryQueryTests {
       pinnedAppIDs: [systemApp.id]
     )
     query = SimulatorInventoryQuery(snapshot: snapshot, filters: filters)
-    #expect(query.visibleApps(for: device.id).map(\.id).prefix(2) == [
-      systemApp.id,
-      alphaApp.id
+    #expect(query.visibleApps(for: device.id).map(\.id) == [
+      alphaApp.id,
+      databaseApp.id,
+      groupApp.id,
+      systemApp.id
     ])
   }
 

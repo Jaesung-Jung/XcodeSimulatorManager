@@ -72,6 +72,8 @@ public struct AppContainerScanner {
       in: runtimeRoot,
       device: device,
       homeScreenAppIDs: homeScreenAppIDs,
+      dataContainersByBundleID: dataContainersByBundleID,
+      appGroupsByID: appGroupsByID,
       warnings: &warnings
     )
 

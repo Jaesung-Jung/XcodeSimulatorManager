@@ -225,17 +225,33 @@ struct AppContainerScannerTests {
     let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
     let runtimeRoot = temporaryDirectory.url.appendingPathComponent("RuntimeRoot", isDirectory: true)
     let appBundle = runtimeRoot.appendingPathComponent("Applications/Preferences.app", isDirectory: true)
+    let dataContainer = dataPath.appendingPathComponent(
+      "Containers/Data/Application/DATA-1",
+      isDirectory: true
+    )
+    let appGroupContainer = dataPath.appendingPathComponent(
+      "Containers/Shared/AppGroup/GROUP-1",
+      isDirectory: true
+    )
 
     try createDirectory(appBundle)
     try createDirectory(dataPath.appendingPathComponent("Containers/Bundle/Application", isDirectory: true))
-    try createDirectory(dataPath.appendingPathComponent("Containers/Data/Application", isDirectory: true))
-    try createDirectory(dataPath.appendingPathComponent("Containers/Shared/AppGroup", isDirectory: true))
+    try createDirectory(dataContainer)
+    try createDirectory(appGroupContainer)
+    try writeMetadata(bundleID: "com.apple.Preferences", to: dataContainer)
+    try writeMetadata(bundleID: "group.com.apple.FileProvider.LocalStorage", to: appGroupContainer)
     try writeInfoPlist(
       [
         "CFBundleIdentifier": "com.apple.Preferences",
         "CFBundleName": "Settings"
       ],
       to: appBundle
+    )
+    try writePropertyList(
+      [
+        "com.apple.security.application-groups": ["group.com.apple.FileProvider.LocalStorage"]
+      ],
+      to: appBundle.appendingPathComponent("Entitlements.plist")
     )
 
     let scanner = AppContainerScanner()
@@ -244,7 +260,22 @@ struct AppContainerScannerTests {
     let app = try #require(result.apps.first)
     #expect(app.bundleID == "com.apple.Preferences")
     #expect(app.displayName == "Settings")
+    #expect(app.dataContainer?.resolvingSymlinksInPath() == dataContainer.resolvingSymlinksInPath())
     #expect(app.appBundlePath?.resolvingSymlinksInPath() == appBundle.resolvingSymlinksInPath())
+    let normalizedAppGroups = app.appGroups.map { appGroup in
+      AppGroupContainer(
+        id: appGroup.id,
+        groupID: appGroup.groupID,
+        path: appGroup.path.resolvingSymlinksInPath()
+      )
+    }
+    #expect(normalizedAppGroups == [
+      AppGroupContainer(
+        id: "DEVICE-1:group.com.apple.FileProvider.LocalStorage",
+        groupID: "group.com.apple.FileProvider.LocalStorage",
+        path: appGroupContainer.resolvingSymlinksInPath()
+      )
+    ])
     #expect(app.isSystemApp)
   }
 

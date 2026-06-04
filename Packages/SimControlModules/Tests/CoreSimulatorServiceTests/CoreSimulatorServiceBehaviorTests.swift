@@ -127,6 +127,49 @@ struct CoreSimulatorServiceTests {
     #expect(result.diagnostic?.contains("Failed to decode simctl list JSON") == true)
   }
 
+  @Test func listAppsRunsSimctlListappsCommandAndDecodesContainers() async throws {
+    let commandResult = makeCommandResult(
+      executable: "xcrun",
+      arguments: ["simctl", "listapps", "DEVICE-1"],
+      stdout: """
+      {
+          "com.apple.DocumentsApp" =     {
+              Bundle = "file:///RuntimeRoot/Applications/Files.app/";
+              CFBundleDisplayName = Files;
+              CFBundleIdentifier = "com.apple.DocumentsApp";
+              DataContainer = "file:///DeviceData/Containers/Data/Application/DATA-1/";
+              GroupContainers =         {
+                  "group.com.apple.FileProvider.LocalStorage" = "file:///DeviceData/Containers/Shared/AppGroup/GROUP-1/";
+              };
+              Path = "/RuntimeRoot/Applications/Files.app";
+          };
+      }
+      """
+    )
+    let recorder = CommandRecorder(results: [commandResult])
+    let service = makeService(recorder: recorder)
+
+    let result = await service.listApps(deviceID: "DEVICE-1")
+
+    #expect(result.succeeded)
+    let app = try #require(result.appsByBundleID["com.apple.DocumentsApp"])
+    #expect(app.bundleID == "com.apple.DocumentsApp")
+    #expect(app.appBundlePath == URL(fileURLWithPath: "/RuntimeRoot/Applications/Files.app"))
+    #expect(app.dataContainer == URL(fileURLWithPath: "/DeviceData/Containers/Data/Application/DATA-1", isDirectory: true))
+    #expect(app.groupContainers == [
+      "group.com.apple.FileProvider.LocalStorage": URL(fileURLWithPath: "/DeviceData/Containers/Shared/AppGroup/GROUP-1", isDirectory: true)
+    ])
+    #expect(result.commandResult == commandResult)
+    #expect(result.diagnostic == nil)
+    #expect(await recorder.recordedCalls() == [
+      CommandCall(
+        executable: "xcrun",
+        arguments: ["simctl", "listapps", "DEVICE-1"],
+        timeout: 30
+      )
+    ])
+  }
+
   @Test func openSimulatorAppRunsOpenCommandAndReturnsResult() async {
     let commandResult = makeCommandResult(
       executable: "open",

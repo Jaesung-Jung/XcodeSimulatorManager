@@ -415,7 +415,7 @@ struct WorkspaceFeatureTests {
   }
 
   @Test
-  func deviceSortAndPinPriorityProjectVisibleDevices() {
+  func deviceSortIgnoresBookmarkPriorityWhenProjectingVisibleDevices() {
     let alphaDevice = MainWindowTestFixtures.makeDevice(id: "DEVICE-A", name: "Alpha")
     let zedDevice = MainWindowTestFixtures.makeDevice(id: "DEVICE-Z", name: "Zed")
     var state = WorkspaceFeature.State(
@@ -433,7 +433,7 @@ struct WorkspaceFeatureTests {
     #expect(state.deviceList.devices.map(\.name) == ["Zed", "Alpha"])
 
     state.togglePinnedDevice(id: alphaDevice.id)
-    #expect(state.deviceList.devices.map(\.id).first == alphaDevice.id)
+    #expect(state.deviceList.devices.map(\.name) == ["Zed", "Alpha"])
   }
 
   @Test

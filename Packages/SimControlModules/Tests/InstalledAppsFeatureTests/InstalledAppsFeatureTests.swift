@@ -135,6 +135,13 @@ struct InstalledAppsFeatureTests {
     )
   }
 
+  @Test func appRowMetadataUsesBookmarkDisplayForPinnedAction() {
+    #expect(InstalledAppsView.AppRowMetadata.bookmarkIconName(isBookmarked: false) == "bookmark")
+    #expect(InstalledAppsView.AppRowMetadata.bookmarkIconName(isBookmarked: true) == "bookmark.fill")
+    #expect(InstalledAppsView.AppRowMetadata.bookmarkHelpTitle(isBookmarked: false) == "Bookmark app")
+    #expect(InstalledAppsView.AppRowMetadata.bookmarkHelpTitle(isBookmarked: true) == "Remove app bookmark")
+  }
+
   @Test func selectedAppActionsRenderButtonsWithoutAppSummaryHeader() {
     let app = InstalledApp(
       id: "app-1",

@@ -6,7 +6,7 @@ extension SimulatorFilters.SidebarScope {
     case .all:
       "All Devices"
     case .pinned:
-      "Pinned"
+      "Bookmark"
     case .warnings:
       "Warnings"
     case .platform(let platform):

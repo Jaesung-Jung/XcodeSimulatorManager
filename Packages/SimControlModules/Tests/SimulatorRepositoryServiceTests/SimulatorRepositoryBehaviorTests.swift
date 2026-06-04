@@ -264,6 +264,88 @@ struct SimulatorRepositoryTests {
     #expect(snapshot.warnings.contains(scannerWarning))
   }
 
+  @Test func refreshMergesListAppsGroupContainersIntoScannerApps() async throws {
+    let filesApp = InstalledApp(
+      id: "PHONE-UDID:com.apple.DocumentsApp",
+      bundleID: "com.apple.DocumentsApp",
+      displayName: "Files",
+      version: nil,
+      build: nil,
+      deviceID: "PHONE-UDID",
+      bundleContainer: nil,
+      dataContainer: nil,
+      appBundlePath: URL(fileURLWithPath: "/RuntimeRoot/Applications/Files.app"),
+      appGroups: [],
+      iconPath: nil,
+      isSystemApp: true
+    )
+    let appGroupPath = URL(fileURLWithPath: "/DeviceData/Containers/Shared/AppGroup/GROUP-1", isDirectory: true)
+    let recorder = try RepositoryServiceRecorder(
+      selectedXcodePathResult: makeSelectedXcodePathResult(),
+      listResult: makeListResult(
+        json: """
+        {
+          "runtimes": [
+            {
+              "identifier": "runtime-ios",
+              "name": "iOS 26.4",
+              "platform": "iOS",
+              "runtimeRoot": "/RuntimeRoot"
+            }
+          ],
+          "devicetypes": [],
+          "devices": {
+            "runtime-ios": [
+              {
+                "udid": "PHONE-UDID",
+                "name": "iPhone 17 Pro",
+                "state": "Booted",
+                "dataPath": "/DeviceData"
+              }
+            ]
+          },
+          "pairs": {}
+        }
+        """
+      ),
+      listAppsResultsByDeviceID: [
+        "PHONE-UDID": CoreSimulatorService.ListAppsResult(
+          appsByBundleID: [
+            "com.apple.DocumentsApp": CoreSimulatorService.ListedApp(
+              bundleID: "com.apple.DocumentsApp",
+              appBundlePath: URL(fileURLWithPath: "/RuntimeRoot/Applications/Files.app"),
+              dataContainer: URL(fileURLWithPath: "/DeviceData/Containers/Data/Application/DATA-1", isDirectory: true),
+              groupContainers: [
+                "group.com.apple.FileProvider.LocalStorage": appGroupPath
+              ]
+            )
+          ],
+          commandResult: makeCommandResult(executable: "xcrun", arguments: ["simctl", "listapps", "PHONE-UDID"]),
+          diagnostic: nil
+        )
+      ]
+    )
+    let repository = makeRepository(
+      recorder: recorder,
+      installedApps: { _, _ in
+        AppContainerScanner.ScanResult(apps: [filesApp], warnings: [])
+      }
+    )
+
+    let result = await repository.refresh()
+
+    let snapshot = try #require(result.snapshot)
+    let app = try #require(snapshot.installedAppsByDeviceID["PHONE-UDID"]?.first)
+    #expect(app.dataContainer == URL(fileURLWithPath: "/DeviceData/Containers/Data/Application/DATA-1", isDirectory: true))
+    #expect(app.appGroups == [
+      AppGroupContainer(
+        id: "PHONE-UDID:group.com.apple.FileProvider.LocalStorage",
+        groupID: "group.com.apple.FileProvider.LocalStorage",
+        path: appGroupPath
+      )
+    ])
+  }
+
   @Test func refreshPreservesListFailureAfterXcodePathSucceeds() async throws {
     let xcodeCommandResult = makeCommandResult(
       executable: "xcode-select",
@@ -455,6 +537,9 @@ struct SimulatorRepositoryTests {
       list: {
         await recorder.list()
       },
+      listApps: { deviceID in
+        await recorder.listApps(deviceID: deviceID)
+      },
       installedApps: { device, runtimeRoot in
         await installedApps(device, runtimeRoot)
       }
@@ -517,15 +602,19 @@ extension SimulatorRepositoryTests {
   private actor RepositoryServiceRecorder {
     private let selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult
     private let listResult: CoreSimulatorService.ListResult
+    private let listAppsResultsByDeviceID: [String: CoreSimulatorService.ListAppsResult]
     private var selectedXcodePathCalls = 0
     private var listCalls = 0
+    private var listAppsCalls: [String] = []
 
     init(
       selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult,
-      listResult: CoreSimulatorService.ListResult
+      listResult: CoreSimulatorService.ListResult,
+      listAppsResultsByDeviceID: [String: CoreSimulatorService.ListAppsResult] = [:]
     ) {
       self.selectedXcodePathResult = selectedXcodePathResult
       self.listResult = listResult
+      self.listAppsResultsByDeviceID = listAppsResultsByDeviceID
     }
 
     func selectedXcodePath() -> CoreSimulatorService.DeveloperPathResult {
@@ -538,12 +627,34 @@ extension SimulatorRepositoryTests {
       return listResult
     }
 
+    func listApps(deviceID: String) -> CoreSimulatorService.ListAppsResult {
+      listAppsCalls.append(deviceID)
+      return listAppsResultsByDeviceID[deviceID] ?? CoreSimulatorService.ListAppsResult(
+        appsByBundleID: [:],
+        commandResult: CommandResult(
+          id: "listapps-\(deviceID)",
+          executable: "xcrun",
+          arguments: ["simctl", "listapps", deviceID],
+          stdout: "",
+          stderr: "",
+          exitCode: 0,
+          duration: 0,
+          startedAt: Date(timeIntervalSince1970: 0)
+        ),
+        diagnostic: nil
+      )
+    }
+
     func selectedXcodePathCallCount() -> Int {
       selectedXcodePathCalls
     }
 
     func listCallCount() -> Int {
       listCalls
+    }
+
+    func listAppsCallCount() -> Int {
+      listAppsCalls.count
     }
   }
 

@@ -8,6 +8,7 @@ struct MainWindowDisplaySupportTests {
   @Test func exposesDisplayTitlesAcrossModules() {
     #expect(SimulatorPlatform.iOS.displayTitle == "iOS")
     #expect(SimulatorDevice.State.booted.displayTitle == "Booted")
+    #expect(SimulatorFilters.SidebarScope.pinned.displayTitle == "Bookmark")
     #expect(SimulatorFilters.DeviceSort.lastBootedAt.displayTitle == "Last Booted")
     #expect(SimulatorFilters.AppSystemFilter.user.displayTitle == "User Apps")
   }

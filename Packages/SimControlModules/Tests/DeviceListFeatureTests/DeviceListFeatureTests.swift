@@ -65,4 +65,11 @@ struct DeviceListFeatureTests {
       onPin: {}
     )
   }
+
+  @Test func deviceRowUsesBookmarkDisplayForPinnedAction() {
+    #expect(DeviceListView.Row.bookmarkIconName(isBookmarked: false) == "bookmark")
+    #expect(DeviceListView.Row.bookmarkIconName(isBookmarked: true) == "bookmark.fill")
+    #expect(DeviceListView.Row.bookmarkHelpTitle(isBookmarked: false) == "Bookmark device")
+    #expect(DeviceListView.Row.bookmarkHelpTitle(isBookmarked: true) == "Remove device bookmark")
+  }
 }
