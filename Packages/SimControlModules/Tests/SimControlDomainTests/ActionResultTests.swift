@@ -3,7 +3,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("ActionResultTests")
 struct ActionResultTests {
   @Test func preservesOutcomeMessageCommandAndOccurrenceDate() {
     let occurredAt = Date(timeIntervalSince1970: 400)

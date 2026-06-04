@@ -3,7 +3,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("AppGroupContainerTests")
 struct AppGroupContainerTests {
   @Test func preservesGroupIdentifierAndPath() {
     let path = URL(fileURLWithPath: "/tmp/Groups/group.com.example")

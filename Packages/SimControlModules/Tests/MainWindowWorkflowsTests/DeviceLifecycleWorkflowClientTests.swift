@@ -106,77 +106,79 @@ struct DeviceLifecycleWorkflowClientTests {
   }
 }
 
-private struct CreateDeviceCall: Equatable, Sendable {
-  let name: String
-  let deviceTypeID: String
-  let runtimeID: String
-}
+extension DeviceLifecycleWorkflowClientTests {
+  private struct CreateDeviceCall: Equatable, Sendable {
+    let name: String
+    let deviceTypeID: String
+    let runtimeID: String
+  }
 
-private struct PairDevicesCall: Equatable, Sendable {
-  let watchDeviceID: String
-  let phoneDeviceID: String
-}
+  private struct PairDevicesCall: Equatable, Sendable {
+    let watchDeviceID: String
+    let phoneDeviceID: String
+  }
 
-private actor DeviceLifecycleRecorder {
-  private var recordedCreateCalls: [CreateDeviceCall] = []
-  private var recordedPairCalls: [PairDevicesCall] = []
+  private actor DeviceLifecycleRecorder {
+    private var recordedCreateCalls: [CreateDeviceCall] = []
+    private var recordedPairCalls: [PairDevicesCall] = []
 
-  func recordCreate(
-    name: String,
-    deviceTypeID: String,
-    runtimeID: String
-  ) {
-    recordedCreateCalls.append(
-      CreateDeviceCall(
-        name: name,
-        deviceTypeID: deviceTypeID,
-        runtimeID: runtimeID
+    func recordCreate(
+      name: String,
+      deviceTypeID: String,
+      runtimeID: String
+    ) {
+      recordedCreateCalls.append(
+        CreateDeviceCall(
+          name: name,
+          deviceTypeID: deviceTypeID,
+          runtimeID: runtimeID
+        )
       )
+    }
+
+    func recordPair(
+      watchDeviceID: String,
+      phoneDeviceID: String
+    ) {
+      recordedPairCalls.append(
+        PairDevicesCall(
+          watchDeviceID: watchDeviceID,
+          phoneDeviceID: phoneDeviceID
+        )
+      )
+    }
+
+    func createCalls() -> [CreateDeviceCall] {
+      recordedCreateCalls
+    }
+
+    func pairCalls() -> [PairDevicesCall] {
+      recordedPairCalls
+    }
+  }
+
+  private func makeRefreshResult(id: String) -> SimulatorRefreshResult {
+    SimulatorRefreshResult(
+      snapshot: nil,
+      xcodeCommandResult: makeCommandResult(id: "\(id)-xcode"),
+      listCommandResult: makeCommandResult(id: "\(id)-list"),
+      diagnostic: nil
     )
   }
 
-  func recordPair(
-    watchDeviceID: String,
-    phoneDeviceID: String
-  ) {
-    recordedPairCalls.append(
-      PairDevicesCall(
-        watchDeviceID: watchDeviceID,
-        phoneDeviceID: phoneDeviceID
-      )
+  private func makeCommandResult(
+    id: String,
+    stdout: String = ""
+  ) -> CommandResult {
+    CommandResult(
+      id: id,
+      executable: "test",
+      arguments: [id],
+      stdout: stdout,
+      stderr: "",
+      exitCode: 0,
+      duration: 0,
+      startedAt: Date(timeIntervalSince1970: 0)
     )
   }
-
-  func createCalls() -> [CreateDeviceCall] {
-    recordedCreateCalls
-  }
-
-  func pairCalls() -> [PairDevicesCall] {
-    recordedPairCalls
-  }
-}
-
-private func makeRefreshResult(id: String) -> SimulatorRefreshResult {
-  SimulatorRefreshResult(
-    snapshot: nil,
-    xcodeCommandResult: makeCommandResult(id: "\(id)-xcode"),
-    listCommandResult: makeCommandResult(id: "\(id)-list"),
-    diagnostic: nil
-  )
-}
-
-private func makeCommandResult(
-  id: String,
-  stdout: String = ""
-) -> CommandResult {
-  CommandResult(
-    id: id,
-    executable: "test",
-    arguments: [id],
-    stdout: stdout,
-    stderr: "",
-    exitCode: 0,
-    duration: 0,
-    startedAt: Date(timeIntervalSince1970: 0)
-  )
 }

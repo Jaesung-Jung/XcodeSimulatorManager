@@ -52,18 +52,43 @@ public struct SimulatorFilters: Equatable {
 
   private static let recentTargetLimit = 8
 
+  /// Free-text search used by device and app projections.
   public var searchQuery: String
+
+  /// The sidebar scope used to narrow visible devices.
   public var sidebarScope: SidebarScope
+
+  /// The active device list sort key.
   public var deviceSort: DeviceSort
+
+  /// The direction used when sorting devices.
   public var deviceSortDirection: SortDirection
+
+  /// The active system-app visibility filter.
   public var appSystemFilter: AppSystemFilter
+
+  /// Whether hidden system apps should be included when system apps are visible.
   public var showsHiddenSystemApps: Bool
+
+  /// The active app group presence filter.
   public var appGroupFilter: PresenceFilter
+
+  /// The active database file presence filter.
   public var appDatabaseFilter: PresenceFilter
+
+  /// The active installed app list sort key.
   public var appSort: AppSort
+
+  /// The direction used when sorting installed apps.
   public var appSortDirection: SortDirection
+
+  /// Device identifiers pinned by the user.
   public var pinnedDeviceIDs: Set<String>
+
+  /// App identifiers pinned by the user.
   public var pinnedAppIDs: Set<String>
+
+  /// Recently selected app identifiers, most recent first.
   public var recentAppIDs: [String]
 
   /// Creates simulator inventory filters with app-focused defaults.
@@ -98,22 +123,13 @@ public struct SimulatorFilters: Equatable {
   }
 
   /// The search query with surrounding whitespace removed.
-  public var trimmedSearchQuery: String {
-    searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-  }
+  public var trimmedSearchQuery: String { searchQuery.trimmingCharacters(in: .whitespacesAndNewlines) }
 
   /// Whether the current search query contains non-whitespace text.
-  public var hasSearchQuery: Bool {
-    !trimmedSearchQuery.isEmpty
-  }
+  public var hasSearchQuery: Bool { !trimmedSearchQuery.isEmpty }
 
   /// Whether app-specific filters differ from the default user-app view.
-  public var hasActiveAppFilters: Bool {
-    appSystemFilter != .all
-      || showsHiddenSystemApps
-      || appGroupFilter != .all
-      || appDatabaseFilter != .all
-  }
+  public var hasActiveAppFilters: Bool { appSystemFilter != .all || showsHiddenSystemApps || appGroupFilter != .all || appDatabaseFilter != .all }
 
   /// Records a recently selected app identifier, keeping the most recent value first.
   public mutating func recordRecentAppID(_ id: String) {

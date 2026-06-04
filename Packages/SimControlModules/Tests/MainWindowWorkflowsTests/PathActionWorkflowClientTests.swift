@@ -126,74 +126,76 @@ struct PathActionWorkflowClientTests {
   }
 }
 
-private struct AppContainerCall: Equatable, Sendable {
-  let deviceID: String
-  let bundleID: String
-  let container: SimulatorAppContainerKind
-}
+extension PathActionWorkflowClientTests {
+  private struct AppContainerCall: Equatable, Sendable {
+    let deviceID: String
+    let bundleID: String
+    let container: SimulatorAppContainerKind
+  }
 
-private struct PathActionCall: Equatable, Sendable {
-  let url: URL?
-  let label: String
-}
+  private struct PathActionCall: Equatable, Sendable {
+    let url: URL?
+    let label: String
+  }
 
-private actor AppContainerRecorder {
-  private var recordedCalls: [AppContainerCall] = []
+  private actor AppContainerRecorder {
+    private var recordedCalls: [AppContainerCall] = []
 
-  func record(
-    deviceID: String,
-    bundleID: String,
-    container: SimulatorAppContainerKind
-  ) {
-    recordedCalls.append(
-      AppContainerCall(
-        deviceID: deviceID,
-        bundleID: bundleID,
-        container: container
+    func record(
+      deviceID: String,
+      bundleID: String,
+      container: SimulatorAppContainerKind
+    ) {
+      recordedCalls.append(
+        AppContainerCall(
+          deviceID: deviceID,
+          bundleID: bundleID,
+          container: container
+        )
       )
+    }
+
+    func calls() -> [AppContainerCall] {
+      recordedCalls
+    }
+  }
+
+  private actor PathActionRecorder {
+    private var recordedOpenCalls: [PathActionCall] = []
+    private var recordedCopyPathCalls: [PathActionCall] = []
+
+    func recordOpen(url: URL?, label: String) {
+      recordedOpenCalls.append(PathActionCall(url: url, label: label))
+    }
+
+    func recordCopyPath(url: URL?, label: String) {
+      recordedCopyPathCalls.append(PathActionCall(url: url, label: label))
+    }
+
+    func openCalls() -> [PathActionCall] {
+      recordedOpenCalls
+    }
+
+    func copyPathCalls() -> [PathActionCall] {
+      recordedCopyPathCalls
+    }
+  }
+
+  private func makeCommandResult(
+    id: String,
+    stdout: String = "",
+    stderr: String = "",
+    exitCode: Int32 = 0
+  ) -> CommandResult {
+    CommandResult(
+      id: id,
+      executable: "test",
+      arguments: [id],
+      stdout: stdout,
+      stderr: stderr,
+      exitCode: exitCode,
+      duration: 0,
+      startedAt: Date(timeIntervalSince1970: 0)
     )
   }
-
-  func calls() -> [AppContainerCall] {
-    recordedCalls
-  }
-}
-
-private actor PathActionRecorder {
-  private var recordedOpenCalls: [PathActionCall] = []
-  private var recordedCopyPathCalls: [PathActionCall] = []
-
-  func recordOpen(url: URL?, label: String) {
-    recordedOpenCalls.append(PathActionCall(url: url, label: label))
-  }
-
-  func recordCopyPath(url: URL?, label: String) {
-    recordedCopyPathCalls.append(PathActionCall(url: url, label: label))
-  }
-
-  func openCalls() -> [PathActionCall] {
-    recordedOpenCalls
-  }
-
-  func copyPathCalls() -> [PathActionCall] {
-    recordedCopyPathCalls
-  }
-}
-
-private func makeCommandResult(
-  id: String,
-  stdout: String = "",
-  stderr: String = "",
-  exitCode: Int32 = 0
-) -> CommandResult {
-  CommandResult(
-    id: id,
-    executable: "test",
-    arguments: [id],
-    stdout: stdout,
-    stderr: stderr,
-    exitCode: exitCode,
-    duration: 0,
-    startedAt: Date(timeIntervalSince1970: 0)
-  )
 }

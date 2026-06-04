@@ -41,24 +41,26 @@ struct InventoryWorkflowClientTests {
   }
 }
 
-private func makeRefreshResult() -> SimulatorRefreshResult {
-  SimulatorRefreshResult(
-    snapshot: nil,
-    xcodeCommandResult: makeCommandResult(id: "xcode"),
-    listCommandResult: makeCommandResult(id: "list"),
-    diagnostic: "test"
-  )
-}
+extension InventoryWorkflowClientTests {
+  private func makeRefreshResult() -> SimulatorRefreshResult {
+    SimulatorRefreshResult(
+      snapshot: nil,
+      xcodeCommandResult: makeCommandResult(id: "xcode"),
+      listCommandResult: makeCommandResult(id: "list"),
+      diagnostic: "test"
+    )
+  }
 
-private func makeCommandResult(id: String) -> CommandResult {
-  CommandResult(
-    id: id,
-    executable: "test",
-    arguments: [id],
-    stdout: "",
-    stderr: "",
-    exitCode: 0,
-    duration: 0,
-    startedAt: Date(timeIntervalSince1970: 0)
-  )
+  private func makeCommandResult(id: String) -> CommandResult {
+    CommandResult(
+      id: id,
+      executable: "test",
+      arguments: [id],
+      stdout: "",
+      stderr: "",
+      exitCode: 0,
+      duration: 0,
+      startedAt: Date(timeIntervalSince1970: 0)
+    )
+  }
 }

@@ -5,6 +5,7 @@ public struct SectionHeader: View {
   let title: LocalizedStringKey
   let systemImage: String
 
+  /// Creates a section header with a title and SF Symbol.
   public init(title: LocalizedStringKey, systemImage: String) {
     self.title = title
     self.systemImage = systemImage

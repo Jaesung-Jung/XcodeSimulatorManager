@@ -2,7 +2,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("SimulatorDeviceTypeTests")
 struct SimulatorDeviceTypeTests {
   @Test func preservesDeviceTypeMetadata() {
     let deviceType = SimulatorDeviceType(

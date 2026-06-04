@@ -5,6 +5,7 @@ public struct StatusBadge: View {
   let title: LocalizedStringKey
   let systemImage: String?
 
+  /// Creates a status badge with an optional SF Symbol.
   public init(title: LocalizedStringKey, systemImage: String? = nil) {
     self.title = title
     self.systemImage = systemImage

@@ -279,119 +279,121 @@ struct SimulatorInventoryQueryTests {
   }
 }
 
-private enum InventoryQueryFixtures {
-  static let runtime = SimulatorRuntime(
-    id: "runtime-ios",
-    name: "iOS 26.4",
-    version: "26.4",
-    buildVersion: "23E244",
-    platform: .iOS,
-    isAvailable: true,
-    supportedDeviceTypeIDs: ["device-type-iphone"]
-  )
-
-  static let deviceType = SimulatorDeviceType(
-    id: "device-type-iphone",
-    name: "iPhone 17 Pro",
-    productFamily: "iPhone",
-    modelIdentifier: "iPhone18,1"
-  )
-
-  static let watchRuntime = SimulatorRuntime(
-    id: "runtime-watchos",
-    name: "watchOS 26.4",
-    version: "26.4",
-    buildVersion: "23T244",
-    platform: .watchOS,
-    isAvailable: true,
-    supportedDeviceTypeIDs: ["device-type-watch"]
-  )
-
-  static let watchDeviceType = SimulatorDeviceType(
-    id: "device-type-watch",
-    name: "Apple Watch Series 11",
-    productFamily: "Apple Watch",
-    modelIdentifier: "Watch7,1"
-  )
-
-  static let device = makeDevice(id: "DEVICE-1")
-
-  static func makeSnapshot(
-    generatedAt: Date = Date(timeIntervalSince1970: 1_000),
-    runtimes: [SimulatorRuntime] = [runtime],
-    deviceTypes: [SimulatorDeviceType] = [deviceType],
-    devices: [SimulatorDevice] = [device],
-    pairs: [DevicePair] = [],
-    installedAppsByDeviceID: [String: [InstalledApp]] = [:],
-    warnings: [SimulatorWarning] = []
-  ) -> SimulatorSnapshot {
-    SimulatorSnapshot(
-      generatedAt: generatedAt,
-      xcode: XcodeSelection(
-        developerPath: URL(fileURLWithPath: "/Applications/Xcode.app/Contents/Developer"),
-        version: nil,
-        isValid: true
-      ),
-      runtimes: runtimes,
-      deviceTypes: deviceTypes,
-      devices: devices,
-      pairs: pairs,
-      installedAppsByDeviceID: installedAppsByDeviceID,
-      warnings: warnings
+extension SimulatorInventoryQueryTests {
+  private enum InventoryQueryFixtures {
+    static let runtime = SimulatorRuntime(
+      id: "runtime-ios",
+      name: "iOS 26.4",
+      version: "26.4",
+      buildVersion: "23E244",
+      platform: .iOS,
+      isAvailable: true,
+      supportedDeviceTypeIDs: ["device-type-iphone"]
     )
-  }
 
-  static func makeDevice(
-    id: String,
-    name: String? = nil,
-    state: SimulatorDevice.State = .shutdown,
-    isAvailable: Bool = true,
-    runtimeID: String = runtime.id,
-    deviceTypeID: String = deviceType.id,
-    platform: SimulatorPlatform = .iOS
-  ) -> SimulatorDevice {
-    SimulatorDevice(
-      id: id,
-      udid: id,
-      name: name ?? "Device \(id)",
-      runtimeID: runtimeID,
-      deviceTypeID: deviceTypeID,
-      platform: platform,
-      state: state,
-      isAvailable: isAvailable,
-      dataPath: URL(fileURLWithPath: "/tmp/\(id)/data"),
-      logPath: URL(fileURLWithPath: "/tmp/\(id)/logs"),
-      lastBootedAt: nil,
-      dataPathSize: nil
+    static let deviceType = SimulatorDeviceType(
+      id: "device-type-iphone",
+      name: "iPhone 17 Pro",
+      productFamily: "iPhone",
+      modelIdentifier: "iPhone18,1"
     )
-  }
 
-  static func makeInstalledApp(
-    deviceID: String,
-    bundleID: String,
-    displayName: String = "Example",
-    appGroups: [AppGroupContainer] = [],
-    isSystemApp: Bool = false,
-    isHiddenSystemApp: Bool = false,
-    databaseFiles: [URL] = [],
-    dataContainerSize: Int64? = nil
-  ) -> InstalledApp {
-    InstalledApp(
-      id: "\(deviceID):\(bundleID)",
-      bundleID: bundleID,
-      displayName: displayName,
-      version: "1.0",
-      build: "100",
-      deviceID: deviceID,
-      bundleContainer: URL(fileURLWithPath: "/tmp/\(deviceID)/\(bundleID)/bundle"),
-      dataContainer: URL(fileURLWithPath: "/tmp/\(deviceID)/\(bundleID)/data"),
-      appBundlePath: URL(fileURLWithPath: "/tmp/\(deviceID)/\(bundleID)/Example.app"),
-      appGroups: appGroups,
-      iconPath: nil,
-      isSystemApp: isSystemApp,
-      isHiddenSystemApp: isHiddenSystemApp,
-      databaseFiles: databaseFiles,
-      dataContainerSize: dataContainerSize
+    static let watchRuntime = SimulatorRuntime(
+      id: "runtime-watchos",
+      name: "watchOS 26.4",
+      version: "26.4",
+      buildVersion: "23T244",
+      platform: .watchOS,
+      isAvailable: true,
+      supportedDeviceTypeIDs: ["device-type-watch"]
     )
+
+    static let watchDeviceType = SimulatorDeviceType(
+      id: "device-type-watch",
+      name: "Apple Watch Series 11",
+      productFamily: "Apple Watch",
+      modelIdentifier: "Watch7,1"
+    )
+
+    static let device = makeDevice(id: "DEVICE-1")
+
+    static func makeSnapshot(
+      generatedAt: Date = Date(timeIntervalSince1970: 1_000),
+      runtimes: [SimulatorRuntime] = [runtime],
+      deviceTypes: [SimulatorDeviceType] = [deviceType],
+      devices: [SimulatorDevice] = [device],
+      pairs: [DevicePair] = [],
+      installedAppsByDeviceID: [String: [InstalledApp]] = [:],
+      warnings: [SimulatorWarning] = []
+    ) -> SimulatorSnapshot {
+      SimulatorSnapshot(
+        generatedAt: generatedAt,
+        xcode: XcodeSelection(
+          developerPath: URL(fileURLWithPath: "/Applications/Xcode.app/Contents/Developer"),
+          version: nil,
+          isValid: true
+        ),
+        runtimes: runtimes,
+        deviceTypes: deviceTypes,
+        devices: devices,
+        pairs: pairs,
+        installedAppsByDeviceID: installedAppsByDeviceID,
+        warnings: warnings
+      )
+    }
+
+    static func makeDevice(
+      id: String,
+      name: String? = nil,
+      state: SimulatorDevice.State = .shutdown,
+      isAvailable: Bool = true,
+      runtimeID: String = runtime.id,
+      deviceTypeID: String = deviceType.id,
+      platform: SimulatorPlatform = .iOS
+    ) -> SimulatorDevice {
+      SimulatorDevice(
+        id: id,
+        udid: id,
+        name: name ?? "Device \(id)",
+        runtimeID: runtimeID,
+        deviceTypeID: deviceTypeID,
+        platform: platform,
+        state: state,
+        isAvailable: isAvailable,
+        dataPath: URL(fileURLWithPath: "/tmp/\(id)/data"),
+        logPath: URL(fileURLWithPath: "/tmp/\(id)/logs"),
+        lastBootedAt: nil,
+        dataPathSize: nil
+      )
+    }
+
+    static func makeInstalledApp(
+      deviceID: String,
+      bundleID: String,
+      displayName: String = "Example",
+      appGroups: [AppGroupContainer] = [],
+      isSystemApp: Bool = false,
+      isHiddenSystemApp: Bool = false,
+      databaseFiles: [URL] = [],
+      dataContainerSize: Int64? = nil
+    ) -> InstalledApp {
+      InstalledApp(
+        id: "\(deviceID):\(bundleID)",
+        bundleID: bundleID,
+        displayName: displayName,
+        version: "1.0",
+        build: "100",
+        deviceID: deviceID,
+        bundleContainer: URL(fileURLWithPath: "/tmp/\(deviceID)/\(bundleID)/bundle"),
+        dataContainer: URL(fileURLWithPath: "/tmp/\(deviceID)/\(bundleID)/data"),
+        appBundlePath: URL(fileURLWithPath: "/tmp/\(deviceID)/\(bundleID)/Example.app"),
+        appGroups: appGroups,
+        iconPath: nil,
+        isSystemApp: isSystemApp,
+        isHiddenSystemApp: isHiddenSystemApp,
+        databaseFiles: databaseFiles,
+        dataContainerSize: dataContainerSize
+      )
+    }
   }
 }

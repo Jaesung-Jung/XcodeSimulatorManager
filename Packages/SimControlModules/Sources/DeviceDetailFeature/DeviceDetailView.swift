@@ -6,9 +6,11 @@ import MainWindowFeatureSupport
 import SimControlDomain
 import SwiftUI
 
+/// Renders details and actions for the selected simulator device.
 public struct DeviceDetailView: View {
   private let store: StoreOf<DeviceDetailFeature>
 
+  /// Creates a device detail view bound to a device detail store.
   public init(store: StoreOf<DeviceDetailFeature>) {
     self.store = store
   }

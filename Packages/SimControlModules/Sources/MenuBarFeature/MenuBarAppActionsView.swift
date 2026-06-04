@@ -7,13 +7,9 @@ struct MenuBarAppActionsView: View {
   let store: StoreOf<MenuBarFeature>
   let openMainWindow: () -> Void
 
-  private var isRefreshing: Bool {
-    store.refreshState == .refreshing
-  }
+  private var isRefreshing: Bool { store.refreshState == .refreshing }
 
-  private var refreshTitle: String {
-    isRefreshing ? "Refreshing" : "Refresh"
-  }
+  private var refreshTitle: String { isRefreshing ? "Refreshing" : "Refresh" }
 
   var body: some View {
     Section {

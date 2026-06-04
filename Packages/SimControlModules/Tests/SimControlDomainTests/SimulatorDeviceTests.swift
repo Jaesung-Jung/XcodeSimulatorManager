@@ -3,7 +3,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("SimulatorDeviceTests")
 struct SimulatorDeviceTests {
   @Test func preservesInventoryFieldsAndPaths() {
     let lastBootedAt = Date(timeIntervalSince1970: 300)

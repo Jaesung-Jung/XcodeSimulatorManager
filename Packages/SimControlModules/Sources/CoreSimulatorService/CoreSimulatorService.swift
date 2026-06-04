@@ -15,6 +15,7 @@ public struct CoreSimulatorService {
     /// Additional service-level context, such as an empty stdout or command failure.
     public let diagnostic: String?
 
+    /// Creates a developer path result from the command output and service diagnostic.
     public init(
       developerPath: URL?,
       commandResult: CommandResult,
@@ -26,9 +27,7 @@ public struct CoreSimulatorService {
     }
 
     /// Indicates whether the command produced a usable developer path.
-    public var succeeded: Bool {
-      commandResult.succeeded && developerPath != nil && diagnostic == nil
-    }
+    public var succeeded: Bool { commandResult.succeeded && developerPath != nil && diagnostic == nil }
   }
 
   /// The decoded `simctl list -j` result returned by CoreSimulatorService.
@@ -42,6 +41,7 @@ public struct CoreSimulatorService {
     /// Additional service-level context, such as a command failure or JSON decode failure.
     public let diagnostic: String?
 
+    /// Creates a list result from the decoded payload, command output, and service diagnostic.
     public init(
       payload: SimctlListPayload?,
       commandResult: CommandResult,
@@ -53,9 +53,7 @@ public struct CoreSimulatorService {
     }
 
     /// Indicates whether the command produced a decoded simctl payload.
-    public var succeeded: Bool {
-      commandResult.succeeded && payload != nil && diagnostic == nil
-    }
+    public var succeeded: Bool { commandResult.succeeded && payload != nil && diagnostic == nil }
   }
 
   typealias CommandRunner = (_ executable: String, _ arguments: [String], _ timeout: TimeInterval?) async -> CommandResult
@@ -99,11 +97,7 @@ public struct CoreSimulatorService {
     self.now = now
     self.makeID = makeID
     self.runCommand = { executable, arguments, timeout in
-      await commandExecutor.execute(
-        executable: executable,
-        arguments: arguments,
-        timeout: timeout
-      )
+      await commandExecutor.execute(executable: executable, arguments: arguments, timeout: timeout)
     }
   }
 

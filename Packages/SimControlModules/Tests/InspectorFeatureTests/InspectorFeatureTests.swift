@@ -3,7 +3,7 @@ import InspectorFeature
 import SimControlDomain
 import Testing
 
-@Suite
+@Suite("InspectorFeatureTests")
 @MainActor
 struct InspectorFeatureTests {
   @Test func stateCanBeConstructedAcrossModules() {

@@ -569,60 +569,62 @@ struct MainWindowFeatureDeviceManagementTests {
   }
 }
 
-private struct MainWindowPairDevicesCall: Equatable {
-  let watchDeviceID: String
-  let phoneDeviceID: String
-}
-
-private actor MainWindowPhase14CommandRecorder {
-  private let result: CommandResult
-  private var recordedEraseCalls: [String] = []
-  private var recordedDeleteCalls: [String] = []
-  private var recordedPairCalls: [MainWindowPairDevicesCall] = []
-  private var recordedUnpairCalls: [String] = []
-
-  init(result: CommandResult) {
-    self.result = result
+extension MainWindowFeatureDeviceManagementTests {
+  private struct MainWindowPairDevicesCall: Equatable {
+    let watchDeviceID: String
+    let phoneDeviceID: String
   }
 
-  func eraseDevice(id: String) -> CommandResult {
-    recordedEraseCalls.append(id)
-    return result
-  }
+  private actor MainWindowPhase14CommandRecorder {
+    private let result: CommandResult
+    private var recordedEraseCalls: [String] = []
+    private var recordedDeleteCalls: [String] = []
+    private var recordedPairCalls: [MainWindowPairDevicesCall] = []
+    private var recordedUnpairCalls: [String] = []
 
-  func deleteDevice(id: String) -> CommandResult {
-    recordedDeleteCalls.append(id)
-    return result
-  }
+    init(result: CommandResult) {
+      self.result = result
+    }
 
-  func pairDevices(watchDeviceID: String, phoneDeviceID: String) -> CommandResult {
-    recordedPairCalls.append(
-      MainWindowPairDevicesCall(
-        watchDeviceID: watchDeviceID,
-        phoneDeviceID: phoneDeviceID
+    func eraseDevice(id: String) -> CommandResult {
+      recordedEraseCalls.append(id)
+      return result
+    }
+
+    func deleteDevice(id: String) -> CommandResult {
+      recordedDeleteCalls.append(id)
+      return result
+    }
+
+    func pairDevices(watchDeviceID: String, phoneDeviceID: String) -> CommandResult {
+      recordedPairCalls.append(
+        MainWindowPairDevicesCall(
+          watchDeviceID: watchDeviceID,
+          phoneDeviceID: phoneDeviceID
+        )
       )
-    )
-    return result
-  }
+      return result
+    }
 
-  func unpairDevice(pairID: String) -> CommandResult {
-    recordedUnpairCalls.append(pairID)
-    return result
-  }
+    func unpairDevice(pairID: String) -> CommandResult {
+      recordedUnpairCalls.append(pairID)
+      return result
+    }
 
-  func eraseCalls() -> [String] {
-    recordedEraseCalls
-  }
+    func eraseCalls() -> [String] {
+      recordedEraseCalls
+    }
 
-  func deleteCalls() -> [String] {
-    recordedDeleteCalls
-  }
+    func deleteCalls() -> [String] {
+      recordedDeleteCalls
+    }
 
-  func pairCalls() -> [MainWindowPairDevicesCall] {
-    recordedPairCalls
-  }
+    func pairCalls() -> [MainWindowPairDevicesCall] {
+      recordedPairCalls
+    }
 
-  func unpairCalls() -> [String] {
-    recordedUnpairCalls
+    func unpairCalls() -> [String] {
+      recordedUnpairCalls
+    }
   }
 }

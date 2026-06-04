@@ -4,10 +4,13 @@ import InstalledAppsFeature
 import MainWindowFeatureSupport
 import SimControlDomain
 
+/// Coordinates detail-pane commands for the selected simulator device.
 @Reducer
 public struct DeviceDetailFeature {
+  /// Creates the device detail reducer.
   public init() {}
 
+  /// Summary of a paired phone and watch device relationship.
   public struct DevicePairSummary: Equatable, Identifiable {
     public let id: String
     public let phoneDeviceID: String
@@ -18,6 +21,7 @@ public struct DeviceDetailFeature {
     public let watchUDID: String
     public let state: DevicePair.State
 
+    /// Creates a device pair summary from pair metadata and current pair state.
     public init(
       id: String,
       phoneDeviceID: String,
@@ -39,6 +43,7 @@ public struct DeviceDetailFeature {
     }
   }
 
+  /// State displayed by the selected device detail pane.
   @ObservableState
   public struct State: Equatable {
     public var device: SimulatorDevice?
@@ -52,6 +57,7 @@ public struct DeviceDetailFeature {
     public var isOpeningSimulatorApp: Bool
     public var developerTools: DeveloperToolsFeature.State
 
+    /// Creates device detail state from the current selected device context and command state.
     public init(
       device: SimulatorDevice? = nil,
       runtime: SimulatorRuntime? = nil,
@@ -97,6 +103,7 @@ public struct DeviceDetailFeature {
     }
   }
 
+  /// User actions emitted by the device detail pane.
   public enum Action: Equatable {
     case bootButtonTapped(String)
     case shutdownButtonTapped(String)

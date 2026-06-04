@@ -4,11 +4,7 @@ import SimControlDomain
 extension CoreSimulatorService {
   /// Returns the active Xcode developer path reported by `xcode-select -p`.
   public func selectedXcodePath() async -> DeveloperPathResult {
-    let commandResult = await runCommand(
-      "xcode-select",
-      ["-p"],
-      selectedXcodePathTimeout
-    )
+    let commandResult = await runCommand("xcode-select", ["-p"], selectedXcodePathTimeout)
 
     guard commandResult.succeeded else {
       return DeveloperPathResult(
@@ -36,11 +32,7 @@ extension CoreSimulatorService {
 
   /// Runs `simctl list -j` and decodes the raw service-layer payload.
   public func list() async -> ListResult {
-    let commandResult = await runCommand(
-      "xcrun",
-      ["simctl", "list", "-j"],
-      listTimeout
-    )
+    let commandResult = await runCommand("xcrun", ["simctl", "list", "-j"], listTimeout)
 
     guard commandResult.succeeded else {
       return ListResult(
@@ -51,10 +43,7 @@ extension CoreSimulatorService {
     }
 
     do {
-      let payload = try JSONDecoder().decode(
-        SimctlListPayload.self,
-        from: Data(commandResult.stdout.utf8)
-      )
+      let payload = try JSONDecoder().decode(SimctlListPayload.self, from: Data(commandResult.stdout.utf8))
 
       return ListResult(
         payload: payload,
@@ -72,10 +61,6 @@ extension CoreSimulatorService {
 
   /// Opens Simulator.app.
   public func openSimulatorApp() async -> CommandResult {
-    await runCommand(
-      "open",
-      ["-a", "Simulator"],
-      openSimulatorAppTimeout
-    )
+    await runCommand("open", ["-a", "Simulator"], openSimulatorAppTimeout)
   }
 }

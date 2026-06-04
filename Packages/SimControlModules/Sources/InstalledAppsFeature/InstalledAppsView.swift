@@ -1,9 +1,11 @@
 import ComposableArchitecture
 import SwiftUI
 
+/// Renders installed apps, filters, and selected-app actions.
 public struct InstalledAppsView: View {
   let store: StoreOf<InstalledAppsFeature>
 
+  /// Creates an installed apps view bound to an installed apps store.
   public init(store: StoreOf<InstalledAppsFeature>) {
     self.store = store
   }

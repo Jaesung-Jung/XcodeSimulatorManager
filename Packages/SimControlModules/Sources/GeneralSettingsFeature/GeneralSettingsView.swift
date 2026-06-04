@@ -5,6 +5,7 @@ import SwiftUI
 public struct GeneralSettingsView: View {
   private let store: StoreOf<GeneralSettingsFeature>
 
+  /// Creates a general settings view bound to a general settings store.
   public init(store: StoreOf<GeneralSettingsFeature>) {
     self.store = store
   }

@@ -9,9 +9,7 @@ extension Sidebar {
     let snapshot: SimulatorSnapshot?
     let filters: SimulatorFilters
 
-    private var visiblePinnedDeviceCount: Int {
-      snapshot?.devices.filter { filters.pinnedDeviceIDs.contains($0.id) }.count ?? 0
-    }
+    private var visiblePinnedDeviceCount: Int { snapshot?.devices.filter { filters.pinnedDeviceIDs.contains($0.id) }.count ?? 0 }
 
     var body: some View {
       Section("Inventory") {

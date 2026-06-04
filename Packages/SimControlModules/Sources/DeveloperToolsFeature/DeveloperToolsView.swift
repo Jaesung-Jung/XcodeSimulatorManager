@@ -2,9 +2,11 @@ import ComposableArchitecture
 import MainWindowFeatureSupport
 import SwiftUI
 
+/// Renders simulator developer tool panels for the selected device.
 public struct DeveloperToolsView: View {
   let store: StoreOf<DeveloperToolsFeature>
 
+  /// Creates a developer tools view bound to a developer tools store.
   public init(store: StoreOf<DeveloperToolsFeature>) {
     self.store = store
   }

@@ -7,7 +7,5 @@ extension CommandResult {
     return ([executableName] + arguments).joined(separator: " ")
   }
 
-  public var durationTitle: String {
-    String(format: "%.2fs", duration)
-  }
+  public var durationTitle: String { String(format: "%.2fs", duration) }
 }

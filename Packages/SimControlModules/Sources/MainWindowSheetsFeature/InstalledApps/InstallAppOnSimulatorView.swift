@@ -11,13 +11,9 @@ public struct InstallAppOnSimulatorView: View {
   let targetCandidates: [InstallAppTargetCandidate]
   let onSubmit: (InstallAppTargetFormState) -> Void
 
-  private var selectedTarget: InstallAppTargetCandidate? {
-    targetCandidates.first { $0.id == formState.targetDeviceID }
-  }
+  private var selectedTarget: InstallAppTargetCandidate? { targetCandidates.first { $0.id == formState.targetDeviceID } }
 
-  private var canSubmit: Bool {
-    selectedTarget != nil
-  }
+  private var canSubmit: Bool { selectedTarget != nil }
 
   /// Creates an install-app sheet from a source app and target simulator candidates.
   public init(

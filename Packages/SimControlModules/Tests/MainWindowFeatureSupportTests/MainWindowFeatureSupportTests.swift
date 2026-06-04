@@ -1,7 +1,7 @@
 import MainWindowFeatureSupport
 import Testing
 
-@Suite
+@Suite("MainWindowFeatureSupportTests")
 struct MainWindowFeatureSupportTests {
   @Test func commandStatesExposeTheirStoredValuesAcrossModules() {
     let deviceState = DeviceCommandState(command: .boot, deviceID: "device-1")

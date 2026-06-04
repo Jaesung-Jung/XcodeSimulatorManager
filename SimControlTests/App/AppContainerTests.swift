@@ -2,7 +2,7 @@ import Testing
 @testable import SimControl
 
 @MainActor
-@Suite
+@Suite("AppContainerTests")
 struct AppContainerTests {
   @Test func holdsStableMainWindowStoreInstance() {
     let container = AppContainer()

@@ -5,6 +5,7 @@ import SwiftUI
 public struct LinkFolderSettingsView: View {
   private let store: StoreOf<LinkFolderSettingsFeature>
 
+  /// Creates a link folder settings view bound to a link folder settings store.
   public init(store: StoreOf<LinkFolderSettingsFeature>) {
     self.store = store
   }

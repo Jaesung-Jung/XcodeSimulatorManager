@@ -2,11 +2,13 @@ import ComposableArchitecture
 import SimControlDomain
 import SwiftUI
 
+/// Renders simulator inventory filters in the sidebar.
 public struct Sidebar: View {
   private let store: StoreOf<SidebarFeature>
   private let filters: SimulatorFilters
   private let onScopeSelected: (SimulatorFilters.SidebarScope) -> Void
 
+  /// Creates a sidebar bound to sidebar state and an external filter selection handler.
   public init(
     store: StoreOf<SidebarFeature>,
     filters: SimulatorFilters,

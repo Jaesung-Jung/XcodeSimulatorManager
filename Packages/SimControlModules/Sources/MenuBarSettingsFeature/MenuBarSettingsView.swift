@@ -5,6 +5,7 @@ import SwiftUI
 public struct MenuBarSettingsView: View {
   private let store: StoreOf<MenuBarSettingsFeature>
 
+  /// Creates a menu bar settings view bound to a menu bar settings store.
   public init(store: StoreOf<MenuBarSettingsFeature>) {
     self.store = store
   }

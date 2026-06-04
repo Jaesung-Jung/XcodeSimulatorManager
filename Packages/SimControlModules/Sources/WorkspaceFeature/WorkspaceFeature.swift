@@ -6,10 +6,13 @@ import InstalledAppsFeature
 import MainWindowFeatureSupport
 import SimControlDomain
 
+/// Coordinates the main workspace selection, filters, and detail state.
 @Reducer
 public struct WorkspaceFeature {
+  /// Creates the workspace reducer.
   public init() {}
 
+  /// State for workspace inventory, selection, filters, and child features.
   @ObservableState
   public struct State: Equatable {
     public var snapshot: SimulatorSnapshot?
@@ -24,6 +27,7 @@ public struct WorkspaceFeature {
     public var appCommandState: AppCommandState?
     public var isOpeningSimulatorApp: Bool
 
+    /// Creates workspace state from inventory, selection, command state, and filters.
     public init(
       snapshot: SimulatorSnapshot? = nil,
       refreshState: InventoryRefreshState = .idle,
@@ -59,29 +63,17 @@ public struct WorkspaceFeature {
       return SimulatorInventoryQuery(snapshot: snapshot, filters: filters)
     }
 
-    var devices: [SimulatorDevice] {
-      inventoryQuery?.devices ?? []
-    }
+    var devices: [SimulatorDevice] { inventoryQuery?.devices ?? [] }
 
-    var runtimeByID: [String: SimulatorRuntime] {
-      inventoryQuery?.runtimeByID ?? [:]
-    }
+    var runtimeByID: [String: SimulatorRuntime] { inventoryQuery?.runtimeByID ?? [:] }
 
-    var deviceTypeByID: [String: SimulatorDeviceType] {
-      inventoryQuery?.deviceTypeByID ?? [:]
-    }
+    var deviceTypeByID: [String: SimulatorDeviceType] { inventoryQuery?.deviceTypeByID ?? [:] }
 
-    public var selectedDevice: SimulatorDevice? {
-      inventoryQuery?.device(id: deviceList.selectedDeviceID)
-    }
+    public var selectedDevice: SimulatorDevice? { inventoryQuery?.device(id: deviceList.selectedDeviceID) }
 
-    public var selectedRuntime: SimulatorRuntime? {
-      inventoryQuery?.runtime(for: selectedDevice)
-    }
+    public var selectedRuntime: SimulatorRuntime? { inventoryQuery?.runtime(for: selectedDevice) }
 
-    public var selectedDeviceType: SimulatorDeviceType? {
-      inventoryQuery?.deviceType(for: selectedDevice)
-    }
+    public var selectedDeviceType: SimulatorDeviceType? { inventoryQuery?.deviceType(for: selectedDevice) }
 
     public var selectedPairSummary: DeviceDetailFeature.DevicePairSummary? {
       guard let summary = inventoryQuery?.pairSummary(for: selectedDevice) else {
@@ -100,6 +92,7 @@ public struct WorkspaceFeature {
       )
     }
 
+    /// Updates the running device command and propagates it to child state.
     public mutating func setDeviceCommandState(_ deviceCommandState: DeviceCommandState?) {
       self.deviceCommandState = deviceCommandState
       deviceDetail.deviceCommandState = deviceCommandState
@@ -107,6 +100,7 @@ public struct WorkspaceFeature {
       deviceDetail.developerTools.deviceCommandState = deviceCommandState
     }
 
+    /// Updates the running app command and propagates it to child state.
     public mutating func setAppCommandState(_ appCommandState: AppCommandState?) {
       self.appCommandState = appCommandState
       deviceDetail.appCommandState = appCommandState
@@ -114,11 +108,13 @@ public struct WorkspaceFeature {
       deviceDetail.developerTools.appCommandState = appCommandState
     }
 
+    /// Updates whether Simulator.app is currently being opened.
     public mutating func setOpeningSimulatorApp(_ isOpeningSimulatorApp: Bool) {
       self.isOpeningSimulatorApp = isOpeningSimulatorApp
       deviceDetail.isOpeningSimulatorApp = isOpeningSimulatorApp
     }
 
+    /// Applies a search query and selects an exact match when one exists.
     public mutating func setSearchQuery(_ query: String) {
       filters.searchQuery = query
       let searchTarget = inventoryQuery?.exactSearchTarget()
@@ -128,51 +124,61 @@ public struct WorkspaceFeature {
       )
     }
 
+    /// Applies a sidebar scope filter and reconciles selection.
     public mutating func setSidebarScope(_ scope: SimulatorFilters.SidebarScope) {
       filters.sidebarScope = scope
       rebuildAfterFilterChange()
     }
 
+    /// Applies the device sort field and reconciles selection.
     public mutating func setDeviceSort(_ sort: SimulatorFilters.DeviceSort) {
       filters.deviceSort = sort
       rebuildAfterFilterChange()
     }
 
+    /// Applies the device sort direction and reconciles selection.
     public mutating func setDeviceSortDirection(_ direction: SimulatorFilters.SortDirection) {
       filters.deviceSortDirection = direction
       rebuildAfterFilterChange()
     }
 
+    /// Applies the app system filter and reconciles selection.
     public mutating func setAppSystemFilter(_ filter: SimulatorFilters.AppSystemFilter) {
       filters.appSystemFilter = filter
       rebuildAfterFilterChange()
     }
 
+    /// Applies hidden system app visibility and reconciles selection.
     public mutating func setShowsHiddenSystemApps(_ showsHiddenSystemApps: Bool) {
       filters.showsHiddenSystemApps = showsHiddenSystemApps
       rebuildAfterFilterChange()
     }
 
+    /// Applies the app group filter and reconciles selection.
     public mutating func setAppGroupFilter(_ filter: SimulatorFilters.PresenceFilter) {
       filters.appGroupFilter = filter
       rebuildAfterFilterChange()
     }
 
+    /// Applies the app database filter and reconciles selection.
     public mutating func setAppDatabaseFilter(_ filter: SimulatorFilters.PresenceFilter) {
       filters.appDatabaseFilter = filter
       rebuildAfterFilterChange()
     }
 
+    /// Applies the app sort field and reconciles selection.
     public mutating func setAppSort(_ sort: SimulatorFilters.AppSort) {
       filters.appSort = sort
       rebuildAfterFilterChange()
     }
 
+    /// Applies the app sort direction and reconciles selection.
     public mutating func setAppSortDirection(_ direction: SimulatorFilters.SortDirection) {
       filters.appSortDirection = direction
       rebuildAfterFilterChange()
     }
 
+    /// Clears app filters and reconciles selection.
     public mutating func clearAppFilters() {
       filters.appSystemFilter = .all
       filters.showsHiddenSystemApps = false
@@ -181,6 +187,7 @@ public struct WorkspaceFeature {
       rebuildAfterFilterChange()
     }
 
+    /// Toggles a pinned device and prefers that device during selection reconciliation.
     public mutating func togglePinnedDevice(id: String) {
       if filters.pinnedDeviceIDs.contains(id) {
         filters.pinnedDeviceIDs.remove(id)
@@ -191,6 +198,7 @@ public struct WorkspaceFeature {
       rebuildAfterFilterChange(preferredSelectedDeviceID: id)
     }
 
+    /// Toggles a pinned app and prefers that app during selection reconciliation.
     public mutating func togglePinnedApp(id: String) {
       if filters.pinnedAppIDs.contains(id) {
         filters.pinnedAppIDs.remove(id)
@@ -201,10 +209,12 @@ public struct WorkspaceFeature {
       rebuildAfterFilterChange(preferredSelectedAppID: id)
     }
 
+    /// Updates the inventory refresh state.
     public mutating func setRefreshState(_ refreshState: InventoryRefreshState) {
       self.refreshState = refreshState
     }
 
+    /// Applies a refresh failure while preserving the last successful snapshot.
     public mutating func applyRefreshFailure(
       _ refreshState: InventoryRefreshState,
       commandResults: [CommandResult]
@@ -214,6 +224,7 @@ public struct WorkspaceFeature {
       deviceDetail.commandResults = commandResults
     }
 
+    /// Applies a refreshed snapshot and reconciles device and app selection.
     public mutating func applySnapshot(
       _ snapshot: SimulatorSnapshot,
       refreshState: InventoryRefreshState,
@@ -241,11 +252,13 @@ public struct WorkspaceFeature {
       rebuildDetail(selectedAppID: selection?.appID)
     }
 
+    /// Appends a command result and propagates it to detail state.
     public mutating func appendCommandResult(_ result: CommandResult) {
       commandResults.append(result)
       deviceDetail.commandResults = commandResults
     }
 
+    /// Selects a visible device and clears app selection when the device changes.
     public mutating func selectDevice(id: String?) {
       guard deviceList.selectedDeviceID != id else {
         return
@@ -262,6 +275,7 @@ public struct WorkspaceFeature {
       rebuildDetail(selectedAppID: nil)
     }
 
+    /// Selects a visible app and records it as recent.
     public mutating func selectApp(id: String?) {
       if let id {
         guard deviceDetail.installedApps.apps.contains(where: { $0.id == id }) else {
@@ -359,6 +373,7 @@ public struct WorkspaceFeature {
     }
   }
 
+  /// User actions emitted by workspace search, sidebar, list, detail, and inspector views.
   public enum Action: Equatable {
     case searchQueryChanged(String)
     case sidebarScopeChanged(SimulatorFilters.SidebarScope)

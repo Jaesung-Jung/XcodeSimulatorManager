@@ -3,7 +3,7 @@ import MainWindowFeatureSupport
 import Testing
 import WorkspaceFeature
 
-@Suite
+@Suite("WorkspaceFeatureTests")
 @MainActor
 struct WorkspaceFeatureTests {
   @Test func stateCanBeConstructedAcrossModules() {

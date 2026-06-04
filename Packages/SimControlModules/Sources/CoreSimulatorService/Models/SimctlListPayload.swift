@@ -1,7 +1,15 @@
+/// The top-level raw payload decoded from `simctl list -j`.
 public struct SimctlListPayload: Decodable, Equatable {
+  /// Raw runtime entries.
   public let runtimes: [SimctlRuntime]
+
+  /// Raw device type entries.
   public let deviceTypes: [SimctlDeviceType]
+
+  /// Raw device entries keyed by runtime identifier.
   public let devicesByRuntimeID: [String: [SimctlDevice]]
+
+  /// Raw paired-device entries keyed by pair identifier.
   public let pairsByID: [String: SimctlPair]
 
   private enum CodingKeys: String, CodingKey {
@@ -11,6 +19,7 @@ public struct SimctlListPayload: Decodable, Equatable {
     case pairs
   }
 
+  /// Decodes a simctl list payload, defaulting absent collections to empty values.
   public init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
 

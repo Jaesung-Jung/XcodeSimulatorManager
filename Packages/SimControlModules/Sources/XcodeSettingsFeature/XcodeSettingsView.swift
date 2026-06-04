@@ -5,6 +5,7 @@ import SwiftUI
 public struct XcodeSettingsView: View {
   private let store: StoreOf<XcodeSettingsFeature>
 
+  /// Creates an Xcode settings view bound to an Xcode settings store.
   public init(store: StoreOf<XcodeSettingsFeature>) {
     self.store = store
   }

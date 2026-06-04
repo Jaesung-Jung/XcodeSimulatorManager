@@ -2,9 +2,7 @@ import Foundation
 import SimControlDomain
 
 extension SimulatorDevice {
-  public var availabilityTitle: String {
-    isAvailable ? "Available" : "Unavailable"
-  }
+  public var availabilityTitle: String { isAvailable ? "Available" : "Unavailable" }
 
   public var dataPathSizeTitle: String {
     guard let dataPathSize else {

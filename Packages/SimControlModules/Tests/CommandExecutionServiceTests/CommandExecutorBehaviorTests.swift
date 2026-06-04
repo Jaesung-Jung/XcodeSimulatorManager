@@ -3,7 +3,7 @@ import SimControlDomain
 import Testing
 @testable import CommandExecutionService
 
-@Suite
+@Suite("CommandExecutorTests")
 struct CommandExecutorTests {
   @Test func successBareCommandCapturesOutputAndTiming() async {
     let executor = CommandExecutor()

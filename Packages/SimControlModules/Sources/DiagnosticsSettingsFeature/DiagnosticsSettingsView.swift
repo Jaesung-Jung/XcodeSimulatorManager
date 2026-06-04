@@ -5,6 +5,7 @@ import SwiftUI
 public struct DiagnosticsSettingsView: View {
   private let store: StoreOf<DiagnosticsSettingsFeature>
 
+  /// Creates a diagnostics settings view bound to a diagnostics settings store.
   public init(store: StoreOf<DiagnosticsSettingsFeature>) {
     self.store = store
   }

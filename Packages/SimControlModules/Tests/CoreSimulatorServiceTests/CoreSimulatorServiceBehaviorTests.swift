@@ -3,7 +3,7 @@ import SimControlDomain
 import Testing
 @testable import CoreSimulatorService
 
-@Suite
+@Suite("CoreSimulatorServiceTests")
 struct CoreSimulatorServiceTests {
   @Test func selectedXcodePathRunsXcodeSelectCommandAndTrimsOutput() async {
     let commandResult = makeCommandResult(
@@ -913,50 +913,52 @@ struct CoreSimulatorServiceTests {
   }
 }
 
-private struct CommandCall: Equatable {
-  let executable: String
-  let arguments: [String]
-  let timeout: TimeInterval?
-}
-
-private actor CommandRecorder {
-  private var results: [CommandResult]
-  private var calls: [CommandCall] = []
-
-  init(results: [CommandResult]) {
-    self.results = results
+extension CoreSimulatorServiceTests {
+  private struct CommandCall: Equatable {
+    let executable: String
+    let arguments: [String]
+    let timeout: TimeInterval?
   }
 
-  func run(
-    _ executable: String,
-    _ arguments: [String],
-    _ timeout: TimeInterval?
-  ) -> CommandResult {
-    calls.append(
-      CommandCall(
-        executable: executable,
-        arguments: arguments,
-        timeout: timeout
-      )
-    )
+  private actor CommandRecorder {
+    private var results: [CommandResult]
+    private var calls: [CommandCall] = []
 
-    guard !results.isEmpty else {
-      return CommandResult(
-        id: "missing-command-result",
-        executable: executable,
-        arguments: arguments,
-        stdout: "",
-        stderr: "No test command result was provided.",
-        exitCode: -1,
-        duration: 0,
-        startedAt: Date(timeIntervalSince1970: 100)
-      )
+    init(results: [CommandResult]) {
+      self.results = results
     }
 
-    return results.removeFirst()
-  }
+    func run(
+      _ executable: String,
+      _ arguments: [String],
+      _ timeout: TimeInterval?
+    ) -> CommandResult {
+      calls.append(
+        CommandCall(
+          executable: executable,
+          arguments: arguments,
+          timeout: timeout
+        )
+      )
 
-  func recordedCalls() -> [CommandCall] {
-    calls
+      guard !results.isEmpty else {
+        return CommandResult(
+          id: "missing-command-result",
+          executable: executable,
+          arguments: arguments,
+          stdout: "",
+          stderr: "No test command result was provided.",
+          exitCode: -1,
+          duration: 0,
+          startedAt: Date(timeIntervalSince1970: 100)
+        )
+      }
+
+      return results.removeFirst()
+    }
+
+    func recordedCalls() -> [CommandCall] {
+      calls
+    }
   }
 }

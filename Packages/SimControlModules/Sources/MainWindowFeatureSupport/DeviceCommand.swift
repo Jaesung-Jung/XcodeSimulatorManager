@@ -1,3 +1,4 @@
+/// Device-level commands that can be routed from the UI to workflow execution.
 public enum DeviceCommand {
   case boot
   case shutdown

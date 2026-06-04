@@ -1,9 +1,11 @@
 import ComposableArchitecture
 import SwiftUI
 
+/// Renders the simulator device list column.
 public struct DeviceListView: View {
   private let store: StoreOf<DeviceListFeature>
 
+  /// Creates a device list view bound to a device list store.
   public init(store: StoreOf<DeviceListFeature>) {
     self.store = store
   }

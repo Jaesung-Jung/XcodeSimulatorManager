@@ -52,7 +52,5 @@ public struct CommandResult: Identifiable, Equatable, Hashable {
   }
 
   /// Indicates whether the command completed with a zero exit code.
-  public var succeeded: Bool {
-    exitCode == 0
-  }
+  public var succeeded: Bool { exitCode == 0 }
 }

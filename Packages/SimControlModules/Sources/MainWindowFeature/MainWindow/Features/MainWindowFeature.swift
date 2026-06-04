@@ -8,18 +8,15 @@ import SidebarFeature
 import SimControlDomain
 import WorkspaceFeature
 
+/// Coordinates the main window feature tree and routes workflow responses.
 @Reducer
 public struct MainWindowFeature {
   static let menuBarAutoRefreshInterval: TimeInterval = 60
 
-  @Dependency(\.developerToolWorkflow) var developerToolWorkflow
-  @Dependency(\.deviceLifecycleWorkflow) var deviceLifecycleWorkflow
-  @Dependency(\.installedAppWorkflow) var installedAppWorkflow
-  @Dependency(\.inventoryWorkflow) var inventoryWorkflow
-  @Dependency(\.pathActionWorkflow) var pathActionWorkflow
-
+  /// Creates the main window reducer.
   public init() {}
 
+  /// User actions and workflow responses handled by the main window.
   public enum Action: Equatable {
     case task
     case menuBar(MenuBarFeature.Action)
@@ -73,6 +70,12 @@ public struct MainWindowFeature {
     case sidebar(SidebarFeature.Action)
     case workspace(WorkspaceFeature.Action)
   }
+
+  @Dependency(\.developerToolWorkflow) var developerToolWorkflow
+  @Dependency(\.deviceLifecycleWorkflow) var deviceLifecycleWorkflow
+  @Dependency(\.installedAppWorkflow) var installedAppWorkflow
+  @Dependency(\.inventoryWorkflow) var inventoryWorkflow
+  @Dependency(\.pathActionWorkflow) var pathActionWorkflow
 
   public var body: some ReducerOf<Self> {
     Reduce { state, action in

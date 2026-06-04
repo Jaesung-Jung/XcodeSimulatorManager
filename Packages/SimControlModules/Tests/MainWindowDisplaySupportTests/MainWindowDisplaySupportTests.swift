@@ -3,7 +3,7 @@ import MainWindowDisplaySupport
 import SimControlDomain
 import Testing
 
-@Suite
+@Suite("MainWindowDisplaySupportTests")
 struct MainWindowDisplaySupportTests {
   @Test func exposesDisplayTitlesAcrossModules() {
     #expect(SimulatorPlatform.iOS.displayTitle == "iOS")

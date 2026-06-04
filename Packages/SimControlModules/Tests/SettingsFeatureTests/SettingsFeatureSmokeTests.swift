@@ -3,7 +3,7 @@ import SettingsFeature
 import SimControlClients
 import Testing
 
-@Suite
+@Suite("SettingsFeatureSmokeTests")
 @MainActor
 struct SettingsFeatureSmokeTests {
   @Test func rootViewCanBeConstructedFromOutsideTheModule() {
@@ -61,10 +61,12 @@ struct SettingsFeatureSmokeTests {
   }
 }
 
-private actor UserSettingsSaveRecorder {
-  var values: [SimControlUserSettings] = []
+extension SettingsFeatureSmokeTests {
+  private actor UserSettingsSaveRecorder {
+    var values: [SimControlUserSettings] = []
 
-  func append(_ settings: SimControlUserSettings) {
-    values.append(settings)
+    func append(_ settings: SimControlUserSettings) {
+      values.append(settings)
+    }
   }
 }

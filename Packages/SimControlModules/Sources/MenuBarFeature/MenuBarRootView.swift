@@ -4,12 +4,14 @@ import MainWindowFeatureSupport
 import SimControlDomain
 import SwiftUI
 
+/// Renders the menu bar extra root content.
 @MainActor
 public struct MenuBarRootView: View {
   @Environment(\.openWindow) private var openWindow
 
   let store: StoreOf<MenuBarFeature>
 
+  /// Creates a menu bar root view bound to a menu bar store.
   public init(store: StoreOf<MenuBarFeature>) {
     self.store = store
   }

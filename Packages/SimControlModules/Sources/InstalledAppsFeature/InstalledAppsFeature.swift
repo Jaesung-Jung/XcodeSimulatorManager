@@ -2,10 +2,13 @@ import ComposableArchitecture
 import MainWindowFeatureSupport
 import SimControlDomain
 
+/// Coordinates installed-app selection, filtering, and app commands.
 @Reducer
 public struct InstalledAppsFeature {
+  /// Creates the installed apps reducer.
   public init() {}
 
+  /// State displayed by the installed apps pane.
   @ObservableState
   public struct State: Equatable {
     public var apps: [InstalledApp]
@@ -19,6 +22,7 @@ public struct InstalledAppsFeature {
     public var allAppsCount: Int
     public var allSystemAppsCount: Int
 
+    /// Creates installed apps state from scanned apps, command state, selection, and filters.
     public init(
       apps: [InstalledApp] = [],
       availability: InstalledAppsAvailability = .notLoaded,
@@ -52,21 +56,13 @@ public struct InstalledAppsFeature {
       return apps.first { $0.id == selectedAppID }
     }
 
-    public var userApps: [InstalledApp] {
-      apps.filter { !$0.isSystemApp }
-    }
+    public var userApps: [InstalledApp] { apps.filter { !$0.isSystemApp } }
 
-    public var systemApps: [InstalledApp] {
-      apps.filter(\.isSystemApp)
-    }
+    public var systemApps: [InstalledApp] { apps.filter(\.isSystemApp) }
 
-    public var hasSystemApps: Bool {
-      allSystemAppsCount > 0
-    }
+    public var hasSystemApps: Bool { allSystemAppsCount > 0 }
 
-    public var isActionRunning: Bool {
-      appCommandState != nil || isDeviceCommandRunning
-    }
+    public var isActionRunning: Bool { appCommandState != nil || isDeviceCommandRunning }
 
     public var canLaunchSelectedApp: Bool {
       guard let device,
@@ -104,9 +100,7 @@ public struct InstalledAppsFeature {
       return device.state == .booted || device.state == .shutdown
     }
 
-    public var canResetSelectedAppSandbox: Bool {
-      selectedApp?.dataContainer != nil && !isActionRunning
-    }
+    public var canResetSelectedAppSandbox: Bool { selectedApp?.dataContainer != nil && !isActionRunning }
 
     public var canInstallSelectedAppOnAnotherSimulator: Bool {
       selectedApp?.appBundlePath != nil
@@ -114,10 +108,9 @@ public struct InstalledAppsFeature {
         && !isActionRunning
     }
 
-    public var canUseSelectedAppPaths: Bool {
-      selectedApp != nil
-    }
+    public var canUseSelectedAppPaths: Bool { selectedApp != nil }
 
+    /// Reconciles selected app state when app inventory changes.
     public mutating func validateSelection() {
       guard availability == .loaded,
             let selectedAppID
@@ -131,6 +124,7 @@ public struct InstalledAppsFeature {
     }
   }
 
+  /// User actions emitted by installed-app list and action controls.
   public enum Action: Equatable {
     case selectionChanged(String?)
     case launchButtonTapped(String)

@@ -3,6 +3,7 @@ import SimControlDomain
 
 /// A TCA dependency boundary for simulator inventory refreshes.
 public struct SimulatorRepositoryClient: Sendable {
+  /// Refreshes simulator inventory from the backing repository.
   public var refresh: @Sendable () async -> SimulatorRefreshResult
 
   /// Creates a simulator repository client from an inventory refresh endpoint.
@@ -12,6 +13,7 @@ public struct SimulatorRepositoryClient: Sendable {
 }
 
 extension SimulatorRepositoryClient: TestDependencyKey {
+  /// An unimplemented client used by dependency tests unless overridden.
   public static let testValue = SimulatorRepositoryClient(
     refresh: unimplemented(
       "SimulatorRepositoryClient.refresh",

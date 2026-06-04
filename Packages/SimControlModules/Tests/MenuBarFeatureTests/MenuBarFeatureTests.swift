@@ -6,7 +6,7 @@ import SimControlDomain
 import Testing
 import WorkspaceFeature
 
-@Suite
+@Suite("MenuBarFeatureTests")
 @MainActor
 struct MenuBarFeatureTests {
   @Test func rootViewCanBeConstructedWithoutMainWindowFeature() {

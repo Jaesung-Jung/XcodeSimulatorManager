@@ -4,8 +4,13 @@ import SimControlDomain
 
 /// A TCA dependency boundary for Finder and pasteboard path actions.
 public struct PathActionClient: Sendable {
+  /// Opens a filesystem URL in Finder.
   public var openInFinder: @Sendable (_ url: URL?, _ label: String) async -> CommandResult
+
+  /// Copies a string value to the pasteboard.
   public var copy: @Sendable (_ value: String?, _ label: String) async -> CommandResult
+
+  /// Copies a filesystem path to the pasteboard.
   public var copyPath: @Sendable (_ url: URL?, _ label: String) async -> CommandResult
 
   /// Creates a path action client from endpoint closures.
@@ -21,6 +26,7 @@ public struct PathActionClient: Sendable {
 }
 
 extension PathActionClient: TestDependencyKey {
+  /// An unimplemented client used by dependency tests unless overridden.
   public static let testValue = PathActionClient(
     openInFinder: unimplemented(
       "PathActionClient.openInFinder",

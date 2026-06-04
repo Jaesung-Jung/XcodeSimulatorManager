@@ -8,25 +8,15 @@ struct MenuBarDeviceSection: View {
   let store: StoreOf<MenuBarFeature>
   let openMainWindow: () -> Void
 
-  private var snapshot: SimulatorSnapshot? {
-    store.snapshot
-  }
+  private var snapshot: SimulatorSnapshot? { store.snapshot }
 
-  private var devices: [SimulatorDevice] {
-    snapshot?.devices ?? []
-  }
+  private var devices: [SimulatorDevice] { snapshot?.devices ?? [] }
 
-  private var filters: SimulatorFilters {
-    store.filters
-  }
+  private var filters: SimulatorFilters { store.filters }
 
-  private var runtimeByID: [String: SimulatorRuntime] {
-    Dictionary(uniqueKeysWithValues: (snapshot?.runtimes ?? []).map { ($0.id, $0) })
-  }
+  private var runtimeByID: [String: SimulatorRuntime] { Dictionary(uniqueKeysWithValues: (snapshot?.runtimes ?? []).map { ($0.id, $0) }) }
 
-  private var pinnedDevices: [SimulatorDevice] {
-    devices.filter { filters.pinnedDeviceIDs.contains($0.id) }
-  }
+  private var pinnedDevices: [SimulatorDevice] { devices.filter { filters.pinnedDeviceIDs.contains($0.id) } }
 
   private var installedAppsByID: [String: InstalledApp] {
     Dictionary(
@@ -42,9 +32,7 @@ struct MenuBarDeviceSection: View {
       .sorted { $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending }
   }
 
-  private var recentApps: [InstalledApp] {
-    filters.recentAppIDs.compactMap { installedAppsByID[$0] }
-  }
+  private var recentApps: [InstalledApp] { filters.recentAppIDs.compactMap { installedAppsByID[$0] } }
 
   var body: some View {
     if !pinnedDevices.isEmpty {

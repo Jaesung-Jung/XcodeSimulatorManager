@@ -3,7 +3,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("InstalledAppTests")
 struct InstalledAppTests {
   @Test func preservesMetadataContainerPathsAndIconPath() {
     let appGroup = AppGroupContainer(

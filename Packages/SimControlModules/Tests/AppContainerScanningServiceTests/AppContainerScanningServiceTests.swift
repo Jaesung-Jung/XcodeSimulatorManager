@@ -1,7 +1,7 @@
 import AppContainerScanningService
 import Testing
 
-@Suite
+@Suite("AppContainerScanningServiceSmokeTests")
 struct AppContainerScanningServiceSmokeTests {
   @Test func scannerCanBeConstructedAcrossModules() {
     _ = AppContainerScanner()

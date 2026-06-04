@@ -4,7 +4,7 @@ import MainWindowFeatureSupport
 import SimControlDomain
 import Testing
 
-@Suite
+@Suite("DeveloperToolsFeatureTests")
 @MainActor
 struct DeveloperToolsFeatureTests {
   @Test func stateCanValidateDeepLinksAcrossModules() {

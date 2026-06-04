@@ -3,10 +3,15 @@ import SimControlDomain
 
 /// Reads CoreSimulator app container folders and builds installed app entries.
 public struct AppContainerScanner {
+  /// The installed app scan output for a single simulator device.
   public struct ScanResult: Equatable {
+    /// Installed apps discovered for the device.
     public let apps: [InstalledApp]
+
+    /// Filesystem or metadata warnings collected while scanning.
     public let warnings: [SimulatorWarning]
 
+    /// Creates an installed app scan result.
     public init(apps: [InstalledApp], warnings: [SimulatorWarning]) {
       self.apps = apps
       self.warnings = warnings
@@ -25,10 +30,8 @@ public struct AppContainerScanner {
     self.hidesSystemApps = hidesSystemApps
   }
 
-  public func scanInstalledApps(
-    for device: SimulatorDevice,
-    runtimeRoot: URL? = nil
-  ) -> ScanResult {
+  /// Scans a simulator device for user, app group, database, and runtime system app containers.
+  public func scanInstalledApps(for device: SimulatorDevice, runtimeRoot: URL? = nil) -> ScanResult {
     var warnings: [SimulatorWarning] = []
 
     guard let dataPath = device.dataPath else {

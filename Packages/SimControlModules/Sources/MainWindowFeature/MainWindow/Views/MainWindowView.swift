@@ -3,19 +3,19 @@ import MainWindowWorkflows
 import SimControlDomain
 import SwiftUI
 
+/// Renders the main simulator management window.
 @MainActor
 public struct MainWindowView: View {
   @State private var isInspectorPresented = true
 
   let store: StoreOf<MainWindowFeature>
 
+  /// Creates a main window view bound to a main window store.
   public init(store: StoreOf<MainWindowFeature>) {
     self.store = store
   }
 
-  private var isRefreshing: Bool {
-    store.workspace.refreshState == .refreshing
-  }
+  private var isRefreshing: Bool { store.workspace.refreshState == .refreshing }
 
   private var lifecycleSheet: Binding<MainWindowFeature.DeviceLifecycleSheet?> {
     Binding(

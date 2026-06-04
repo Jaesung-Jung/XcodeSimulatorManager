@@ -4,6 +4,7 @@ import SimControlDomain
 
 /// A TCA dependency boundary for destructive app sandbox reset operations.
 public struct AppSandboxResetClient: Sendable {
+  /// Resets the contents of an app data container.
   public var resetSandbox: @Sendable (_ dataContainer: URL) async -> CommandResult
 
   /// Creates an app sandbox reset client from a reset endpoint.
@@ -13,6 +14,7 @@ public struct AppSandboxResetClient: Sendable {
 }
 
 extension AppSandboxResetClient: TestDependencyKey {
+  /// An unimplemented client used by dependency tests unless overridden.
   public static let testValue = AppSandboxResetClient(
     resetSandbox: unimplemented(
       "AppSandboxResetClient.resetSandbox",

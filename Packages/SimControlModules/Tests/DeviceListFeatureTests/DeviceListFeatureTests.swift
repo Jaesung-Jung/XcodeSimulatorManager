@@ -3,7 +3,7 @@ import DeviceListFeature
 import SimControlDomain
 import Testing
 
-@Suite
+@Suite("DeviceListFeatureTests")
 @MainActor
 struct DeviceListFeatureTests {
   @Test func stateCanBeConstructedAcrossModules() {

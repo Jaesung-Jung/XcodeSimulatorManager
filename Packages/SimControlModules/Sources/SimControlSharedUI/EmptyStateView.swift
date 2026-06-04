@@ -7,6 +7,7 @@ public struct EmptyStateView: View {
   let systemImage: String
   let action: Action?
 
+  /// Creates an empty state view with optional action content.
   public init(
     title: LocalizedStringKey,
     message: LocalizedStringKey,
@@ -51,6 +52,7 @@ extension EmptyStateView {
     let title: LocalizedStringKey
     let handler: @MainActor () -> Void
 
+    /// Creates an action button configuration for an empty state view.
     public static func action(_ title: LocalizedStringKey, handler: @MainActor @escaping () -> Void) -> Action {
       Action(title: title, handler: handler)
     }

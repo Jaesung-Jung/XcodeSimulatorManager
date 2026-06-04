@@ -1,7 +1,7 @@
 import SimControlInfrastructure
 import Testing
 
-@Suite
+@Suite("SimControlInfrastructureSmokeTests")
 struct SimControlInfrastructureSmokeTests {
   @Test func umbrellaExportsConcreteServices() {
     _ = CommandExecutor()

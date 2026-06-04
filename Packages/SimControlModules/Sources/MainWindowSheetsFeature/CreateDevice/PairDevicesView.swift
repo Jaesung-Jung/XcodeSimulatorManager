@@ -11,17 +11,11 @@ public struct PairDevicesView: View {
   let watchCandidates: [PairDeviceCandidate]
   let onSubmit: (PairDevicesFormState) -> Void
 
-  private var selectedPhone: PairDeviceCandidate? {
-    phoneCandidates.first { $0.id == formState.phoneDeviceID }
-  }
+  private var selectedPhone: PairDeviceCandidate? { phoneCandidates.first { $0.id == formState.phoneDeviceID } }
 
-  private var selectedWatch: PairDeviceCandidate? {
-    watchCandidates.first { $0.id == formState.watchDeviceID }
-  }
+  private var selectedWatch: PairDeviceCandidate? { watchCandidates.first { $0.id == formState.watchDeviceID } }
 
-  private var canSubmit: Bool {
-    selectedPhone != nil && selectedWatch != nil
-  }
+  private var canSubmit: Bool { selectedPhone != nil && selectedWatch != nil }
 
   /// Creates a pair-devices sheet from candidate phone and watch devices.
   public init(

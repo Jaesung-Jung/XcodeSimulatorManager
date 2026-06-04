@@ -3,7 +3,7 @@ import MainWindowFeatureSupport
 import SidebarFeature
 import Testing
 
-@Suite
+@Suite("SidebarFeatureTests")
 @MainActor
 struct SidebarFeatureTests {
   @Test func stateCanBeConstructedAcrossModules() {

@@ -3,7 +3,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("SimulatorSnapshotTests")
 struct SimulatorSnapshotTests {
   @Test func preservesEnvironmentInventoryAndWarnings() {
     let generatedAt = Date(timeIntervalSince1970: 200)

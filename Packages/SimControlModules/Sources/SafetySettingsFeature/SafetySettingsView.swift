@@ -5,6 +5,7 @@ import SwiftUI
 public struct SafetySettingsView: View {
   private let store: StoreOf<SafetySettingsFeature>
 
+  /// Creates a safety settings view bound to a safety settings store.
   public init(store: StoreOf<SafetySettingsFeature>) {
     self.store = store
   }

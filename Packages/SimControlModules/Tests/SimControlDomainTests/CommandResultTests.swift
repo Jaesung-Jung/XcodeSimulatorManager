@@ -3,7 +3,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("CommandResultTests")
 struct CommandResultTests {
   @Test func succeededReflectsExitCode() {
     let success = makeCommandResult(id: "success", exitCode: 0)

@@ -1,9 +1,11 @@
 import ComposableArchitecture
 import SwiftUI
 
+/// Renders the inspector pane for the selected simulator context.
 public struct InspectorView: View {
   private let store: StoreOf<InspectorFeature>
 
+  /// Creates an inspector view bound to an inspector store.
   public init(store: StoreOf<InspectorFeature>) {
     self.store = store
   }

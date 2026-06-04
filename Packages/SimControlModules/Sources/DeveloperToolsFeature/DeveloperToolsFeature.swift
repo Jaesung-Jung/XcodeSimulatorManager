@@ -3,10 +3,13 @@ import Foundation
 import MainWindowFeatureSupport
 import SimControlDomain
 
+/// Coordinates simulator developer tool input, validation, and command actions.
 @Reducer
 public struct DeveloperToolsFeature {
+  /// Creates the developer tools reducer.
   public init() {}
 
+  /// State for developer tool panels and their validation context.
   @ObservableState
   public struct State: Equatable {
     public var device: SimulatorDevice?
@@ -36,6 +39,7 @@ public struct DeveloperToolsFeature {
     public var statusBarBatteryState: StatusBarBatteryState?
     public var statusBarBatteryLevel: String
 
+    /// Creates developer tools state from the selected device context and panel input values.
     public init(
       device: SimulatorDevice? = nil,
       installedApps: [InstalledApp] = [],
@@ -101,9 +105,7 @@ public struct DeveloperToolsFeature {
       return installedApps.first { $0.id == selectedAppID }
     }
 
-    public var selectedAppBundleID: String? {
-      selectedApp?.bundleID
-    }
+    public var selectedAppBundleID: String? { selectedApp?.bundleID }
 
     public var appBundleIDOptions: [String] {
       Array(Set(installedApps.map(\.bundleID).filter { !$0.isEmpty }))
@@ -144,18 +146,14 @@ public struct DeveloperToolsFeature {
         ?? selectedLocationValidationError
     }
 
-    public var clearLocationDisabledReason: String? {
-      runnableDeviceDisabledReason
-    }
+    public var clearLocationDisabledReason: String? { runnableDeviceDisabledReason }
 
     public var setStatusBarOverrideDisabledReason: String? {
       bootedDeviceDisabledReason
         ?? statusBarOverrideValidationError
     }
 
-    public var clearStatusBarOverrideDisabledReason: String? {
-      bootedDeviceDisabledReason
-    }
+    public var clearStatusBarOverrideDisabledReason: String? { bootedDeviceDisabledReason }
 
     public var selectedLocationCoordinate: LocationCoordinateInput? {
       switch locationPreset {
@@ -299,6 +297,7 @@ public struct DeveloperToolsFeature {
       )
     }
 
+    /// Updates device and app context while preserving user-entered panel values.
     public mutating func updateContext(
       device: SimulatorDevice?,
       installedApps: [InstalledApp],
@@ -321,6 +320,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
+    /// Copies the selected app bundle identifier into bundle-targeted tool inputs.
     public mutating func applySelectedAppBundle() {
       guard let selectedAppBundleID else {
         return
@@ -330,6 +330,7 @@ public struct DeveloperToolsFeature {
       privacyBundleID = selectedAppBundleID
     }
 
+    /// Records a non-empty deep-link URL as a recent entry.
     public mutating func recordDeepLinkURL(_ urlString: String) {
       let urlString = Self.trimmed(urlString)
       guard !urlString.isEmpty else {
@@ -341,6 +342,7 @@ public struct DeveloperToolsFeature {
       recentDeepLinkURLs = Array(recentDeepLinkURLs.prefix(5))
     }
 
+    /// Records a valid coordinate as a recent location entry.
     public mutating func recordLocation(_ location: LocationCoordinateInput) {
       guard Self.coordinateValidationError(
         latitude: location.latitude,
@@ -368,6 +370,7 @@ public struct DeveloperToolsFeature {
       }
     }
 
+    /// Returns a validation error for an entered deep-link URL.
     public static func urlValidationError(_ value: String) -> String? {
       let value = Self.trimmed(value)
 
@@ -394,6 +397,7 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
+    /// Returns a validation error for a remote notification payload and target bundle.
     public static func remoteNotificationPayloadValidationError(
       _ payloadJSON: String,
       bundleID: String
@@ -432,6 +436,7 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
+    /// Returns a validation error for latitude and longitude input.
     public static func coordinateValidationError(
       latitude: String,
       longitude: String
@@ -453,6 +458,7 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
+    /// Returns a validation error for optional integer input within a closed range.
     public static func integerValidationError(
       _ value: String,
       label: String,
@@ -474,6 +480,7 @@ public struct DeveloperToolsFeature {
       return nil
     }
 
+    /// Trims whitespace and newlines from user-entered text.
     public static func trimmed(_ value: String) -> String {
       value.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -487,6 +494,7 @@ public struct DeveloperToolsFeature {
     """
   }
 
+  /// User actions emitted by developer tool panels.
   public enum Action: Equatable {
     case deepLinkURLChanged(String)
     case recentDeepLinkURLSelected(String)
@@ -626,22 +634,23 @@ public struct DeveloperToolsFeature {
 }
 
 extension DeveloperToolsFeature {
+  /// User-entered or preset location coordinates for simctl location commands.
   public struct LocationCoordinateInput: Equatable, Hashable, Identifiable {
     public let name: String
     public let latitude: String
     public let longitude: String
 
+    /// Creates a location coordinate input from display name and coordinate text.
     public init(name: String, latitude: String, longitude: String) {
       self.name = name
       self.latitude = latitude
       self.longitude = longitude
     }
 
-    public var id: String {
-      "\(latitude),\(longitude)"
-    }
+    public var id: String { "\(latitude),\(longitude)" }
   }
 
+  /// Preset locations available to the location tool.
   public enum LocationPreset: String, CaseIterable, Equatable, Identifiable {
     case applePark
     case sanFrancisco
@@ -650,9 +659,7 @@ extension DeveloperToolsFeature {
     case seoul
     case custom
 
-    public var id: String {
-      rawValue
-    }
+    public var id: String { rawValue }
 
     public var displayTitle: String {
       switch self {
@@ -709,14 +716,13 @@ extension DeveloperToolsFeature {
     }
   }
 
+  /// Privacy operations supported by the privacy tool.
   public enum PrivacyAction: String, CaseIterable, Equatable, Identifiable {
     case grant
     case revoke
     case reset
 
-    public var id: String {
-      rawValue
-    }
+    public var id: String { rawValue }
 
     public var displayTitle: String {
       switch self {
@@ -729,11 +735,10 @@ extension DeveloperToolsFeature {
       }
     }
 
-    public var requiresBundleID: Bool {
-      self == .grant || self == .revoke
-    }
+    public var requiresBundleID: Bool { self == .grant || self == .revoke }
   }
 
+  /// Privacy services exposed by the privacy tool.
   public enum PrivacyService: String, CaseIterable, Equatable, Identifiable {
     case all
     case calendar
@@ -752,9 +757,7 @@ extension DeveloperToolsFeature {
     case notifications
     case bluetooth
 
-    public var id: String {
-      rawValue
-    }
+    public var id: String { rawValue }
 
     public var displayTitle: String {
       switch self {
@@ -852,6 +855,7 @@ extension DeveloperToolsFeature {
     }
   }
 
+  /// Data network values supported by the status bar override tool.
   public enum StatusBarDataNetwork: String, CaseIterable, Equatable, Identifiable {
     case hide
     case wifi
@@ -865,9 +869,7 @@ extension DeveloperToolsFeature {
     case fiveGUWB
     case fiveGUC
 
-    public var id: String {
-      rawValue
-    }
+    public var id: String { rawValue }
 
     public var displayTitle: String {
       switch self {
@@ -924,14 +926,13 @@ extension DeveloperToolsFeature {
     }
   }
 
+  /// Wi-Fi mode values supported by the status bar override tool.
   public enum StatusBarWifiMode: String, CaseIterable, Equatable, Identifiable {
     case searching
     case failed
     case active
 
-    public var id: String {
-      rawValue
-    }
+    public var id: String { rawValue }
 
     public var displayTitle: String {
       switch self {
@@ -944,20 +945,17 @@ extension DeveloperToolsFeature {
       }
     }
 
-    public var simctlArgument: String {
-      rawValue
-    }
+    public var simctlArgument: String { rawValue }
   }
 
+  /// Cellular mode values supported by the status bar override tool.
   public enum StatusBarCellularMode: String, CaseIterable, Equatable, Identifiable {
     case notSupported
     case searching
     case failed
     case active
 
-    public var id: String {
-      rawValue
-    }
+    public var id: String { rawValue }
 
     public var displayTitle: String {
       switch self {
@@ -986,14 +984,13 @@ extension DeveloperToolsFeature {
     }
   }
 
+  /// Battery state values supported by the status bar override tool.
   public enum StatusBarBatteryState: String, CaseIterable, Equatable, Identifiable {
     case charging
     case charged
     case discharging
 
-    public var id: String {
-      rawValue
-    }
+    public var id: String { rawValue }
 
     public var displayTitle: String {
       switch self {
@@ -1006,8 +1003,6 @@ extension DeveloperToolsFeature {
       }
     }
 
-    public var simctlArgument: String {
-      rawValue
-    }
+    public var simctlArgument: String { rawValue }
   }
 }

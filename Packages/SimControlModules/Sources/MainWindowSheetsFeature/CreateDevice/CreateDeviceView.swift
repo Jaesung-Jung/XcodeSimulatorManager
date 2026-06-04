@@ -11,13 +11,9 @@ public struct CreateDeviceView: View {
   let deviceTypes: [SimulatorDeviceType]
   let onSubmit: (CreateDeviceFormState) -> Void
 
-  private var availableRuntimes: [SimulatorRuntime] {
-    runtimes.filter(\.isAvailable)
-  }
+  private var availableRuntimes: [SimulatorRuntime] { runtimes.filter(\.isAvailable) }
 
-  private var selectedRuntime: SimulatorRuntime? {
-    availableRuntimes.first { $0.id == formState.runtimeID }
-  }
+  private var selectedRuntime: SimulatorRuntime? { availableRuntimes.first { $0.id == formState.runtimeID } }
 
   private var compatibleDeviceTypes: [SimulatorDeviceType] {
     guard let selectedRuntime else {
@@ -32,9 +28,7 @@ public struct CreateDeviceView: View {
     return deviceTypes.filter { supportedDeviceTypeIDs.contains($0.id) }
   }
 
-  private var selectedDeviceType: SimulatorDeviceType? {
-    compatibleDeviceTypes.first { $0.id == formState.deviceTypeID }
-  }
+  private var selectedDeviceType: SimulatorDeviceType? { compatibleDeviceTypes.first { $0.id == formState.deviceTypeID } }
 
   private var compatibilityMessage: Text {
     guard let selectedRuntime else {
@@ -48,9 +42,7 @@ public struct CreateDeviceView: View {
     return Text(LocalizedStringResource.mainWindowCreateCompatibleDeviceTypesCount(count: compatibleDeviceTypes.count))
   }
 
-  private var canSubmit: Bool {
-    selectedRuntime != nil && selectedDeviceType != nil
-  }
+  private var canSubmit: Bool { selectedRuntime != nil && selectedDeviceType != nil }
 
   /// Creates a create-device sheet and normalizes the initial runtime and device type selections.
   public init(

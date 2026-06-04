@@ -22,13 +22,20 @@ extension LocalizedStringResource {
   static let mainWindowCommonWatch = LocalizedStringResource("main_window.common.watch", bundle: .atURL(Bundle.module.bundleURL))
   static let mainWindowCreateAction = LocalizedStringResource("main_window.create.action", bundle: .atURL(Bundle.module.bundleURL))
   static func mainWindowCreateCompatibleDeviceTypesCount(count: Int) -> LocalizedStringResource {
-    LocalizedStringResource("main_window.create.compatible_device_types_count", defaultValue: "\(count) compatible device types", bundle: .atURL(Bundle.module.bundleURL))
+    LocalizedStringResource(
+      "main_window.create.compatible_device_types_count",
+      defaultValue: "\(count) compatible device types",
+      bundle: .atURL(Bundle.module.bundleURL)
+    )
   }
   static let mainWindowCreateDeviceType = LocalizedStringResource("main_window.create.device_type", bundle: .atURL(Bundle.module.bundleURL))
   static let mainWindowCreateNoRuntime = LocalizedStringResource("main_window.create.no_runtime", bundle: .atURL(Bundle.module.bundleURL))
   static let mainWindowCreateRuntime = LocalizedStringResource("main_window.create.runtime", bundle: .atURL(Bundle.module.bundleURL))
   static let mainWindowCreateTitle = LocalizedStringResource("main_window.create.title", bundle: .atURL(Bundle.module.bundleURL))
-  static let mainWindowCreateUnreportedCompatibility = LocalizedStringResource("main_window.create.unreported_compatibility", bundle: .atURL(Bundle.module.bundleURL))
+  static let mainWindowCreateUnreportedCompatibility = LocalizedStringResource(
+    "main_window.create.unreported_compatibility",
+    bundle: .atURL(Bundle.module.bundleURL)
+  )
   static let mainWindowDeleteAction = LocalizedStringResource("main_window.delete.action", bundle: .atURL(Bundle.module.bundleURL))
   static let mainWindowDeleteMessage = LocalizedStringResource("main_window.delete.message", bundle: .atURL(Bundle.module.bundleURL))
   static let mainWindowDeleteTitle = LocalizedStringResource("main_window.delete.title", bundle: .atURL(Bundle.module.bundleURL))
@@ -36,7 +43,10 @@ extension LocalizedStringResource {
   static let mainWindowEraseMessage = LocalizedStringResource("main_window.erase.message", bundle: .atURL(Bundle.module.bundleURL))
   static let mainWindowEraseTitle = LocalizedStringResource("main_window.erase.title", bundle: .atURL(Bundle.module.bundleURL))
   static let mainWindowInstallAppAction = LocalizedStringResource("main_window.install_app.action", bundle: .atURL(Bundle.module.bundleURL))
-  static let mainWindowInstallAppLaunchAfterInstall = LocalizedStringResource("main_window.install_app.launch_after_install", bundle: .atURL(Bundle.module.bundleURL))
+  static let mainWindowInstallAppLaunchAfterInstall = LocalizedStringResource(
+    "main_window.install_app.launch_after_install",
+    bundle: .atURL(Bundle.module.bundleURL)
+  )
   static let mainWindowInstallAppTitle = LocalizedStringResource("main_window.install_app.title", bundle: .atURL(Bundle.module.bundleURL))
   static let mainWindowPairAction = LocalizedStringResource("main_window.pair.action", bundle: .atURL(Bundle.module.bundleURL))
   static let mainWindowPairPhoneUdid = LocalizedStringResource("main_window.pair.phone_udid", bundle: .atURL(Bundle.module.bundleURL))

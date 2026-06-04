@@ -1,7 +1,7 @@
 import AppSandboxResetService
 import Testing
 
-@Suite
+@Suite("AppSandboxResetServiceTests")
 struct AppSandboxResetServiceTests {
   @Test func serviceCanBeConstructedAcrossModules() {
     _ = AppSandboxResetService()

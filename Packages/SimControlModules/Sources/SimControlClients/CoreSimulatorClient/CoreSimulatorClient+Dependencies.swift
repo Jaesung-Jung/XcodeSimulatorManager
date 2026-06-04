@@ -1,6 +1,7 @@
 import Dependencies
 
 extension CoreSimulatorClient: TestDependencyKey {
+  /// An unimplemented client used by dependency tests unless overridden.
   public static let testValue = CoreSimulatorClient(
     openSimulatorApp: unimplemented(
       "CoreSimulatorClient.openSimulatorApp",

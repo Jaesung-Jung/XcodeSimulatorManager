@@ -7,7 +7,7 @@ import SwiftUI
 import Testing
 @testable import InstalledAppsFeature
 
-@Suite
+@Suite("InstalledAppsFeatureTests")
 @MainActor
 struct InstalledAppsFeatureTests {
   @Test func stateCanBeConstructedAcrossModules() {
@@ -185,20 +185,22 @@ struct InstalledAppsFeatureTests {
   }
 }
 
-private actor AppIconImageLoadProbe {
-  private let loadedImage = NSImage(size: NSSize(width: 2, height: 2))
-  private var loads = 0
+extension InstalledAppsFeatureTests {
+  private actor AppIconImageLoadProbe {
+    private let loadedImage = NSImage(size: NSSize(width: 2, height: 2))
+    private var loads = 0
 
-  func image() -> NSImage {
-    loadedImage
-  }
+    func image() -> NSImage {
+      loadedImage
+    }
 
-  func loadImage(_: URL) -> NSImage? {
-    loads += 1
-    return loadedImage
-  }
+    func loadImage(_: URL) -> NSImage? {
+      loads += 1
+      return loadedImage
+    }
 
-  func loadCount() -> Int {
-    loads
+    func loadCount() -> Int {
+      loads
+    }
   }
 }

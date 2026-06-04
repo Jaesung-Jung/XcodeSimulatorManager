@@ -2,7 +2,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("SimulatorWarningTests")
 struct SimulatorWarningTests {
   @Test func preservesSeverityCategoryMessageAndRelatedID() {
     let warning = SimulatorWarning(

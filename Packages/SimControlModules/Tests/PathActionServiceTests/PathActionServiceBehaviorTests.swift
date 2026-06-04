@@ -4,7 +4,7 @@ import Testing
 @testable import PathActionService
 
 @MainActor
-@Suite
+@Suite("PathActionServiceTests")
 struct PathActionServiceTests {
   @Test func existingReadablePathOpenReturnsSuccess() async throws {
     let directory = try temporaryDirectory()

@@ -8,9 +8,7 @@ extension DeviceDetailView {
   struct CommandResultsSection: View {
     let results: [CommandResult]
 
-    private var recentResults: [CommandResult] {
-      Array(results.suffix(5).reversed())
-    }
+    private var recentResults: [CommandResult] { Array(results.suffix(5).reversed()) }
 
     var body: some View {
       VStack(alignment: .leading, spacing: 10) {

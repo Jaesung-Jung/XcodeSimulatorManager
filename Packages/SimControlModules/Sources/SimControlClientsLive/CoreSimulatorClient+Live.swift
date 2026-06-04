@@ -18,11 +18,7 @@ public extension CoreSimulatorClient {
         await service.shutdownDevice(id: id)
       },
       createDevice: { name, deviceTypeID, runtimeID in
-        await service.createDevice(
-          name: name,
-          deviceTypeID: deviceTypeID,
-          runtimeID: runtimeID
-        )
+        await service.createDevice(name: name, deviceTypeID: deviceTypeID, runtimeID: runtimeID)
       },
       cloneDevice: { id, name in
         await service.cloneDevice(id: id, name: name)
@@ -37,10 +33,7 @@ public extension CoreSimulatorClient {
         await service.deleteDevice(id: id)
       },
       pairDevices: { watchDeviceID, phoneDeviceID in
-        await service.pairDevices(
-          watchDeviceID: watchDeviceID,
-          phoneDeviceID: phoneDeviceID
-        )
+        await service.pairDevices(watchDeviceID: watchDeviceID, phoneDeviceID: phoneDeviceID)
       },
       unpairDevice: { pairID in
         await service.unpairDevice(pairID: pairID)
@@ -58,29 +51,16 @@ public extension CoreSimulatorClient {
         await service.installApp(deviceID: deviceID, appBundlePath: appBundlePath)
       },
       getAppContainer: { deviceID, bundleID, container in
-        await service.getAppContainer(
-          deviceID: deviceID,
-          bundleID: bundleID,
-          container: container
-        )
+        await service.getAppContainer(deviceID: deviceID, bundleID: bundleID, container: container)
       },
       openURL: { deviceID, urlString in
         await service.openURL(deviceID: deviceID, urlString: urlString)
       },
       pushNotification: { deviceID, bundleID, payloadJSON in
-        await service.pushNotification(
-          deviceID: deviceID,
-          bundleID: bundleID,
-          payloadJSON: payloadJSON
-        )
+        await service.pushNotification(deviceID: deviceID, bundleID: bundleID, payloadJSON: payloadJSON)
       },
       setPrivacyPermission: { deviceID, action, serviceName, bundleID in
-        await service.setPrivacyPermission(
-          deviceID: deviceID,
-          action: action,
-          service: serviceName,
-          bundleID: bundleID
-        )
+        await service.setPrivacyPermission(deviceID: deviceID, action: action, service: serviceName, bundleID: bundleID)
       },
       setLocation: { deviceID, coordinate in
         await service.setLocation(deviceID: deviceID, coordinate: coordinate)

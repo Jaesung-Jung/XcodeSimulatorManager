@@ -422,69 +422,71 @@ struct MainWindowFeatureDeviceCreationTests {
   }
 }
 
-private struct MainWindowCreateDeviceCall: Equatable {
-  let name: String
-  let deviceTypeID: String
-  let runtimeID: String
-}
-
-private struct MainWindowNamedDeviceCall: Equatable {
-  let id: String
-  let name: String
-}
-
-private actor MainWindowDeviceLifecycleCommandRecorder {
-  private let createResult: CommandResult
-  private let cloneResult: CommandResult
-  private let renameResult: CommandResult
-  private var recordedCreateCalls: [MainWindowCreateDeviceCall] = []
-  private var recordedCloneCalls: [MainWindowNamedDeviceCall] = []
-  private var recordedRenameCalls: [MainWindowNamedDeviceCall] = []
-
-  init(
-    createResult: CommandResult,
-    cloneResult: CommandResult,
-    renameResult: CommandResult
-  ) {
-    self.createResult = createResult
-    self.cloneResult = cloneResult
-    self.renameResult = renameResult
+extension MainWindowFeatureDeviceCreationTests {
+  private struct MainWindowCreateDeviceCall: Equatable {
+    let name: String
+    let deviceTypeID: String
+    let runtimeID: String
   }
 
-  func createDevice(
-    name: String,
-    deviceTypeID: String,
-    runtimeID: String
-  ) -> CommandResult {
-    recordedCreateCalls.append(
-      MainWindowCreateDeviceCall(
-        name: name,
-        deviceTypeID: deviceTypeID,
-        runtimeID: runtimeID
+  private struct MainWindowNamedDeviceCall: Equatable {
+    let id: String
+    let name: String
+  }
+
+  private actor MainWindowDeviceLifecycleCommandRecorder {
+    private let createResult: CommandResult
+    private let cloneResult: CommandResult
+    private let renameResult: CommandResult
+    private var recordedCreateCalls: [MainWindowCreateDeviceCall] = []
+    private var recordedCloneCalls: [MainWindowNamedDeviceCall] = []
+    private var recordedRenameCalls: [MainWindowNamedDeviceCall] = []
+
+    init(
+      createResult: CommandResult,
+      cloneResult: CommandResult,
+      renameResult: CommandResult
+    ) {
+      self.createResult = createResult
+      self.cloneResult = cloneResult
+      self.renameResult = renameResult
+    }
+
+    func createDevice(
+      name: String,
+      deviceTypeID: String,
+      runtimeID: String
+    ) -> CommandResult {
+      recordedCreateCalls.append(
+        MainWindowCreateDeviceCall(
+          name: name,
+          deviceTypeID: deviceTypeID,
+          runtimeID: runtimeID
+        )
       )
-    )
-    return createResult
-  }
+      return createResult
+    }
 
-  func cloneDevice(id: String, name: String) -> CommandResult {
-    recordedCloneCalls.append(MainWindowNamedDeviceCall(id: id, name: name))
-    return cloneResult
-  }
+    func cloneDevice(id: String, name: String) -> CommandResult {
+      recordedCloneCalls.append(MainWindowNamedDeviceCall(id: id, name: name))
+      return cloneResult
+    }
 
-  func renameDevice(id: String, name: String) -> CommandResult {
-    recordedRenameCalls.append(MainWindowNamedDeviceCall(id: id, name: name))
-    return renameResult
-  }
+    func renameDevice(id: String, name: String) -> CommandResult {
+      recordedRenameCalls.append(MainWindowNamedDeviceCall(id: id, name: name))
+      return renameResult
+    }
 
-  func createCalls() -> [MainWindowCreateDeviceCall] {
-    recordedCreateCalls
-  }
+    func createCalls() -> [MainWindowCreateDeviceCall] {
+      recordedCreateCalls
+    }
 
-  func cloneCalls() -> [MainWindowNamedDeviceCall] {
-    recordedCloneCalls
-  }
+    func cloneCalls() -> [MainWindowNamedDeviceCall] {
+      recordedCloneCalls
+    }
 
-  func renameCalls() -> [MainWindowNamedDeviceCall] {
-    recordedRenameCalls
+    func renameCalls() -> [MainWindowNamedDeviceCall] {
+      recordedRenameCalls
+    }
   }
 }

@@ -8,9 +8,7 @@ public struct CloneDeviceView: View {
 
   let onSubmit: (CloneDeviceFormState) -> Void
 
-  private var canSubmit: Bool {
-    !formState.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-  }
+  private var canSubmit: Bool { !formState.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
   /// Creates a clone-device sheet with editable form state.
   public init(

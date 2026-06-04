@@ -8,13 +8,9 @@ actor CommandTimeoutController {
   private var didTimeOut = false
   private var didForceKill = false
 
-  var timedOut: Bool {
-    didTimeOut
-  }
+  var timedOut: Bool { didTimeOut }
 
-  var wasForceKilled: Bool {
-    didForceKill
-  }
+  var wasForceKilled: Bool { didForceKill }
 
   init(process: Process) {
     self.process = process
@@ -34,9 +30,7 @@ actor CommandTimeoutController {
       }
 
       await self?.terminateProcessIfRunning()
-      try? await Task.sleep(
-        nanoseconds: UInt64(Self.hardKillGracePeriod * 1_000_000_000)
-      )
+      try? await Task.sleep(nanoseconds: UInt64(Self.hardKillGracePeriod * 1_000_000_000))
 
       guard !Task.isCancelled else {
         return

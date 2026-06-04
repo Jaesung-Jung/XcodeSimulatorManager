@@ -2,10 +2,13 @@ import ComposableArchitecture
 import MainWindowFeatureSupport
 import SimControlDomain
 
+/// Coordinates device list selection, sorting, and pin commands.
 @Reducer
 public struct DeviceListFeature {
+  /// Creates the device list reducer.
   public init() {}
 
+  /// State projected into the simulator device list.
   @ObservableState
   public struct State: Equatable {
     public var devices: [SimulatorDevice]
@@ -17,6 +20,7 @@ public struct DeviceListFeature {
     public var filters: SimulatorFilters
     public var totalDeviceCount: Int
 
+    /// Creates device list state from visible devices, lookup tables, selection, and filters.
     public init(
       devices: [SimulatorDevice] = [],
       runtimeByID: [String: SimulatorRuntime] = [:],
@@ -38,6 +42,7 @@ public struct DeviceListFeature {
     }
   }
 
+  /// User actions emitted by the device list UI.
   public enum Action: Equatable {
     case selectionChanged(String?)
     case pinButtonTapped(String)

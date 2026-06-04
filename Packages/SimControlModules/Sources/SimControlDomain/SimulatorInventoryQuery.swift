@@ -19,22 +19,14 @@ public struct SimulatorInventoryQuery: Equatable {
   }
 
   /// All devices from the snapshot.
-  public var devices: [SimulatorDevice] {
-    snapshot.devices
-  }
+  public var devices: [SimulatorDevice] { snapshot.devices }
 
   /// Runtimes keyed by runtime identifier.
-  public var runtimeByID: [String: SimulatorRuntime] {
-    Dictionary(uniqueKeysWithValues: snapshot.runtimes.map { ($0.id, $0) })
-  }
+  public var runtimeByID: [String: SimulatorRuntime] { Dictionary(uniqueKeysWithValues: snapshot.runtimes.map { ($0.id, $0) }) }
 
   /// Device types keyed by device type identifier.
-  public var deviceTypeByID: [String: SimulatorDeviceType] {
-    Dictionary(uniqueKeysWithValues: snapshot.deviceTypes.map { ($0.id, $0) })
-  }
+  public var deviceTypeByID: [String: SimulatorDeviceType] { Dictionary(uniqueKeysWithValues: snapshot.deviceTypes.map { ($0.id, $0) }) }
 
   /// Devices keyed by device identifier.
-  public var deviceByID: [String: SimulatorDevice] {
-    Dictionary(uniqueKeysWithValues: snapshot.devices.map { ($0.id, $0) })
-  }
+  public var deviceByID: [String: SimulatorDevice] { Dictionary(uniqueKeysWithValues: snapshot.devices.map { ($0.id, $0) }) }
 }

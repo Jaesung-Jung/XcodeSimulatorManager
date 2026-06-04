@@ -3,7 +3,7 @@ import SimControlDomain
 import Testing
 @testable import CoreSimulatorService
 
-@Suite
+@Suite("SimctlListPayloadTests")
 struct SimctlListPayloadTests {
   @Test func decodesRepresentativeListPayload() throws {
     let payload = try decode(

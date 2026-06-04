@@ -2,7 +2,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("SimulatorRuntimeTests")
 struct SimulatorRuntimeTests {
   @Test func preservesRuntimeMetadataAndCompatibility() {
     let runtime = SimulatorRuntime(

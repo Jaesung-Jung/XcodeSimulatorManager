@@ -5,10 +5,12 @@ import MainWindowFeatureSupport
 import SimControlSharedUI
 import SwiftUI
 
+/// Renders the workspace detail area for the selected simulator context.
 @MainActor
 public struct WorkspaceView: View {
   private let store: StoreOf<WorkspaceFeature>
 
+  /// Creates a workspace view bound to a workspace store.
   public init(store: StoreOf<WorkspaceFeature>) {
     self.store = store
   }

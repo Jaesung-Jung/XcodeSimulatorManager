@@ -12,6 +12,7 @@ import XcodeSettingsFeature
 public struct SettingsRootView: View {
   private let store: StoreOf<SettingsFeature>
 
+  /// Creates the settings root view bound to a settings store.
   public init(store: StoreOf<SettingsFeature>) {
     self.store = store
   }

@@ -3,7 +3,7 @@ import SimControlDomain
 import Testing
 @testable import AppContainerScanningService
 
-@Suite
+@Suite("AppContainerScannerTests")
 struct AppContainerScannerTests {
   @Test func scansBundleDataAndAppGroupContainersForShutdownDevice() throws {
     let temporaryDirectory = try TemporaryDirectory()
@@ -373,70 +373,72 @@ struct AppContainerScannerTests {
   }
 }
 
-private final class TemporaryDirectory {
-  let url: URL
+extension AppContainerScannerTests {
+  private final class TemporaryDirectory {
+    let url: URL
 
-  init() throws {
-    url = FileManager.default.temporaryDirectory.appendingPathComponent(
-      "SimControlTests-\(UUID().uuidString)",
-      isDirectory: true
-    )
+    init() throws {
+      url = FileManager.default.temporaryDirectory.appendingPathComponent(
+        "SimControlTests-\(UUID().uuidString)",
+        isDirectory: true
+      )
+      try FileManager.default.createDirectory(
+        at: url,
+        withIntermediateDirectories: true
+      )
+    }
+
+    deinit {
+      try? FileManager.default.removeItem(at: url)
+    }
+  }
+
+  private func createDirectory(_ url: URL) throws {
     try FileManager.default.createDirectory(
       at: url,
       withIntermediateDirectories: true
     )
   }
 
-  deinit {
-    try? FileManager.default.removeItem(at: url)
+  private func writeMetadata(bundleID: String, to container: URL) throws {
+    try writePropertyList(
+      [
+        "MCMMetadataIdentifier": bundleID
+      ],
+      to: container.appendingPathComponent(".com.apple.mobile_container_manager.metadata.plist")
+    )
   }
-}
 
-private func createDirectory(_ url: URL) throws {
-  try FileManager.default.createDirectory(
-    at: url,
-    withIntermediateDirectories: true
-  )
-}
+  private func writeInfoPlist(_ values: [String: Any], to appBundle: URL) throws {
+    try writePropertyList(
+      values,
+      to: appBundle.appendingPathComponent("Info.plist")
+    )
+  }
 
-private func writeMetadata(bundleID: String, to container: URL) throws {
-  try writePropertyList(
-    [
-      "MCMMetadataIdentifier": bundleID
-    ],
-    to: container.appendingPathComponent(".com.apple.mobile_container_manager.metadata.plist")
-  )
-}
+  private func writePropertyList(_ values: [String: Any], to url: URL) throws {
+    let data = try PropertyListSerialization.data(
+      fromPropertyList: values,
+      format: .xml,
+      options: 0
+    )
+    try data.write(to: url)
+  }
 
-private func writeInfoPlist(_ values: [String: Any], to appBundle: URL) throws {
-  try writePropertyList(
-    values,
-    to: appBundle.appendingPathComponent("Info.plist")
-  )
-}
+  private func directorySize(_ url: URL) throws -> Int64 {
+    let fileManager = FileManager.default
+    let subpaths = try fileManager.subpathsOfDirectory(atPath: url.path)
+    return try subpaths.reduce(Int64(0)) { size, subpath in
+      let fileURL = url.appendingPathComponent(subpath)
+      var isDirectory: ObjCBool = false
+      guard fileManager.fileExists(atPath: fileURL.path, isDirectory: &isDirectory),
+            !isDirectory.boolValue
+      else {
+        return size
+      }
 
-private func writePropertyList(_ values: [String: Any], to url: URL) throws {
-  let data = try PropertyListSerialization.data(
-    fromPropertyList: values,
-    format: .xml,
-    options: 0
-  )
-  try data.write(to: url)
-}
-
-private func directorySize(_ url: URL) throws -> Int64 {
-  let fileManager = FileManager.default
-  let subpaths = try fileManager.subpathsOfDirectory(atPath: url.path)
-  return try subpaths.reduce(Int64(0)) { size, subpath in
-    let fileURL = url.appendingPathComponent(subpath)
-    var isDirectory: ObjCBool = false
-    guard fileManager.fileExists(atPath: fileURL.path, isDirectory: &isDirectory),
-          !isDirectory.boolValue
-    else {
-      return size
+      let attributes = try fileManager.attributesOfItem(atPath: fileURL.path)
+      return size + Int64((attributes[.size] as? NSNumber)?.int64Value ?? 0)
     }
-
-    let attributes = try fileManager.attributesOfItem(atPath: fileURL.path)
-    return size + Int64((attributes[.size] as? NSNumber)?.int64Value ?? 0)
   }
 }

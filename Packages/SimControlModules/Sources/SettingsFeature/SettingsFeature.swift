@@ -7,10 +7,13 @@ import SafetySettingsFeature
 import SimControlClients
 import XcodeSettingsFeature
 
+/// Coordinates loading and saving app settings across settings sections.
 @Reducer
 public struct SettingsFeature {
+  /// Creates the settings reducer.
   public init() {}
 
+  /// Aggregated state for all settings sections.
   @ObservableState
   public struct State: Equatable {
     public var general: GeneralSettingsFeature.State
@@ -21,6 +24,7 @@ public struct SettingsFeature {
     public var diagnostics: DiagnosticsSettingsFeature.State
     public var isLoading: Bool
 
+    /// Creates settings state from persisted user settings and loading state.
     public init(
       settings: SimControlUserSettings = .defaults,
       isLoading: Bool = false
@@ -56,6 +60,7 @@ public struct SettingsFeature {
     }
   }
 
+  /// User actions and loading responses handled by settings.
   public enum Action: Equatable {
     case task
     case settingsLoaded(SimControlUserSettings)

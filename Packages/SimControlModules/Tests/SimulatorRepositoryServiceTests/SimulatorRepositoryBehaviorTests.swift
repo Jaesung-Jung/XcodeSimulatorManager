@@ -5,7 +5,7 @@ import SimControlDomain
 import Testing
 @testable import SimulatorRepositoryService
 
-@Suite
+@Suite("SimulatorRepositoryTests")
 struct SimulatorRepositoryTests {
   @Test func refreshMapsServicePayloadIntoDomainSnapshot() async throws {
     let generatedAt = Date(timeIntervalSince1970: 1_000)
@@ -513,102 +513,104 @@ struct SimulatorRepositoryTests {
   }
 }
 
-private actor RepositoryServiceRecorder {
-  private let selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult
-  private let listResult: CoreSimulatorService.ListResult
-  private var selectedXcodePathCalls = 0
-  private var listCalls = 0
+extension SimulatorRepositoryTests {
+  private actor RepositoryServiceRecorder {
+    private let selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult
+    private let listResult: CoreSimulatorService.ListResult
+    private var selectedXcodePathCalls = 0
+    private var listCalls = 0
 
-  init(
-    selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult,
-    listResult: CoreSimulatorService.ListResult
-  ) {
-    self.selectedXcodePathResult = selectedXcodePathResult
-    self.listResult = listResult
+    init(
+      selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult,
+      listResult: CoreSimulatorService.ListResult
+    ) {
+      self.selectedXcodePathResult = selectedXcodePathResult
+      self.listResult = listResult
+    }
+
+    func selectedXcodePath() -> CoreSimulatorService.DeveloperPathResult {
+      selectedXcodePathCalls += 1
+      return selectedXcodePathResult
+    }
+
+    func list() -> CoreSimulatorService.ListResult {
+      listCalls += 1
+      return listResult
+    }
+
+    func selectedXcodePathCallCount() -> Int {
+      selectedXcodePathCalls
+    }
+
+    func listCallCount() -> Int {
+      listCalls
+    }
   }
 
-  func selectedXcodePath() -> CoreSimulatorService.DeveloperPathResult {
-    selectedXcodePathCalls += 1
-    return selectedXcodePathResult
-  }
+  private actor BlockingRefreshRecorder {
+    private let selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult
+    private let listResult: CoreSimulatorService.ListResult
+    private var selectedXcodePathCalls = 0
+    private var listCalls = 0
+    private var selectedXcodePathStartedWaiters: [CheckedContinuation<Void, Never>] = []
+    private var selectedXcodePathReleaseContinuations: [CheckedContinuation<Void, Never>] = []
+    private var selectedXcodePathLookupsReleased = false
 
-  func list() -> CoreSimulatorService.ListResult {
-    listCalls += 1
-    return listResult
-  }
+    init(
+      selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult,
+      listResult: CoreSimulatorService.ListResult
+    ) {
+      self.selectedXcodePathResult = selectedXcodePathResult
+      self.listResult = listResult
+    }
 
-  func selectedXcodePathCallCount() -> Int {
-    selectedXcodePathCalls
-  }
+    func selectedXcodePath() async -> CoreSimulatorService.DeveloperPathResult {
+      selectedXcodePathCalls += 1
+      resumeSelectedXcodePathStartedWaiters()
 
-  func listCallCount() -> Int {
-    listCalls
-  }
-}
+      if !selectedXcodePathLookupsReleased {
+        await withCheckedContinuation { continuation in
+          selectedXcodePathReleaseContinuations.append(continuation)
+        }
+      }
 
-private actor BlockingRefreshRecorder {
-  private let selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult
-  private let listResult: CoreSimulatorService.ListResult
-  private var selectedXcodePathCalls = 0
-  private var listCalls = 0
-  private var selectedXcodePathStartedWaiters: [CheckedContinuation<Void, Never>] = []
-  private var selectedXcodePathReleaseContinuations: [CheckedContinuation<Void, Never>] = []
-  private var selectedXcodePathLookupsReleased = false
+      return selectedXcodePathResult
+    }
 
-  init(
-    selectedXcodePathResult: CoreSimulatorService.DeveloperPathResult,
-    listResult: CoreSimulatorService.ListResult
-  ) {
-    self.selectedXcodePathResult = selectedXcodePathResult
-    self.listResult = listResult
-  }
+    func list() -> CoreSimulatorService.ListResult {
+      listCalls += 1
+      return listResult
+    }
 
-  func selectedXcodePath() async -> CoreSimulatorService.DeveloperPathResult {
-    selectedXcodePathCalls += 1
-    resumeSelectedXcodePathStartedWaiters()
+    func waitUntilSelectedXcodePathStarted() async {
+      guard selectedXcodePathCalls == 0 else {
+        return
+      }
 
-    if !selectedXcodePathLookupsReleased {
       await withCheckedContinuation { continuation in
-        selectedXcodePathReleaseContinuations.append(continuation)
+        selectedXcodePathStartedWaiters.append(continuation)
       }
     }
 
-    return selectedXcodePathResult
-  }
-
-  func list() -> CoreSimulatorService.ListResult {
-    listCalls += 1
-    return listResult
-  }
-
-  func waitUntilSelectedXcodePathStarted() async {
-    guard selectedXcodePathCalls == 0 else {
-      return
+    func releaseSelectedXcodePathLookups() {
+      selectedXcodePathLookupsReleased = true
+      let continuations = selectedXcodePathReleaseContinuations
+      selectedXcodePathReleaseContinuations.removeAll()
+      continuations.forEach { $0.resume() }
     }
 
-    await withCheckedContinuation { continuation in
-      selectedXcodePathStartedWaiters.append(continuation)
+    func selectedXcodePathCallCount() -> Int {
+      selectedXcodePathCalls
     }
-  }
 
-  func releaseSelectedXcodePathLookups() {
-    selectedXcodePathLookupsReleased = true
-    let continuations = selectedXcodePathReleaseContinuations
-    selectedXcodePathReleaseContinuations.removeAll()
-    continuations.forEach { $0.resume() }
-  }
+    func listCallCount() -> Int {
+      listCalls
+    }
 
-  func selectedXcodePathCallCount() -> Int {
-    selectedXcodePathCalls
-  }
-
-  func listCallCount() -> Int {
-    listCalls
-  }
-
-  private func resumeSelectedXcodePathStartedWaiters() {
-    let waiters = selectedXcodePathStartedWaiters
-    selectedXcodePathStartedWaiters.removeAll()
-    waiters.forEach { $0.resume() }
+    private func resumeSelectedXcodePathStartedWaiters() {
+      let waiters = selectedXcodePathStartedWaiters
+      selectedXcodePathStartedWaiters.removeAll()
+      waiters.forEach { $0.resume() }
+    }
   }
 }

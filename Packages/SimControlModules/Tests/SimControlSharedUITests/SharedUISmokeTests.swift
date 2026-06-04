@@ -2,7 +2,7 @@ import SimControlSharedUI
 import SwiftUI
 import Testing
 
-@Suite
+@Suite("SharedUISmokeTests")
 struct SharedUISmokeTests {
   @Test func sharedViewsCanBeConstructedFromOutsideTheModule() {
     _ = EmptyStateView(

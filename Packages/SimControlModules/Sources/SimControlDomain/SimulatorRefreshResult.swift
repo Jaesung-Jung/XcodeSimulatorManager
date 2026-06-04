@@ -13,9 +13,7 @@ public struct SimulatorRefreshResult: Equatable {
   public let diagnostic: String?
 
   /// Indicates whether refresh produced a new snapshot.
-  public var succeeded: Bool {
-    snapshot != nil && diagnostic == nil
-  }
+  public var succeeded: Bool { snapshot != nil && diagnostic == nil }
 
   /// Creates a simulator repository refresh result.
   public init(

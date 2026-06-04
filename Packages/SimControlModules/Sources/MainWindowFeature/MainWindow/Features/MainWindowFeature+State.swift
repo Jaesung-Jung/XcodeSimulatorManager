@@ -8,6 +8,7 @@ import WorkspaceFeature
 
 // MARK: - MainWindowFeature.State
 extension MainWindowFeature {
+  /// Root state for the main window feature tree.
   @ObservableState
   public struct State: Equatable {
     var lastMenuBarAutoRefreshAttemptAt: Date?
@@ -49,9 +50,7 @@ extension MainWindowFeature {
       )
     }
 
-    public static var initial: Self {
-      Self()
-    }
+    public static var initial: Self { Self() }
 
     public var menuBar: MenuBarFeature.State {
       get { MenuBarFeature.State(workspace: workspace) }

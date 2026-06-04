@@ -236,50 +236,52 @@ struct InstalledAppWorkflowClientTests {
   }
 }
 
-private enum InstalledAppWorkflowOperation: Equatable, Sendable {
-  case boot(String)
-  case launch(String, String)
-  case uninstall(String, String)
-  case install(String, URL)
-  case resetSandbox(URL)
-  case refresh
-}
-
-private actor InstalledAppWorkflowRecorder {
-  private var recordedOperations: [InstalledAppWorkflowOperation] = []
-
-  func record(_ operation: InstalledAppWorkflowOperation) {
-    recordedOperations.append(operation)
+extension InstalledAppWorkflowClientTests {
+  private enum InstalledAppWorkflowOperation: Equatable, Sendable {
+    case boot(String)
+    case launch(String, String)
+    case uninstall(String, String)
+    case install(String, URL)
+    case resetSandbox(URL)
+    case refresh
   }
 
-  func operations() -> [InstalledAppWorkflowOperation] {
-    recordedOperations
+  private actor InstalledAppWorkflowRecorder {
+    private var recordedOperations: [InstalledAppWorkflowOperation] = []
+
+    func record(_ operation: InstalledAppWorkflowOperation) {
+      recordedOperations.append(operation)
+    }
+
+    func operations() -> [InstalledAppWorkflowOperation] {
+      recordedOperations
+    }
   }
-}
 
-private func makeRefreshResult(id: String) -> SimulatorRefreshResult {
-  SimulatorRefreshResult(
-    snapshot: nil,
-    xcodeCommandResult: makeCommandResult(id: "\(id)-xcode"),
-    listCommandResult: makeCommandResult(id: "\(id)-list"),
-    diagnostic: nil
-  )
-}
+  private func makeRefreshResult(id: String) -> SimulatorRefreshResult {
+    SimulatorRefreshResult(
+      snapshot: nil,
+      xcodeCommandResult: makeCommandResult(id: "\(id)-xcode"),
+      listCommandResult: makeCommandResult(id: "\(id)-list"),
+      diagnostic: nil
+    )
+  }
 
-private func makeCommandResult(
-  id: String,
-  stdout: String = "",
-  stderr: String = "",
-  exitCode: Int32 = 0
-) -> CommandResult {
-  CommandResult(
-    id: id,
-    executable: "test",
-    arguments: [id],
-    stdout: stdout,
-    stderr: stderr,
-    exitCode: exitCode,
-    duration: 0,
-    startedAt: Date(timeIntervalSince1970: 0)
-  )
+  private func makeCommandResult(
+    id: String,
+    stdout: String = "",
+    stderr: String = "",
+    exitCode: Int32 = 0
+  ) -> CommandResult {
+    CommandResult(
+      id: id,
+      executable: "test",
+      arguments: [id],
+      stdout: stdout,
+      stderr: stderr,
+      exitCode: exitCode,
+      duration: 0,
+      startedAt: Date(timeIntervalSince1970: 0)
+    )
+  }
 }

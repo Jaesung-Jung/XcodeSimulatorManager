@@ -2,7 +2,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("DevicePairTests")
 struct DevicePairTests {
   @Test func preservesPairDeviceIdentifiersAndState() {
     let pair = DevicePair(

@@ -17,9 +17,7 @@ extension InspectorView {
       return value
     }
 
-    private var canActOnValue: Bool {
-      displayValue != nil
-    }
+    private var canActOnValue: Bool { displayValue != nil }
 
     init(
       title: LocalizedStringKey,

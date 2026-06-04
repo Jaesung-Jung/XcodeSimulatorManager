@@ -3,7 +3,7 @@ import Testing
 import SimControlDomain
 
 @MainActor
-@Suite
+@Suite("XcodeSelectionTests")
 struct XcodeSelectionTests {
   @Test func preservesValidDeveloperPathAndVersion() {
     let developerPath = URL(fileURLWithPath: "/Applications/Xcode.app/Contents/Developer")

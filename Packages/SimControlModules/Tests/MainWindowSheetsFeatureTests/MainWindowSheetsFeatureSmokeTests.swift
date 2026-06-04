@@ -3,7 +3,7 @@ import MainWindowSheetsFeature
 import SimControlDomain
 import Testing
 
-@Suite
+@Suite("MainWindowSheetsFeatureSmokeTests")
 struct MainWindowSheetsFeatureSmokeTests {
   @Test func modelsAndViewsCanBeConstructedAcrossModules() {
     let runtime = SimulatorRuntime(

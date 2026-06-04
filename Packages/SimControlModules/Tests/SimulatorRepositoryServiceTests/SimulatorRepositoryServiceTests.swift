@@ -1,7 +1,7 @@
 import SimulatorRepositoryService
 import Testing
 
-@Suite
+@Suite("SimulatorRepositoryServiceSmokeTests")
 struct SimulatorRepositoryServiceSmokeTests {
   @Test func repositoryCanBeConstructedAcrossModules() {
     _ = SimulatorRepository()

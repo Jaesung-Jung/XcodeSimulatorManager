@@ -3,14 +3,8 @@ import SimControlClients
 
 public extension UserSettingsClient {
   /// Creates a live user settings client backed by UserDefaults.
-  static func live(
-    userDefaults: UserDefaults = .standard,
-    key: String = "com.js.simctl.userSettings"
-  ) -> Self {
-    let storage = UserSettingsStorage(
-      userDefaults: userDefaults,
-      key: key
-    )
+  static func live(userDefaults: UserDefaults = .standard, key: String = "com.js.simctl.userSettings") -> Self {
+    let storage = UserSettingsStorage(userDefaults: userDefaults, key: key)
 
     return Self(
       load: {
