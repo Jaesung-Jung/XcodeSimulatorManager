@@ -20,14 +20,29 @@ public struct AppContainerScanner {
 
   let fileManager: FileManager
   let hidesSystemApps: Bool
+  let iconCacheRootPath: String?
 
   /// Creates an app container scanner.
   public init(
     fileManager: FileManager = .default,
     hidesSystemApps: Bool = false
   ) {
+    self.init(
+      fileManager: fileManager,
+      hidesSystemApps: hidesSystemApps,
+      iconCacheRoot: nil
+    )
+  }
+
+  /// Creates an app container scanner.
+  public init(
+    fileManager: FileManager = .default,
+    hidesSystemApps: Bool = false,
+    iconCacheRoot: URL?
+  ) {
     self.fileManager = fileManager
     self.hidesSystemApps = hidesSystemApps
+    self.iconCacheRootPath = (iconCacheRoot ?? Self.defaultIconCacheRoot())?.path
   }
 
   /// Scans a simulator device for user, app group, database, and runtime system app containers.
@@ -79,5 +94,12 @@ public struct AppContainerScanner {
       apps: uniqued(apps + systemApps).sorted(by: installedAppSort),
       warnings: warnings
     )
+  }
+}
+
+extension AppContainerScanner {
+  static func defaultIconCacheRoot() -> URL? {
+    FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?
+      .appendingPathComponent("SimControl/AppIcons", isDirectory: true)
   }
 }

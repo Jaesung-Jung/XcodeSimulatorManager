@@ -6,6 +6,7 @@ import SwiftUI
 extension InstalledAppsView {
   struct InstalledAppList<SelectedAppActions: View>: View {
     let apps: [InstalledApp]
+    var platform: SimulatorPlatform?
     let selectedAppID: String?
     let pinnedAppIDs: Set<String>
     let selectedAppActions: (InstalledApp) -> SelectedAppActions
@@ -20,6 +21,7 @@ extension InstalledAppsView {
           } label: {
             AppRow(
               app: app,
+              platform: platform,
               isSelected: app.id == selectedAppID,
               isPinned: pinnedAppIDs.contains(app.id),
               onPin: {
@@ -48,12 +50,14 @@ extension InstalledAppsView {
 extension InstalledAppsView.InstalledAppList where SelectedAppActions == EmptyView {
   init(
     apps: [InstalledApp],
+    platform: SimulatorPlatform? = nil,
     selectedAppID: String?,
     pinnedAppIDs: Set<String>,
     onSelection: @escaping (String) -> Void,
     onPin: @escaping (String) -> Void
   ) {
     self.apps = apps
+    self.platform = platform
     self.selectedAppID = selectedAppID
     self.pinnedAppIDs = pinnedAppIDs
     self.selectedAppActions = { _ in EmptyView() }
@@ -105,6 +109,7 @@ extension InstalledAppsView.InstalledAppList where SelectedAppActions == EmptyVi
 extension InstalledAppsView {
   struct AppRow: View {
     let app: InstalledApp
+    var platform: SimulatorPlatform?
     let isSelected: Bool
     let isPinned: Bool
     let onPin: () -> Void
@@ -124,7 +129,7 @@ extension InstalledAppsView {
 
     var body: some View {
       HStack(spacing: 10) {
-        AppIconView(iconPath: app.iconPath)
+        AppIconView(iconPath: app.iconPath, platform: platform)
 
         VStack(alignment: .leading, spacing: 3) {
           Text(app.displayName)

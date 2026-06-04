@@ -78,6 +78,7 @@ extension InstalledAppsView {
     private func appList(_ apps: [InstalledApp]) -> some View {
       InstalledAppList(
         apps: apps,
+        platform: store.device?.platform,
         selectedAppID: store.selectedAppID,
         pinnedAppIDs: store.filters.pinnedAppIDs,
         selectedAppActions: { app in

@@ -82,7 +82,7 @@ extension AppContainerScanner {
       displayName: (info["CFBundleDisplayName"] as? String) ?? (info["CFBundleName"] as? String),
       version: info["CFBundleShortVersionString"] as? String,
       build: info["CFBundleVersion"] as? String,
-      iconPath: iconPath(in: appBundle, info: info),
+      iconPath: iconPath(in: appBundle, info: info, device: device),
       isHiddenSystemApp: isHiddenSystemApp(info: info),
       appGroupIDs: appGroupIDs(in: appBundle, device: device, warnings: &warnings)
     )

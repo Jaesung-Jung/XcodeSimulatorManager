@@ -100,6 +100,14 @@ struct InstalledAppsFeatureTests {
     _ = InstalledAppsView.AppIconView(iconPath: nil)
   }
 
+  @Test func appIconShapeUsesCircleForWatchAndVisionPlatforms() {
+    #expect(InstalledAppsView.AppIconView.iconShapeKind(for: .watchOS) == .circle)
+    #expect(InstalledAppsView.AppIconView.iconShapeKind(for: .visionOS) == .circle)
+    #expect(InstalledAppsView.AppIconView.iconShapeKind(for: .iOS) == .roundedRectangle)
+    #expect(InstalledAppsView.AppIconView.iconShapeKind(for: .tvOS) == .roundedRectangle)
+    #expect(InstalledAppsView.AppIconView.iconShapeKind(for: nil) == .roundedRectangle)
+  }
+
   @Test func appListCanRenderSelectedAppActionsInline() {
     let app = InstalledApp(
       id: "app-1",

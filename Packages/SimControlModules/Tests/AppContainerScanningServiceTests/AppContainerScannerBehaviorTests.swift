@@ -1,3 +1,4 @@
+import CoreGraphics
 import Foundation
 import SimControlDomain
 import Testing
@@ -89,6 +90,57 @@ struct AppContainerScannerTests {
         path: appGroupContainer.resolvingSymlinksInPath()
       )
     ])
+  }
+
+  @Test func resolvesAssetCatalogIconIntoCachePath() throws {
+    let temporaryDirectory = try TemporaryDirectory()
+    let dataPath = temporaryDirectory.url.appendingPathComponent("DeviceData", isDirectory: true)
+    let iconCacheRoot = temporaryDirectory.url.appendingPathComponent("IconCache", isDirectory: true)
+    let bundleContainer = dataPath.appendingPathComponent(
+      "Containers/Bundle/Application/BUNDLE-1",
+      isDirectory: true
+    )
+    let appBundle = bundleContainer.appendingPathComponent("TVSettings.app", isDirectory: true)
+
+    try createDirectory(appBundle)
+    try createDirectory(dataPath.appendingPathComponent("Containers/Data/Application", isDirectory: true))
+    try createDirectory(dataPath.appendingPathComponent("Containers/Shared/AppGroup", isDirectory: true))
+    try writeMetadata(bundleID: "com.apple.TVSettings", to: bundleContainer)
+    try writeInfoPlist(
+      [
+        "CFBundleIdentifier": "com.apple.TVSettings",
+        "CFBundleDisplayName": "TVSettings",
+        "CFBundleIcons": [
+          "CFBundlePrimaryIcon": "Settings-ATV-Icon"
+        ]
+      ],
+      to: appBundle
+    )
+    try writeAssetCatalog(named: "Settings-ATV-Icon", to: appBundle)
+
+    let expectedImage = try #require(makeIconImage())
+    let previousLoaderOverride = AppContainerScanner.assetCatalogIconLoaderOverride
+    AppContainerScanner.assetCatalogIconLoaderOverride = { assetsURL, explicitNames, preferredTerms, deviceIdiom in
+      #expect(
+        assetsURL.resolvingSymlinksInPath()
+          == appBundle.appendingPathComponent("Assets.car").resolvingSymlinksInPath()
+      )
+      #expect(explicitNames.contains("Settings-ATV-Icon"))
+      #expect(preferredTerms.contains("TVSettings"))
+      #expect(deviceIdiom == 1)
+      return ("Settings-ATV-Icon", expectedImage)
+    }
+    defer {
+      AppContainerScanner.assetCatalogIconLoaderOverride = previousLoaderOverride
+    }
+    let scanner = AppContainerScanner(iconCacheRoot: iconCacheRoot)
+    let result = scanner.scanInstalledApps(for: makeDevice(dataPath: dataPath))
+
+    let app = try #require(result.apps.first)
+    let resolvedIconPath = try #require(app.iconPath)
+    #expect(resolvedIconPath.path.hasPrefix(iconCacheRoot.path))
+    #expect(resolvedIconPath.pathExtension == "png")
+    #expect(FileManager.default.fileExists(atPath: resolvedIconPath.path))
   }
 
   @Test func includesSystemAppsAndMarksThemByDefault() throws {
@@ -524,6 +576,10 @@ extension AppContainerScannerTests {
     )
   }
 
+  private func writeAssetCatalog(named assetName: String, to appBundle: URL) throws {
+    try Data(assetName.utf8).write(to: appBundle.appendingPathComponent("Assets.car"))
+  }
+
   private func writePropertyList(_ values: [String: Any], to url: URL) throws {
     let data = try PropertyListSerialization.data(
       fromPropertyList: values,
@@ -531,6 +587,23 @@ extension AppContainerScannerTests {
       options: 0
     )
     try data.write(to: url)
+  }
+
+  private func makeIconImage() -> CGImage? {
+    guard let context = CGContext(
+      data: nil,
+      width: 1,
+      height: 1,
+      bitsPerComponent: 8,
+      bytesPerRow: 4,
+      space: CGColorSpaceCreateDeviceRGB(),
+      bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+    ) else {
+      return nil
+    }
+    context.setFillColor(CGColor(red: 1, green: 0, blue: 0, alpha: 1))
+    context.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
+    return context.makeImage()
   }
 
   private func directorySize(_ url: URL) throws -> Int64 {

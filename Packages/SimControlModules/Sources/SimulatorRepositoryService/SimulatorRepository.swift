@@ -18,7 +18,26 @@ public actor SimulatorRepository {
   /// Creates a simulator repository backed by concrete infrastructure services.
   public init(
     coreSimulatorService: CoreSimulatorService = CoreSimulatorService(),
-    appContainerScanner: AppContainerScanner = AppContainerScanner(),
+    now: @escaping () -> Date = Date.init
+  ) {
+    self.init(
+      now: now,
+      selectedXcodePath: {
+        await coreSimulatorService.selectedXcodePath()
+      },
+      list: {
+        await coreSimulatorService.list()
+      },
+      installedApps: { device, runtimeRoot in
+        AppContainerScanner().scanInstalledApps(for: device, runtimeRoot: runtimeRoot)
+      }
+    )
+  }
+
+  /// Creates a simulator repository backed by concrete infrastructure services.
+  public init(
+    coreSimulatorService: CoreSimulatorService = CoreSimulatorService(),
+    appContainerScanner: AppContainerScanner,
     now: @escaping () -> Date = Date.init
   ) {
     self.init(
