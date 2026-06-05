@@ -1,0 +1,80 @@
+{
+  "fill" : {
+    "automatic-gradient" : "gray:0.04784,1.00000"
+  },
+  "groups" : [
+    {
+      "blur-material" : 0.5,
+      "hidden" : false,
+      "layers" : [
+        {
+          "image-name" : "iphone.png",
+          "name" : "iphone",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              -804.4732142857144,
+              183.6142857142861
+            ]
+          }
+        }
+      ],
+      "position" : {
+        "scale" : 0.35,
+        "translation-in-points" : [
+          0,
+          0
+        ]
+      },
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.3
+      },
+      "specular" : true,
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    },
+    {
+      "blur-material" : null,
+      "layers" : [
+        {
+          "fill" : {
+            "solid" : "gray:0.80201,1.00000"
+          },
+          "image-name" : "ipad.png",
+          "name" : "ipad",
+          "position" : {
+            "scale" : 1,
+            "translation-in-points" : [
+              97.14912280701776,
+              0
+            ]
+          }
+        }
+      ],
+      "position" : {
+        "scale" : 0.57,
+        "translation-in-points" : [
+          0,
+          0
+        ]
+      },
+      "shadow" : {
+        "kind" : "layer-color",
+        "opacity" : 0.3
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}
