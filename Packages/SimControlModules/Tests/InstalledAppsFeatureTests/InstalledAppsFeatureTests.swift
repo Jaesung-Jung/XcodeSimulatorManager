@@ -48,6 +48,21 @@ struct InstalledAppsFeatureTests {
     }
   }
 
+  @Test func selectedAppRowSelectionPayloadClearsSelection() {
+    #expect(
+      InstalledAppsView.InstalledAppList<EmptyView>.selectionID(
+        for: "app-1",
+        selectedAppID: "app-1"
+      ) == nil
+    )
+    #expect(
+      InstalledAppsView.InstalledAppList<EmptyView>.selectionID(
+        for: "app-2",
+        selectedAppID: "app-1"
+      ) == "app-2"
+    )
+  }
+
   @Test func showHiddenSystemAppsChangedUpdatesFilters() async {
     let store = TestStore(initialState: InstalledAppsFeature.State()) {
       InstalledAppsFeature()

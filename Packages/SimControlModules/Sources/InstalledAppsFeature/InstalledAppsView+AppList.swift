@@ -11,14 +11,18 @@ extension InstalledAppsView {
     let selectedAppID: String?
     let pinnedAppIDs: Set<String>
     let selectedAppActions: (InstalledApp) -> SelectedAppActions
-    let onSelection: (String) -> Void
+    let onSelection: (String?) -> Void
     let onPin: (String) -> Void
+
+    static func selectionID(for appID: String, selectedAppID: String?) -> String? {
+      appID == selectedAppID ? nil : appID
+    }
 
     var body: some View {
       VStack(spacing: 0) {
         ForEach(apps) { app in
           Button {
-            onSelection(app.id)
+            onSelection(Self.selectionID(for: app.id, selectedAppID: selectedAppID))
           } label: {
             AppRow(
               app: app,
@@ -56,7 +60,7 @@ extension InstalledAppsView.InstalledAppList where SelectedAppActions == EmptyVi
     deviceTypeID: String? = nil,
     selectedAppID: String?,
     pinnedAppIDs: Set<String>,
-    onSelection: @escaping (String) -> Void,
+    onSelection: @escaping (String?) -> Void,
     onPin: @escaping (String) -> Void
   ) {
     self.apps = apps
@@ -166,13 +170,18 @@ extension InstalledAppsView {
 
         AppRowMetadata(
           app: app,
-          isSelected: isSelected,
           isPinned: isPinned,
           onPin: onPin
         )
       }
       .padding(10)
       .contentShape(Rectangle())
+      .background {
+        RoundedRectangle(cornerRadius: 8)
+          .fill(.quaternary)
+          .padding(4)
+          .opacity(isSelected ? 1 : 0)
+      }
       .accessibilityElement(children: .combine)
     }
   }
@@ -181,7 +190,6 @@ extension InstalledAppsView {
 extension InstalledAppsView {
   struct AppRowMetadata: View {
     let app: InstalledApp
-    let isSelected: Bool
     let isPinned: Bool
     let onPin: () -> Void
 
@@ -196,12 +204,6 @@ extension InstalledAppsView {
     var body: some View {
       VStack(alignment: .trailing, spacing: 6) {
         HStack(spacing: 8) {
-          if isSelected {
-            Image(systemName: "checkmark")
-              .foregroundStyle(.tint)
-              .accessibilityHidden(true)
-          }
-
           Button {
             onPin()
           } label: {
