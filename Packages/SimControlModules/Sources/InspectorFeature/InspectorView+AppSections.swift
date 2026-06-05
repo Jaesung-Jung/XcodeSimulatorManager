@@ -46,6 +46,32 @@ extension InspectorView {
   }
 }
 
+// MARK: - InspectorView.AppGroupsSection
+
+extension InspectorView {
+  struct AppGroupsSection: View {
+    let store: StoreOf<InspectorFeature>
+    let selectedApp: InstalledApp
+
+    var body: some View {
+      InspectorSection("App Groups") {
+        ForEach(selectedApp.appGroups) { appGroup in
+          FieldRow(
+            title: LocalizedStringKey(appGroup.groupID),
+            value: appGroup.path.path,
+            onOpen: {
+              store.send(.openAppGroupContainerButtonTapped(selectedApp.id, appGroup.groupID))
+            },
+            onCopy: {
+              store.send(.copyAppGroupContainerButtonTapped(selectedApp.id, appGroup.groupID))
+            }
+          )
+        }
+      }
+    }
+  }
+}
+
 // MARK: - InspectorView.SelectedAppSection Preview
 
 #if DEBUG
@@ -91,29 +117,3 @@ extension InspectorView {
 }
 
 #endif
-
-// MARK: - InspectorView.AppGroupsSection
-
-extension InspectorView {
-  struct AppGroupsSection: View {
-    let store: StoreOf<InspectorFeature>
-    let selectedApp: InstalledApp
-
-    var body: some View {
-      InspectorSection("App Groups") {
-        ForEach(selectedApp.appGroups) { appGroup in
-          FieldRow(
-            title: LocalizedStringKey(appGroup.groupID),
-            value: appGroup.path.path,
-            onOpen: {
-              store.send(.openAppGroupContainerButtonTapped(selectedApp.id, appGroup.groupID))
-            },
-            onCopy: {
-              store.send(.copyAppGroupContainerButtonTapped(selectedApp.id, appGroup.groupID))
-            }
-          )
-        }
-      }
-    }
-  }
-}

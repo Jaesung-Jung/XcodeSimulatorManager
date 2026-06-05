@@ -25,30 +25,6 @@ extension InstalledAppsView {
   }
 }
 
-// MARK: - InstalledAppsView.ActionButtonLabel Preview
-
-#if DEBUG
-
-#Preview {
-  VStack(spacing: 12) {
-    InstalledAppsView.ActionButtonLabel(
-      title: "Launch",
-      systemImage: "play.fill",
-      isRunning: false
-    )
-
-    InstalledAppsView.DisabledPlaceholder(
-      title: "App Inventory Not Loaded",
-      message: "Installed app scanning is not available in this phase.",
-      systemImage: "app.badge"
-    )
-  }
-  .padding(20)
-  .frame(width: 420)
-}
-
-#endif
-
 extension InstalledAppsView {
   struct DisabledPlaceholder: View {
     let title: LocalizedStringKey
@@ -80,3 +56,27 @@ extension InstalledAppsView {
     }
   }
 }
+
+// MARK: - InstalledAppsView.ActionButtonLabel Preview
+
+#if DEBUG
+
+#Preview {
+  VStack(spacing: 12) {
+    InstalledAppsView.ActionButtonLabel(
+      title: "Launch",
+      systemImage: "play.fill",
+      isRunning: false
+    )
+
+    InstalledAppsView.DisabledPlaceholder(
+      title: "App Inventory Not Loaded",
+      message: "Installed app scanning is not available in this phase.",
+      systemImage: "app.badge"
+    )
+  }
+  .padding(20)
+  .frame(width: 420)
+}
+
+#endif

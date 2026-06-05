@@ -74,46 +74,6 @@ extension InstalledAppsView.InstalledAppList where SelectedAppActions == EmptyVi
   }
 }
 
-// MARK: - InstalledAppList Preview
-
-#if DEBUG
-
-#Preview {
-  let app = InstalledApp(
-    id: "PREVIEW-DEVICE-1:com.example.preview",
-    bundleID: "com.example.preview",
-    displayName: "Preview App",
-    version: "1.0",
-    build: "100",
-    deviceID: "PREVIEW-DEVICE-1",
-    bundleContainer: URL(fileURLWithPath: "/tmp/PreviewApp/Bundle"),
-    dataContainer: URL(fileURLWithPath: "/tmp/PreviewApp/Data"),
-    appBundlePath: URL(fileURLWithPath: "/tmp/PreviewApp/Bundle/Preview.app"),
-    appGroups: [
-      AppGroupContainer(
-        id: "group.com.example.preview",
-        groupID: "group.com.example.preview",
-        path: URL(fileURLWithPath: "/tmp/PreviewApp/Groups/group.com.example.preview")
-      )
-    ],
-    iconPath: nil,
-    databaseFiles: [URL(fileURLWithPath: "/tmp/PreviewApp/Data/database.sqlite")],
-    dataContainerSize: 24_000_000
-  )
-
-  InstalledAppsView.InstalledAppList(
-    apps: [app],
-    selectedAppID: app.id,
-    pinnedAppIDs: [app.id],
-    onSelection: { _ in },
-    onPin: { _ in }
-  )
-  .padding(20)
-  .frame(width: 420)
-}
-
-#endif
-
 extension InstalledAppsView {
   struct AppRow: View {
     let app: InstalledApp
@@ -238,3 +198,43 @@ extension InstalledAppsView {
     }
   }
 }
+
+// MARK: - InstalledAppList Preview
+
+#if DEBUG
+
+#Preview {
+  let app = InstalledApp(
+    id: "PREVIEW-DEVICE-1:com.example.preview",
+    bundleID: "com.example.preview",
+    displayName: "Preview App",
+    version: "1.0",
+    build: "100",
+    deviceID: "PREVIEW-DEVICE-1",
+    bundleContainer: URL(fileURLWithPath: "/tmp/PreviewApp/Bundle"),
+    dataContainer: URL(fileURLWithPath: "/tmp/PreviewApp/Data"),
+    appBundlePath: URL(fileURLWithPath: "/tmp/PreviewApp/Bundle/Preview.app"),
+    appGroups: [
+      AppGroupContainer(
+        id: "group.com.example.preview",
+        groupID: "group.com.example.preview",
+        path: URL(fileURLWithPath: "/tmp/PreviewApp/Groups/group.com.example.preview")
+      )
+    ],
+    iconPath: nil,
+    databaseFiles: [URL(fileURLWithPath: "/tmp/PreviewApp/Data/database.sqlite")],
+    dataContainerSize: 24_000_000
+  )
+
+  InstalledAppsView.InstalledAppList(
+    apps: [app],
+    selectedAppID: app.id,
+    pinnedAppIDs: [app.id],
+    onSelection: { _ in },
+    onPin: { _ in }
+  )
+  .padding(20)
+  .frame(width: 420)
+}
+
+#endif

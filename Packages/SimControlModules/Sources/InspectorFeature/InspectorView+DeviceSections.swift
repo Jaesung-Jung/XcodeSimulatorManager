@@ -46,6 +46,40 @@ extension InspectorView {
   }
 }
 
+// MARK: - InspectorView.DeviceFoldersSection
+
+extension InspectorView {
+  struct DeviceFoldersSection: View {
+    let store: StoreOf<InspectorFeature>
+    let device: SimulatorDevice
+
+    var body: some View {
+      InspectorSection("Folders") {
+        FieldRow(
+          title: "Data",
+          value: device.dataPath?.path,
+          onOpen: {
+            store.send(.openDeviceDataFolderButtonTapped(device.id))
+          },
+          onCopy: {
+            store.send(.copyDeviceDataPathButtonTapped(device.id))
+          }
+        )
+        FieldRow(
+          title: "Logs",
+          value: device.logPath?.path,
+          onOpen: {
+            store.send(.openDeviceLogFolderButtonTapped(device.id))
+          },
+          onCopy: {
+            store.send(.copyDeviceLogPathButtonTapped(device.id))
+          }
+        )
+      }
+    }
+  }
+}
+
 // MARK: - InspectorView.DeviceSection Preview
 
 #if DEBUG
@@ -99,37 +133,3 @@ extension InspectorView {
 }
 
 #endif
-
-// MARK: - InspectorView.DeviceFoldersSection
-
-extension InspectorView {
-  struct DeviceFoldersSection: View {
-    let store: StoreOf<InspectorFeature>
-    let device: SimulatorDevice
-
-    var body: some View {
-      InspectorSection("Folders") {
-        FieldRow(
-          title: "Data",
-          value: device.dataPath?.path,
-          onOpen: {
-            store.send(.openDeviceDataFolderButtonTapped(device.id))
-          },
-          onCopy: {
-            store.send(.copyDeviceDataPathButtonTapped(device.id))
-          }
-        )
-        FieldRow(
-          title: "Logs",
-          value: device.logPath?.path,
-          onOpen: {
-            store.send(.openDeviceLogFolderButtonTapped(device.id))
-          },
-          onCopy: {
-            store.send(.copyDeviceLogPathButtonTapped(device.id))
-          }
-        )
-      }
-    }
-  }
-}
