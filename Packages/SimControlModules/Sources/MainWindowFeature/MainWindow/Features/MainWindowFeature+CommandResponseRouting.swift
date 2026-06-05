@@ -79,13 +79,9 @@ extension MainWindowFeature {
 
 extension MainWindowFeature {
   func routePathActionResults(
-    _ results: [CommandResult],
+    _: [CommandResult],
     into state: inout State
   ) -> Effect<Action> {
-    for result in results {
-      state.workspace.appendCommandResult(result)
-    }
-
     return .none
   }
 }
@@ -95,16 +91,12 @@ extension MainWindowFeature {
 extension MainWindowFeature {
   func routeDeveloperToolCommandResults(
     _ deviceCommandState: DeviceCommandState,
-    _ results: [CommandResult],
+    _: [CommandResult],
     refreshAfterward: Bool,
     into state: inout State
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == deviceCommandState else {
       return .none
-    }
-
-    for result in results {
-      state.workspace.appendCommandResult(result)
     }
 
     if refreshAfterward {
@@ -127,15 +119,12 @@ extension MainWindowFeature {
       return .none
     }
 
-    let commandResults = state.workspace.commandResults + commandResults(from: result)
-
     if let snapshot = result.snapshot, result.diagnostic == nil {
       state.sidebar.snapshot = snapshot
       state.sidebar.refreshState = .idle
       state.workspace.applySnapshot(
         snapshot,
         refreshState: .idle,
-        commandResults: commandResults,
         preferredSelectedDeviceID: preferredSelectedDeviceID
       )
     } else {
@@ -143,10 +132,7 @@ extension MainWindowFeature {
         diagnostic: result.diagnostic ?? "Unable to refresh simulator inventory."
       )
       state.sidebar.refreshState = refreshState
-      state.workspace.applyRefreshFailure(
-        refreshState,
-        commandResults: commandResults
-      )
+      state.workspace.applyRefreshFailure(refreshState)
     }
 
     state.workspace.setDeviceCommandState(nil)
@@ -159,14 +145,13 @@ extension MainWindowFeature {
 extension MainWindowFeature {
   func routeDeviceCommandResponse(
     _ deviceCommandState: DeviceCommandState,
-    _ result: CommandResult,
+    _: CommandResult,
     into state: inout State
   ) -> Effect<Action> {
     guard state.workspace.deviceCommandState == deviceCommandState else {
       return .none
     }
 
-    state.workspace.appendCommandResult(result)
     state.sidebar.refreshState = .refreshing
     state.workspace.setRefreshState(.refreshing)
     return .none
@@ -182,15 +167,12 @@ extension MainWindowFeature {
       return .none
     }
 
-    let commandResults = state.workspace.commandResults + commandResults(from: result)
-
     if let snapshot = result.snapshot, result.diagnostic == nil {
       state.sidebar.snapshot = snapshot
       state.sidebar.refreshState = .idle
       state.workspace.applySnapshot(
         snapshot,
         refreshState: .idle,
-        commandResults: commandResults,
         preferredSelectedDeviceID: preferredSelectedDeviceID
       )
     } else {
@@ -198,10 +180,7 @@ extension MainWindowFeature {
         diagnostic: result.diagnostic ?? "Unable to refresh simulator inventory."
       )
       state.sidebar.refreshState = refreshState
-      state.workspace.applyRefreshFailure(
-        refreshState,
-        commandResults: commandResults
-      )
+      state.workspace.applyRefreshFailure(refreshState)
     }
 
     state.workspace.setDeviceCommandState(nil)
@@ -214,16 +193,13 @@ extension MainWindowFeature {
 extension MainWindowFeature {
   func routeAppCommandCommandsCompleted(
     _ appCommandState: AppCommandState,
-    _ commandResults: [CommandResult],
+    _: [CommandResult],
     into state: inout State
   ) -> Effect<Action> {
     guard state.workspace.appCommandState == appCommandState else {
       return .none
     }
 
-    for commandResult in commandResults {
-      state.workspace.appendCommandResult(commandResult)
-    }
     state.sidebar.refreshState = .refreshing
     state.workspace.setRefreshState(.refreshing)
     return .none
@@ -240,15 +216,12 @@ extension MainWindowFeature {
       return .none
     }
 
-    let commandResults = state.workspace.commandResults + commandResults(from: result)
-
     if let snapshot = result.snapshot, result.diagnostic == nil {
       state.sidebar.snapshot = snapshot
       state.sidebar.refreshState = .idle
       state.workspace.applySnapshot(
         snapshot,
         refreshState: .idle,
-        commandResults: commandResults,
         preferredSelectedDeviceID: preferredSelectedDeviceID,
         preferredSelectedAppID: preferredSelectedAppID
       )
@@ -257,10 +230,7 @@ extension MainWindowFeature {
         diagnostic: result.diagnostic ?? "Unable to refresh simulator inventory."
       )
       state.sidebar.refreshState = refreshState
-      state.workspace.applyRefreshFailure(
-        refreshState,
-        commandResults: commandResults
-      )
+      state.workspace.applyRefreshFailure(refreshState)
     }
 
     state.workspace.setAppCommandState(nil)

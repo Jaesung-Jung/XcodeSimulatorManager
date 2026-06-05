@@ -9,7 +9,7 @@ import Testing
 @MainActor
 struct MainWindowFeatureDeveloperToolCommandTests {
   @Test
-  func openDeepLinkRecordsCommandResultWithoutRefreshing() async {
+  func openDeepLinkCompletesWithoutRefreshing() async {
     let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
     let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
     let openResult = MainWindowTestFixtures.makeCommandResult(
@@ -62,7 +62,6 @@ struct MainWindowFeatureDeveloperToolCommandTests {
         refreshAfterward: false
       )
     ) {
-      $0.workspace.appendCommandResult(openResult)
       $0.workspace.setDeviceCommandState(nil)
     }
 
@@ -138,8 +137,6 @@ struct MainWindowFeatureDeveloperToolCommandTests {
         refreshAfterward: true
       )
     ) {
-      $0.workspace.appendCommandResult(bootResult)
-      $0.workspace.appendCommandResult(setLocationResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -155,12 +152,6 @@ struct MainWindowFeatureDeveloperToolCommandTests {
       $0.workspace.applySnapshot(
         refreshedSnapshot,
         refreshState: .idle,
-        commandResults: [
-          bootResult,
-          setLocationResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ],
         preferredSelectedDeviceID: shutdownDevice.id
       )
       $0.workspace.setDeviceCommandState(nil)
@@ -175,7 +166,7 @@ struct MainWindowFeatureDeveloperToolCommandTests {
   }
 
   @Test
-  func statusBarOverrideOnBootedDeviceRecordsCommandResultWithoutRefreshing() async {
+  func statusBarOverrideOnBootedDeviceCompletesWithoutRefreshing() async {
     let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
     let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
     let commandResult = MainWindowTestFixtures.makeCommandResult(
@@ -232,7 +223,6 @@ struct MainWindowFeatureDeveloperToolCommandTests {
         refreshAfterward: false
       )
     ) {
-      $0.workspace.appendCommandResult(commandResult)
       $0.workspace.setDeviceCommandState(nil)
     }
 
@@ -246,7 +236,7 @@ struct MainWindowFeatureDeveloperToolCommandTests {
   }
 
   @Test
-  func clearStatusBarOverrideOnBootedDeviceRecordsCommandResultWithoutRefreshing() async {
+  func clearStatusBarOverrideOnBootedDeviceCompletesWithoutRefreshing() async {
     let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
     let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
     let commandResult = MainWindowTestFixtures.makeCommandResult(
@@ -293,7 +283,6 @@ struct MainWindowFeatureDeveloperToolCommandTests {
         refreshAfterward: false
       )
     ) {
-      $0.workspace.appendCommandResult(commandResult)
       $0.workspace.setDeviceCommandState(nil)
     }
 

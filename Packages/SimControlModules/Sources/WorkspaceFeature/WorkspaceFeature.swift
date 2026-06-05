@@ -21,7 +21,6 @@ public struct WorkspaceFeature {
     public var deviceList: DeviceListFeature.State
     public var deviceDetail: DeviceDetailFeature.State
     public var inspector: InspectorFeature.State
-    public var commandResults: [CommandResult]
     public var installedAppsAvailability: InstalledAppsAvailability
     public var deviceCommandState: DeviceCommandState?
     public var appCommandState: AppCommandState?
@@ -33,7 +32,6 @@ public struct WorkspaceFeature {
       refreshState: InventoryRefreshState = .idle,
       selectedDeviceID: String? = nil,
       selectedAppID: String? = nil,
-      commandResults: [CommandResult] = [],
       installedAppsAvailability: InstalledAppsAvailability? = nil,
       deviceCommandState: DeviceCommandState? = nil,
       appCommandState: AppCommandState? = nil,
@@ -46,7 +44,6 @@ public struct WorkspaceFeature {
       self.deviceList = DeviceListFeature.State()
       self.deviceDetail = DeviceDetailFeature.State()
       self.inspector = InspectorFeature.State(snapshot: snapshot)
-      self.commandResults = commandResults
       self.installedAppsAvailability = installedAppsAvailability ?? (snapshot == nil ? .notLoaded : .loaded)
       self.deviceCommandState = deviceCommandState
       self.appCommandState = appCommandState
@@ -216,19 +213,15 @@ public struct WorkspaceFeature {
 
     /// Applies a refresh failure while preserving the last successful snapshot.
     public mutating func applyRefreshFailure(
-      _ refreshState: InventoryRefreshState,
-      commandResults: [CommandResult]
+      _ refreshState: InventoryRefreshState
     ) {
       self.refreshState = refreshState
-      self.commandResults = commandResults
-      deviceDetail.commandResults = commandResults
     }
 
     /// Applies a refreshed snapshot and reconciles device and app selection.
     public mutating func applySnapshot(
       _ snapshot: SimulatorSnapshot,
       refreshState: InventoryRefreshState,
-      commandResults: [CommandResult],
       preferredSelectedDeviceID: String? = nil,
       preferredSelectedAppID: String? = nil
     ) {
@@ -246,16 +239,9 @@ public struct WorkspaceFeature {
       )
 
       self.refreshState = refreshState
-      self.commandResults = commandResults
       installedAppsAvailability = .loaded
       rebuildDeviceList(selectedDeviceID: selection?.deviceID)
       rebuildDetail(selectedAppID: selection?.appID)
-    }
-
-    /// Appends a command result and propagates it to detail state.
-    public mutating func appendCommandResult(_ result: CommandResult) {
-      commandResults.append(result)
-      deviceDetail.commandResults = commandResults
     }
 
     /// Selects a visible device and clears app selection when the device changes.
@@ -334,7 +320,6 @@ public struct WorkspaceFeature {
           allAppsCount: allInstalledApps.count,
           allSystemAppsCount: allInstalledApps.filter(\.isSystemApp).count
         ),
-        commandResults: commandResults,
         deviceCommandState: deviceCommandState,
         appCommandState: appCommandState,
         isOpeningSimulatorApp: isOpeningSimulatorApp,

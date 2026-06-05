@@ -75,7 +75,6 @@ struct MainWindowFeatureDeviceCreationTests {
     }
 
     await store.receive(.deviceCommandResponse(deviceCommandState, createResult)) {
-      $0.workspace.appendCommandResult(createResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -91,11 +90,6 @@ struct MainWindowFeatureDeviceCreationTests {
       $0.workspace.applySnapshot(
         refreshedSnapshot,
         refreshState: .idle,
-        commandResults: [
-          createResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ],
         preferredSelectedDeviceID: createdDevice.id
       )
       $0.workspace.setDeviceCommandState(nil)
@@ -163,7 +157,6 @@ struct MainWindowFeatureDeviceCreationTests {
     }
 
     await store.receive(.deviceCommandResponse(deviceCommandState, cloneResult)) {
-      $0.workspace.appendCommandResult(cloneResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -179,11 +172,6 @@ struct MainWindowFeatureDeviceCreationTests {
       $0.workspace.applySnapshot(
         refreshedSnapshot,
         refreshState: .idle,
-        commandResults: [
-          cloneResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ],
         preferredSelectedDeviceID: clonedDevice.id
       )
       $0.workspace.setDeviceCommandState(nil)
@@ -241,7 +229,6 @@ struct MainWindowFeatureDeviceCreationTests {
     }
 
     await store.receive(.deviceCommandResponse(deviceCommandState, renameResult)) {
-      $0.workspace.appendCommandResult(renameResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -256,12 +243,7 @@ struct MainWindowFeatureDeviceCreationTests {
       $0.sidebar = SidebarFeature.State(snapshot: refreshedSnapshot, refreshState: .idle)
       $0.workspace.applySnapshot(
         refreshedSnapshot,
-        refreshState: .idle,
-        commandResults: [
-          renameResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ]
+        refreshState: .idle
       )
       $0.workspace.setDeviceCommandState(nil)
     }
@@ -394,7 +376,6 @@ struct MainWindowFeatureDeviceCreationTests {
     await recorder.releaseCommand()
 
     await store.receive(.deviceCommandResponse(deviceCommandState, createResult)) {
-      $0.workspace.appendCommandResult(createResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -410,11 +391,6 @@ struct MainWindowFeatureDeviceCreationTests {
       $0.workspace.applySnapshot(
         refreshedSnapshot,
         refreshState: .idle,
-        commandResults: [
-          createResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ],
         preferredSelectedDeviceID: createdDevice.id
       )
       $0.workspace.setDeviceCommandState(nil)

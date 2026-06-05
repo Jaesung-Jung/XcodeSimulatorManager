@@ -41,25 +41,19 @@ extension MainWindowFeature {
       return refresh(&state)
 
     case .refreshResponse(let result):
-      let commandResults = commandResults(from: result)
-
       if let snapshot = result.snapshot, result.diagnostic == nil {
         state.sidebar.snapshot = snapshot
         state.sidebar.refreshState = .idle
         state.workspace.applySnapshot(
           snapshot,
-          refreshState: .idle,
-          commandResults: commandResults
+          refreshState: .idle
         )
       } else {
         let refreshState = InventoryRefreshState.failed(
           diagnostic: result.diagnostic ?? "Unable to refresh simulator inventory."
         )
         state.sidebar.refreshState = refreshState
-        state.workspace.applyRefreshFailure(
-          refreshState,
-          commandResults: commandResults
-        )
+        state.workspace.applyRefreshFailure(refreshState)
       }
 
       return .none
@@ -67,8 +61,7 @@ extension MainWindowFeature {
     case .openSimulatorAppButtonTapped:
       return openSimulatorApp(&state)
 
-    case .openSimulatorAppResponse(let result):
-      state.workspace.appendCommandResult(result)
+    case .openSimulatorAppResponse:
       state.workspace.setOpeningSimulatorApp(false)
       return .none
 
@@ -140,15 +133,4 @@ extension MainWindowFeature {
     return date.timeIntervalSince(lastMenuBarAutoRefreshAttemptAt) >= Self.menuBarAutoRefreshInterval
   }
 
-  func commandResults(
-    from result: SimulatorRefreshResult
-  ) -> [CommandResult] {
-    var results = [result.xcodeCommandResult]
-
-    if let listCommandResult = result.listCommandResult {
-      results.append(listCommandResult)
-    }
-
-    return results
-  }
 }

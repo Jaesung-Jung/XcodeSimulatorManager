@@ -40,7 +40,7 @@ extension WorkspaceView {
       } else {
         EmptyStateView(
           title: "Select a Simulator",
-          message: "Choose a device from the list to inspect its runtime, folders, apps, and recent command results.",
+          message: "Choose a device from the list to inspect its runtime, folders, and apps.",
           systemImage: "sidebar.left"
         )
       }

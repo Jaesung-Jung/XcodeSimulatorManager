@@ -83,8 +83,6 @@ public struct DeviceDetailView: View {
           DeveloperToolsView(
             store: store.scope(state: \.developerTools, action: \.developerTools)
           )
-
-          CommandResultsSection(results: store.commandResults)
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -165,17 +163,6 @@ public struct DeviceDetailView: View {
     databaseFiles: [],
     dataContainerSize: 42_800_000
   )
-  let commandResult = CommandResult(
-    id: "PREVIEW-COMMAND-1",
-    executable: "xcrun",
-    arguments: ["simctl", "launch", device.id, readingApp.bundleID],
-    stdout: "\(readingApp.bundleID): 42810\n",
-    stderr: "",
-    exitCode: 0,
-    duration: 0.38,
-    startedAt: Date(timeIntervalSince1970: 1_778_008_760)
-  )
-
   DeviceDetailView(
     store: Store(
       initialState: DeviceDetailFeature.State(
@@ -188,8 +175,7 @@ public struct DeviceDetailView: View {
           device: device,
           selectedAppID: readingApp.id,
           compatibleInstallTargetCount: 2
-        ),
-        commandResults: [commandResult]
+        )
       )
     ) {
       DeviceDetailFeature()

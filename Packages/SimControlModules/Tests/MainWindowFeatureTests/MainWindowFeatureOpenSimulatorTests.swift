@@ -6,7 +6,7 @@ import Testing
 @MainActor
 struct MainWindowFeatureOpenSimulatorTests {
   @Test
-  func openSimulatorAppRecordsCommandResult() async {
+  func openSimulatorAppClearsRunningStateWithoutRecordingCommandHistory() async {
     let snapshot = MainWindowTestFixtures.makeSnapshot()
     let commandResult = MainWindowTestFixtures.makeCommandResult(
       id: "open-simulator",
@@ -30,7 +30,6 @@ struct MainWindowFeatureOpenSimulatorTests {
     }
 
     await store.receive(.openSimulatorAppResponse(commandResult)) {
-      $0.workspace.appendCommandResult(commandResult)
       $0.workspace.setOpeningSimulatorApp(false)
     }
   }
@@ -66,7 +65,6 @@ struct MainWindowFeatureOpenSimulatorTests {
     await recorder.releaseCommand()
 
     await store.receive(.openSimulatorAppResponse(commandResult)) {
-      $0.workspace.appendCommandResult(commandResult)
       $0.workspace.setOpeningSimulatorApp(false)
     }
   }

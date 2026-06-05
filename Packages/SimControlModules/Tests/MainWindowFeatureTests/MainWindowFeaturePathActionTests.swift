@@ -67,10 +67,7 @@ struct MainWindowFeaturePathActionTests {
 
     await store.send(.workspace(.deviceDetail(.installedApps(.openBundleContainerButtonTapped(app.id)))))
 
-    await store.receive(.pathActionResults([getContainerResult, openResult])) {
-      $0.workspace.appendCommandResult(getContainerResult)
-      $0.workspace.appendCommandResult(openResult)
-    }
+    await store.receive(.pathActionResults([getContainerResult, openResult]))
 
     #expect(await recorder.getContainerCalls() == [
       MainWindowGetAppContainerCall(
@@ -138,10 +135,7 @@ struct MainWindowFeaturePathActionTests {
 
     await store.send(.workspace(.deviceDetail(.installedApps(.openDataContainerButtonTapped(app.id)))))
 
-    await store.receive(.pathActionResults([getContainerResult, openResult])) {
-      $0.workspace.appendCommandResult(getContainerResult)
-      $0.workspace.appendCommandResult(openResult)
-    }
+    await store.receive(.pathActionResults([getContainerResult, openResult]))
 
     #expect(await recorder.openCalls() == [
       MainWindowOpenPathCall(url: dataContainer, label: "app data container")
@@ -208,10 +202,7 @@ struct MainWindowFeaturePathActionTests {
 
     await store.send(.workspace(.deviceDetail(.installedApps(.copyAppGroupContainerButtonTapped(app.id, groupID)))))
 
-    await store.receive(.pathActionResults([getContainerResult, copyResult])) {
-      $0.workspace.appendCommandResult(getContainerResult)
-      $0.workspace.appendCommandResult(copyResult)
-    }
+    await store.receive(.pathActionResults([getContainerResult, copyResult]))
 
     #expect(await recorder.getContainerCalls() == [
       MainWindowGetAppContainerCall(
@@ -280,10 +271,7 @@ struct MainWindowFeaturePathActionTests {
 
     await store.send(.workspace(.deviceDetail(.installedApps(.openDataContainerButtonTapped(app.id)))))
 
-    await store.receive(.pathActionResults([getContainerResult, openResult])) {
-      $0.workspace.appendCommandResult(getContainerResult)
-      $0.workspace.appendCommandResult(openResult)
-    }
+    await store.receive(.pathActionResults([getContainerResult, openResult]))
 
     #expect(await recorder.openCalls() == [
       MainWindowOpenPathCall(url: nil, label: "app data container")
@@ -291,7 +279,7 @@ struct MainWindowFeaturePathActionTests {
   }
 
   @Test
-  func devicePathAndIdentifierActionsRecordResultsWithoutRefreshing() async {
+  func devicePathAndIdentifierActionsCompleteWithoutRefreshing() async {
     let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", state: .booted)
     let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
     let openResult = MainWindowTestFixtures.makeCommandResult(
@@ -334,14 +322,10 @@ struct MainWindowFeaturePathActionTests {
     }
 
     await store.send(.workspace(.deviceDetail(.openDeviceDataFolderButtonTapped(device.id))))
-    await store.receive(.pathActionResults([openResult])) {
-      $0.workspace.appendCommandResult(openResult)
-    }
+    await store.receive(.pathActionResults([openResult]))
 
     await store.send(.workspace(.deviceDetail(.copyDeviceUDIDButtonTapped(device.id))))
-    await store.receive(.pathActionResults([copyResult])) {
-      $0.workspace.appendCommandResult(copyResult)
-    }
+    await store.receive(.pathActionResults([copyResult]))
 
     #expect(await recorder.openCalls() == [
       MainWindowOpenPathCall(url: device.dataPath, label: "device data folder")

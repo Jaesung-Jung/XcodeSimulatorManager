@@ -82,8 +82,6 @@ struct MainWindowFeatureAppCommandTests {
         preferredSelectedAppID: app.id
       )
     ) {
-      $0.workspace.appendCommandResult(bootResult)
-      $0.workspace.appendCommandResult(launchResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -100,12 +98,6 @@ struct MainWindowFeatureAppCommandTests {
       $0.workspace.applySnapshot(
         refreshedSnapshot,
         refreshState: .idle,
-        commandResults: [
-          bootResult,
-          launchResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ],
         preferredSelectedDeviceID: shutdownDevice.id,
         preferredSelectedAppID: app.id
       )
@@ -185,7 +177,6 @@ struct MainWindowFeatureAppCommandTests {
         preferredSelectedAppID: app.id
       )
     ) {
-      $0.workspace.appendCommandResult(failedBootResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -202,11 +193,6 @@ struct MainWindowFeatureAppCommandTests {
       $0.workspace.applySnapshot(
         snapshot,
         refreshState: .idle,
-        commandResults: [
-          failedBootResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ],
         preferredSelectedDeviceID: shutdownDevice.id,
         preferredSelectedAppID: app.id
       )
@@ -287,7 +273,6 @@ struct MainWindowFeatureAppCommandTests {
         preferredSelectedAppID: nil
       )
     ) {
-      $0.workspace.appendCommandResult(uninstallResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -304,11 +289,6 @@ struct MainWindowFeatureAppCommandTests {
       $0.workspace.applySnapshot(
         refreshedSnapshot,
         refreshState: .idle,
-        commandResults: [
-          uninstallResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ],
         preferredSelectedDeviceID: device.id,
         preferredSelectedAppID: nil
       )
@@ -387,7 +367,6 @@ struct MainWindowFeatureAppCommandTests {
         preferredSelectedAppID: app.id
       )
     ) {
-      $0.workspace.appendCommandResult(resetResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -404,11 +383,6 @@ struct MainWindowFeatureAppCommandTests {
       $0.workspace.applySnapshot(
         snapshot,
         refreshState: .idle,
-        commandResults: [
-          resetResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ],
         preferredSelectedDeviceID: device.id,
         preferredSelectedAppID: app.id
       )
@@ -512,9 +486,6 @@ struct MainWindowFeatureAppCommandTests {
         preferredSelectedAppID: targetApp.id
       )
     ) {
-      $0.workspace.appendCommandResult(bootResult)
-      $0.workspace.appendCommandResult(installResult)
-      $0.workspace.appendCommandResult(launchResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -531,13 +502,6 @@ struct MainWindowFeatureAppCommandTests {
       $0.workspace.applySnapshot(
         refreshedSnapshot,
         refreshState: .idle,
-        commandResults: [
-          bootResult,
-          installResult,
-          launchResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ],
         preferredSelectedDeviceID: targetDevice.id,
         preferredSelectedAppID: targetApp.id
       )
@@ -607,7 +571,6 @@ struct MainWindowFeatureAppCommandTests {
         preferredSelectedAppID: app.id
       )
     ) {
-      $0.workspace.appendCommandResult(launchResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -624,11 +587,6 @@ struct MainWindowFeatureAppCommandTests {
       $0.workspace.applySnapshot(
         snapshot,
         refreshState: .idle,
-        commandResults: [
-          launchResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ],
         preferredSelectedDeviceID: device.id,
         preferredSelectedAppID: app.id
       )

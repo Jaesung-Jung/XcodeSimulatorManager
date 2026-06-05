@@ -9,7 +9,7 @@ import WorkspaceFeature
 @MainActor
 struct MainWindowFeatureDeviceLifecycleTests {
   @Test
-  func bootDeviceRecordsCommandResultAndRefreshesSnapshot() async {
+  func bootDeviceRefreshesSnapshot() async {
     let shutdownDevice = MainWindowTestFixtures.makeDevice(
       id: MainWindowTestFixtures.device.id,
       state: .shutdown
@@ -20,10 +20,6 @@ struct MainWindowFeatureDeviceLifecycleTests {
     )
     let initialSnapshot = MainWindowTestFixtures.makeSnapshot(devices: [shutdownDevice])
     let refreshedSnapshot = MainWindowTestFixtures.makeSnapshot(devices: [bootedDevice])
-    let previousResult = MainWindowTestFixtures.makeCommandResult(
-      id: "previous-list",
-      arguments: ["simctl", "list", "-j"]
-    )
     let bootResult = MainWindowTestFixtures.makeCommandResult(
       id: "boot-device",
       arguments: ["simctl", "boot", shutdownDevice.id]
@@ -34,8 +30,7 @@ struct MainWindowFeatureDeviceLifecycleTests {
     let store = TestStore(
       initialState: MainWindowFeature.State(
         snapshot: initialSnapshot,
-        selectedDeviceID: shutdownDevice.id,
-        lastCommandResults: [previousResult]
+        selectedDeviceID: shutdownDevice.id
       )
     ) {
       MainWindowFeature()
@@ -53,7 +48,6 @@ struct MainWindowFeatureDeviceLifecycleTests {
     }
 
     await store.receive(.deviceCommandResponse(deviceCommandState, bootResult)) {
-      $0.workspace.appendCommandResult(bootResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -68,20 +62,14 @@ struct MainWindowFeatureDeviceLifecycleTests {
       $0.sidebar = SidebarFeature.State(snapshot: refreshedSnapshot, refreshState: .idle)
       $0.workspace.applySnapshot(
         refreshedSnapshot,
-        refreshState: .idle,
-        commandResults: [
-          previousResult,
-          bootResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ]
+        refreshState: .idle
       )
       $0.workspace.setDeviceCommandState(nil)
     }
   }
 
   @Test
-  func shutdownDeviceRecordsCommandResultAndRefreshesSnapshot() async {
+  func shutdownDeviceRefreshesSnapshot() async {
     let bootedDevice = MainWindowTestFixtures.makeDevice(
       id: MainWindowTestFixtures.device.id,
       state: .booted
@@ -120,7 +108,6 @@ struct MainWindowFeatureDeviceLifecycleTests {
     }
 
     await store.receive(.deviceCommandResponse(deviceCommandState, shutdownResult)) {
-      $0.workspace.appendCommandResult(shutdownResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -135,12 +122,7 @@ struct MainWindowFeatureDeviceLifecycleTests {
       $0.sidebar = SidebarFeature.State(snapshot: refreshedSnapshot, refreshState: .idle)
       $0.workspace.applySnapshot(
         refreshedSnapshot,
-        refreshState: .idle,
-        commandResults: [
-          shutdownResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ]
+        refreshState: .idle
       )
       $0.workspace.setDeviceCommandState(nil)
     }
@@ -236,7 +218,6 @@ struct MainWindowFeatureDeviceLifecycleTests {
     await recorder.releaseCommand()
 
     await store.receive(.deviceCommandResponse(deviceCommandState, bootResult)) {
-      $0.workspace.appendCommandResult(bootResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -251,19 +232,14 @@ struct MainWindowFeatureDeviceLifecycleTests {
       $0.sidebar = SidebarFeature.State(snapshot: refreshedSnapshot, refreshState: .idle)
       $0.workspace.applySnapshot(
         refreshedSnapshot,
-        refreshState: .idle,
-        commandResults: [
-          bootResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ]
+        refreshState: .idle
       )
       $0.workspace.setDeviceCommandState(nil)
     }
   }
 
   @Test
-  func failedDeviceCommandResultSurvivesFollowUpRefresh() async {
+  func failedDeviceCommandStillRefreshesSnapshot() async {
     let shutdownDevice = MainWindowTestFixtures.makeDevice(
       id: MainWindowTestFixtures.device.id,
       state: .shutdown
@@ -299,7 +275,6 @@ struct MainWindowFeatureDeviceLifecycleTests {
     }
 
     await store.receive(.deviceCommandResponse(deviceCommandState, failedBootResult)) {
-      $0.workspace.appendCommandResult(failedBootResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -314,12 +289,7 @@ struct MainWindowFeatureDeviceLifecycleTests {
       $0.sidebar = SidebarFeature.State(snapshot: snapshot, refreshState: .idle)
       $0.workspace.applySnapshot(
         snapshot,
-        refreshState: .idle,
-        commandResults: [
-          failedBootResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ]
+        refreshState: .idle
       )
       $0.workspace.setDeviceCommandState(nil)
     }

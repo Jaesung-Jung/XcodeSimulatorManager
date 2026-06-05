@@ -59,7 +59,7 @@ struct MainWindowFeatureDeviceManagementTests {
   }
 
   @Test
-  func eraseDeviceRecordsCommandResultAndRefreshesSnapshot() async {
+  func eraseDeviceRefreshesSnapshot() async {
     let device = MainWindowTestFixtures.makeDevice(id: "DEVICE", name: "Erase Target")
     let snapshot = MainWindowTestFixtures.makeSnapshot(devices: [device])
     let eraseResult = MainWindowTestFixtures.makeCommandResult(
@@ -95,7 +95,6 @@ struct MainWindowFeatureDeviceManagementTests {
     }
 
     await store.receive(.deviceCommandResponse(deviceCommandState, eraseResult)) {
-      $0.workspace.appendCommandResult(eraseResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -110,12 +109,7 @@ struct MainWindowFeatureDeviceManagementTests {
       $0.sidebar = SidebarFeature.State(snapshot: snapshot, refreshState: .idle)
       $0.workspace.applySnapshot(
         snapshot,
-        refreshState: .idle,
-        commandResults: [
-          eraseResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ]
+        refreshState: .idle
       )
       $0.workspace.setDeviceCommandState(nil)
     }
@@ -165,7 +159,6 @@ struct MainWindowFeatureDeviceManagementTests {
     }
 
     await store.receive(.deviceCommandResponse(deviceCommandState, deleteResult)) {
-      $0.workspace.appendCommandResult(deleteResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -180,12 +173,7 @@ struct MainWindowFeatureDeviceManagementTests {
       $0.sidebar = SidebarFeature.State(snapshot: refreshedSnapshot, refreshState: .idle)
       $0.workspace.applySnapshot(
         refreshedSnapshot,
-        refreshState: .idle,
-        commandResults: [
-          deleteResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ]
+        refreshState: .idle
       )
       $0.workspace.setDeviceCommandState(nil)
     }
@@ -251,7 +239,6 @@ struct MainWindowFeatureDeviceManagementTests {
     }
 
     await store.receive(.deviceCommandResponse(deviceCommandState, pairResult)) {
-      $0.workspace.appendCommandResult(pairResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -266,12 +253,7 @@ struct MainWindowFeatureDeviceManagementTests {
       $0.sidebar = SidebarFeature.State(snapshot: snapshot, refreshState: .idle)
       $0.workspace.applySnapshot(
         snapshot,
-        refreshState: .idle,
-        commandResults: [
-          pairResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ]
+        refreshState: .idle
       )
       $0.workspace.setDeviceCommandState(nil)
     }
@@ -413,7 +395,6 @@ struct MainWindowFeatureDeviceManagementTests {
     }
 
     await store.receive(.deviceCommandResponse(deviceCommandState, unpairResult)) {
-      $0.workspace.appendCommandResult(unpairResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -428,12 +409,7 @@ struct MainWindowFeatureDeviceManagementTests {
       $0.sidebar = SidebarFeature.State(snapshot: refreshedSnapshot, refreshState: .idle)
       $0.workspace.applySnapshot(
         refreshedSnapshot,
-        refreshState: .idle,
-        commandResults: [
-          unpairResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ]
+        refreshState: .idle
       )
       $0.workspace.setDeviceCommandState(nil)
     }
@@ -542,7 +518,6 @@ struct MainWindowFeatureDeviceManagementTests {
     await recorder.releaseCommand()
 
     await store.receive(.deviceCommandResponse(deviceCommandState, eraseResult)) {
-      $0.workspace.appendCommandResult(eraseResult)
       $0.sidebar.refreshState = .refreshing
       $0.workspace.refreshState = .refreshing
     }
@@ -557,12 +532,7 @@ struct MainWindowFeatureDeviceManagementTests {
       $0.sidebar = SidebarFeature.State(snapshot: snapshot, refreshState: .idle)
       $0.workspace.applySnapshot(
         snapshot,
-        refreshState: .idle,
-        commandResults: [
-          eraseResult,
-          MainWindowTestFixtures.xcodeCommandResult,
-          MainWindowTestFixtures.listCommandResult
-        ]
+        refreshState: .idle
       )
       $0.workspace.setDeviceCommandState(nil)
     }

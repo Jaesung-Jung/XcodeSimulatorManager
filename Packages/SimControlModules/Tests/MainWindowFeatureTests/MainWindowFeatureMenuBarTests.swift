@@ -15,10 +15,6 @@ struct MainWindowFeatureMenuBarTests {
     let now = Date(timeIntervalSince1970: 2_000)
     let snapshot = MainWindowTestFixtures.makeSnapshot(generatedAt: now)
     let result = MainWindowTestFixtures.makeRefreshResult(snapshot: snapshot)
-    let expectedCommandResults = [
-      MainWindowTestFixtures.xcodeCommandResult,
-      MainWindowTestFixtures.listCommandResult
-    ]
 
     let store = TestStore(initialState: MainWindowFeature.State()) {
       MainWindowFeature()
@@ -38,8 +34,7 @@ struct MainWindowFeatureMenuBarTests {
       $0.sidebar = SidebarFeature.State(snapshot: snapshot, refreshState: .idle)
       $0.workspace = WorkspaceFeature.State(
         snapshot: snapshot,
-        refreshState: .idle,
-        commandResults: expectedCommandResults
+        refreshState: .idle
       )
     }
   }
@@ -77,10 +72,6 @@ struct MainWindowFeatureMenuBarTests {
     )
     let newSnapshot = MainWindowTestFixtures.makeSnapshot(generatedAt: now)
     let result = MainWindowTestFixtures.makeRefreshResult(snapshot: newSnapshot)
-    let expectedCommandResults = [
-      MainWindowTestFixtures.xcodeCommandResult,
-      MainWindowTestFixtures.listCommandResult
-    ]
 
     let store = TestStore(
       initialState: MainWindowFeature.State(snapshot: oldSnapshot)
@@ -102,8 +93,7 @@ struct MainWindowFeatureMenuBarTests {
       $0.sidebar = SidebarFeature.State(snapshot: newSnapshot, refreshState: .idle)
       $0.workspace = WorkspaceFeature.State(
         snapshot: newSnapshot,
-        refreshState: .idle,
-        commandResults: expectedCommandResults
+        refreshState: .idle
       )
     }
   }
@@ -137,8 +127,7 @@ struct MainWindowFeatureMenuBarTests {
       let failedState = InventoryRefreshState.failed(diagnostic: "simctl list failed")
       $0.sidebar.refreshState = failedState
       $0.workspace.applyRefreshFailure(
-        failedState,
-        commandResults: [MainWindowTestFixtures.failedXcodeCommandResult]
+        failedState
       )
     }
 

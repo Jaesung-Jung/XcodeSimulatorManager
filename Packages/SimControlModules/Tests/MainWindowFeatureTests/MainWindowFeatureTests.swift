@@ -12,10 +12,6 @@ struct MainWindowFeatureTests {
   func taskRefreshesWhenSnapshotIsMissing() async {
     let snapshot = MainWindowTestFixtures.makeSnapshot()
     let result = MainWindowTestFixtures.makeRefreshResult(snapshot: snapshot)
-    let expectedCommandResults = [
-      MainWindowTestFixtures.xcodeCommandResult,
-      MainWindowTestFixtures.listCommandResult
-    ]
 
     let store = TestStore(initialState: MainWindowFeature.State()) {
       MainWindowFeature()
@@ -34,8 +30,7 @@ struct MainWindowFeatureTests {
       $0.sidebar = SidebarFeature.State(snapshot: snapshot, refreshState: .idle)
       $0.workspace = WorkspaceFeature.State(
         snapshot: snapshot,
-        refreshState: .idle,
-        commandResults: expectedCommandResults
+        refreshState: .idle
       )
     }
   }
@@ -50,10 +45,6 @@ struct MainWindowFeatureTests {
       ]
     )
     let result = MainWindowTestFixtures.makeRefreshResult(snapshot: newSnapshot)
-    let expectedCommandResults = [
-      MainWindowTestFixtures.xcodeCommandResult,
-      MainWindowTestFixtures.listCommandResult
-    ]
 
     let store = TestStore(
       initialState: MainWindowFeature.State(snapshot: oldSnapshot)
@@ -74,8 +65,7 @@ struct MainWindowFeatureTests {
       $0.sidebar = SidebarFeature.State(snapshot: newSnapshot, refreshState: .idle)
       $0.workspace = WorkspaceFeature.State(
         snapshot: newSnapshot,
-        refreshState: .idle,
-        commandResults: expectedCommandResults
+        refreshState: .idle
       )
     }
   }
@@ -85,10 +75,6 @@ struct MainWindowFeatureTests {
     let snapshot = MainWindowTestFixtures.makeSnapshot()
     let result = MainWindowTestFixtures.makeRefreshResult(snapshot: snapshot)
     let recorder = MainWindowBlockingRefreshRecorder(result: result)
-    let expectedCommandResults = [
-      MainWindowTestFixtures.xcodeCommandResult,
-      MainWindowTestFixtures.listCommandResult
-    ]
 
     let store = TestStore(initialState: MainWindowFeature.State()) {
       MainWindowFeature()
@@ -113,8 +99,7 @@ struct MainWindowFeatureTests {
       $0.sidebar = SidebarFeature.State(snapshot: snapshot, refreshState: .idle)
       $0.workspace = WorkspaceFeature.State(
         snapshot: snapshot,
-        refreshState: .idle,
-        commandResults: expectedCommandResults
+        refreshState: .idle
       )
     }
   }
@@ -150,8 +135,7 @@ struct MainWindowFeatureTests {
       let failedState = InventoryRefreshState.failed(diagnostic: "simctl list failed")
       $0.sidebar.refreshState = failedState
       $0.workspace.applyRefreshFailure(
-        failedState,
-        commandResults: [MainWindowTestFixtures.failedXcodeCommandResult]
+        failedState
       )
     }
   }
@@ -171,10 +155,6 @@ struct MainWindowFeatureTests {
       devices: [MainWindowTestFixtures.secondDevice]
     )
     let result = MainWindowTestFixtures.makeRefreshResult(snapshot: newSnapshot)
-    let expectedCommandResults = [
-      MainWindowTestFixtures.xcodeCommandResult,
-      MainWindowTestFixtures.listCommandResult
-    ]
     let initialState = MainWindowFeature.State(
       snapshot: oldSnapshot,
       selectedDeviceID: MainWindowTestFixtures.device.id,
@@ -200,7 +180,6 @@ struct MainWindowFeatureTests {
       $0.workspace = WorkspaceFeature.State(
         snapshot: newSnapshot,
         refreshState: .idle,
-        commandResults: expectedCommandResults,
         installedAppsAvailability: .loaded
       )
     }

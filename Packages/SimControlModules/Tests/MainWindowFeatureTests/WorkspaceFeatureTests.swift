@@ -135,7 +135,6 @@ struct WorkspaceFeatureTests {
     state.applySnapshot(
       newSnapshot,
       refreshState: .idle,
-      commandResults: [],
       preferredSelectedDeviceID: MainWindowTestFixtures.secondDevice.id
     )
 
@@ -161,7 +160,6 @@ struct WorkspaceFeatureTests {
     state.applySnapshot(
       snapshot,
       refreshState: .idle,
-      commandResults: [],
       preferredSelectedDeviceID: "MISSING"
     )
 
@@ -462,8 +460,7 @@ struct WorkspaceFeatureTests {
 
     state.applySnapshot(
       newSnapshot,
-      refreshState: .idle,
-      commandResults: []
+      refreshState: .idle
     )
 
     #expect(state.filters == filters)
@@ -483,7 +480,7 @@ struct WorkspaceFeatureTests {
       filters: filters
     )
 
-    state.applyRefreshFailure(.failed(diagnostic: "simctl failed"), commandResults: [MainWindowTestFixtures.failedXcodeCommandResult])
+    state.applyRefreshFailure(.failed(diagnostic: "simctl failed"))
 
     #expect(state.snapshot == snapshot)
     #expect(state.filters == filters)

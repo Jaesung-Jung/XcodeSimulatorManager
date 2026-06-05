@@ -51,7 +51,6 @@ public struct DeviceDetailFeature {
     public var deviceType: SimulatorDeviceType?
     public var pairSummary: DevicePairSummary?
     public var installedApps: InstalledAppsFeature.State
-    public var commandResults: [CommandResult]
     public var deviceCommandState: DeviceCommandState?
     public var appCommandState: AppCommandState?
     public var isOpeningSimulatorApp: Bool
@@ -64,7 +63,6 @@ public struct DeviceDetailFeature {
       deviceType: SimulatorDeviceType? = nil,
       pairSummary: DevicePairSummary? = nil,
       installedApps: InstalledAppsFeature.State = InstalledAppsFeature.State(),
-      commandResults: [CommandResult] = [],
       deviceCommandState: DeviceCommandState? = nil,
       appCommandState: AppCommandState? = nil,
       isOpeningSimulatorApp: Bool = false,
@@ -87,7 +85,6 @@ public struct DeviceDetailFeature {
       self.deviceType = deviceType
       self.pairSummary = pairSummary
       self.installedApps = installedApps
-      self.commandResults = commandResults
       self.deviceCommandState = deviceCommandState
       self.appCommandState = appCommandState
       self.isOpeningSimulatorApp = isOpeningSimulatorApp
